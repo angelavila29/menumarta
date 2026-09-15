@@ -171,6 +171,7 @@ def build_products(df: pl.DataFrame, catalog: pl.DataFrame) -> pl.DataFrame:
                 "pack_size": pack_size,
                 "image_url": r.get("thumbnail"),
                 "product_url": r.get("url"),
+                "is_discounted": bool(r.get("is_discounted") or False),
                 "captured_at": r.get("captured_at"),
             }
         )
@@ -192,6 +193,7 @@ PRODUCT_SCHEMA = {
     "pack_size": pl.Utf8,
     "image_url": pl.Utf8,
     "product_url": pl.Utf8,
+    "is_discounted": pl.Boolean,
     "captured_at": pl.Utf8,
 }
 

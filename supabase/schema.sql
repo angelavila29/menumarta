@@ -186,3 +186,9 @@ alter table products
 
 create index if not exists products_name_norm_trgm_idx
   on products using gin (name_norm gin_trgm_ops);
+
+-- ---------------------------------------------------------------------
+-- Ofertas (opencesta marca is_discounted; hoy solo Dia lo trae)
+-- ---------------------------------------------------------------------
+alter table products add column if not exists is_discounted boolean not null default false;
+create index if not exists products_discounted_idx on products (supermarket_id) where is_discounted;

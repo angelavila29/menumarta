@@ -25,3 +25,6 @@ export function familyOf(category: string | null | undefined): Family {
   for (const f of FAMILIES) if (f.re.test(c)) return f;
   return OTHER;
 }
+
+/** Familias para el filtro del buscador; `pattern` filtra products.category en SQL (imatch). */
+export const FAMILY_FILTERS = FAMILIES.map((f) => ({ id: f.id, name: f.name, emoji: f.emoji, pattern: f.re.source }));

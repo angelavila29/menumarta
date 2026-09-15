@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SEARCH_EVENT } from "@/lib/events";
 import { useSyncExternalStore } from "react";
 import {
   CalendarIcon, CartIcon, ChartIcon, ChevronDown, ChevronLeft, ChevronRight, HeartIcon, HelpIcon, HomeIcon, LeafIcon,
@@ -167,16 +168,27 @@ export function SideNav() {
   );
 }
 
-/** Barra superior (escritorio): buscador y usuario. */
+/** Barra superior (escritorio): buscador y usuario. En /buscar filtra mientras escribes. */
 export function TopBar({ name }: { name: string }) {
+  const pathname = usePathname();
+  const onSearchPage = pathname.startsWith("/buscar");
   return (
     <div className="hidden items-center gap-4 md:flex">
-      <form action="/buscar" className="relative flex-1">
+      <form
+        action="/buscar"
+        className="relative flex-1"
+        onSubmit={(e) => {
+          if (onSearchPage) e.preventDefault();
+        }}
+      >
         <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
         <input
           type="search"
           name="q"
-          placeholder="Buscar productos, recetas, marcas…"
+          placeholder={onSearchPage ? "Buscar productos, marcas, ingredientes…" : "Buscar productos, recetas, marcas…"}
+          onChange={(e) => {
+            if (onSearchPage) window.dispatchEvent(new CustomEvent(SEARCH_EVENT, { detail: e.target.value }));
+          }}
           className="w-full rounded-2xl border border-cream-dark bg-white py-2.5 pl-12 pr-4 text-sm shadow-sm outline-none focus:border-brand"
         />
       </form>

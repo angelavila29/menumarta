@@ -30,3 +30,10 @@ export function keywords(text: string): string[] {
 /** Categorías que nunca son un ingrediente (regex sobre products.category, case-insensitive). */
 export const NON_FOOD_CATEGORY =
   "limpieza|hogar|higiene|cuidado|perfumer|cabello|maquillaje|mascotas|beb[eé]|infantil|parafarmacia|fitoterapia|salud|refrescos|agua-y|zumos|golosinas|caramelos|cacao|caf[eé]|infusiones|postres|yogures|pizzas|preparados";
+
+/** Solo lo que seguro no es comida (para comparar y buscar básicos; incluye yogures y postres). */
+export const NOT_FOOD_CATEGORY =
+  "limpieza|hogar|higiene|cuidado|perfumer|cabello|maquillaje|mascotas|parafarmacia|fitoterapia";
+
+/** Palabras de formato o tamaño que no sirven para emparejar productos entre cadenas. */
+export const PACK_WORDS = new Set(["pack", "x", "botella", "bolsa", "brik", "lata", "bote", "tarro", "paquete", "caja", "bandeja", "kg", "g", "gr", "l", "ml", "cl", "ud", "uds", "unidades"]);

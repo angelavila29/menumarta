@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import { keywords, NON_FOOD_CATEGORY, wordRegex } from "@/lib/search";
+import { keywords, NOT_FOOD_CATEGORY, PACK_WORDS, unaccent, wordRegex } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
@@ -59,17 +59,27 @@ export async function compareList(
   return { chains, comparable, items: items.length, cheapest, saving };
 }
 
-async function equivalentIn(supabase: Supa, product: Product, chainId: string): Promise<Product | null> {
-  const words = keywords(product.name.replace(product.brand ?? "", "")).slice(0, 3);
-  if (words.length === 0) return null;
+export async function equivalentIn(supabase: Supa, product: Product, chainId: string): Promise<Product | null> {
+  // Palabras útiles: sin marca, sin cantidades ni formatos ("pack 6 x 1 L")
+  const words = keywords(product.name.replace(product.brand ?? "", ""))
+    .filter((w) => !/\d/.test(w) && !PACK_WORDS.has(unaccent(w)))
+    .slice(0, 3);
+  // Con una sola palabra (p. ej. "exotic" tras quitar la marca) el emparejamiento no es fiable
+  if (words.length < 2) return null;
   let req = supabase
     .from("products")
     .select(PRODUCT_COLUMNS)
     .eq("supermarket_id", chainId)
-    .not("category", "imatch", NON_FOOD_CATEGORY)
+    .not("category", "imatch", NOT_FOOD_CATEGORY)
     .not("price", "is", null);
   if (product.unit) req = req.eq("unit", product.unit);
   for (const w of words) req = req.filter("name_norm", "match", wordRegex(w));
   const { data } = await req.order("unit_price", { ascending: true, nullsFirst: false }).limit(1);
-  return (data?.[0] as Product | undefined) ?? null;
+  const eq = (data?.[0] as Product | undefined) ?? null;
+  // Diferencia de precio por unidad desproporcionada: casi seguro es otro producto
+  if (eq && product.unit_price && eq.unit_price) {
+    const ratio = eq.unit_price / product.unit_price;
+    if (ratio > 3 || ratio < 1 / 3) return null;
+  }
+  return eq;
 }
