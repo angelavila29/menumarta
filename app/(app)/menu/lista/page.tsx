@@ -7,6 +7,7 @@ import {
   getOrCreateMenu,
   loadSlots,
   packsNeeded,
+  weekOffsetFrom,
   type Need,
 } from "@/lib/menu";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
@@ -14,7 +15,7 @@ import { Review, type ReviewRow } from "./review";
 
 export default async function MenuListPage(props: PageProps<"/menu/lista">) {
   const sp = await props.searchParams;
-  const offset = sp.semana === "siguiente" ? 1 : 0;
+  const offset = weekOffsetFrom(sp.semana);
   const { supabase, user } = await requireUser();
   const [menu, supers] = await Promise.all([
     getOrCreateMenu(supabase, user.id, currentWeekStart(offset)),

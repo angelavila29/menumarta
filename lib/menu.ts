@@ -180,3 +180,10 @@ export async function cheapestProductFor(supabase: Supa, need: Need, supers: str
   }
   return null;
 }
+
+/** Parámetro ?semana= → desplazamiento en semanas ('siguiente' = 1, '-1', '2'...). */
+export function weekOffsetFrom(v: string | string[] | undefined): number {
+  if (v === "siguiente") return 1;
+  const n = typeof v === "string" ? parseInt(v, 10) : 0;
+  return Number.isFinite(n) ? Math.max(-12, Math.min(12, n)) : 0;
+}
