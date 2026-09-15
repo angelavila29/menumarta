@@ -59,3 +59,13 @@ revoke all on function public.ensure_supermarket(text, text) from public;
 grant execute on function public.ensure_supermarket(text, text) to authenticated;
 
 alter table profiles add column if not exists display_name text;
+
+-- Preferencias del onboarding (7 pasos)
+alter table profiles add column if not exists household_size int;
+alter table profiles add column if not exists planning_meals text[] not null default '{comida,cena}';
+alter table profiles add column if not exists main_supermarket text;
+alter table profiles add column if not exists compare_mode text;        -- 'habitual' | 'barato' | 'avisar'
+alter table profiles add column if not exists diet text;                -- 'todo' | 'vegetariano' | 'vegano' | 'pescetariano' | 'otro'
+alter table profiles add column if not exists allergies text[] not null default '{}';
+alter table profiles add column if not exists avoid_foods text[] not null default '{}';
+alter table profiles add column if not exists goals text[] not null default '{}';

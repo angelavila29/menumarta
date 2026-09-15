@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { geocode, nearbyChains, reverseGeocode, type GeoPoint, type NearbyChain } from "@/lib/geo";
+import { geocode, nearbyChains, reverseGeocode, type GeoPoint, type NearbyChain, type Store } from "@/lib/geo";
+import { currentWeekStart, loadSlots, getOrCreateMenu } from "@/lib/menu";
+import { generateWeekFor } from "@/lib/menu-actions";
 
 export type LocateResult =
-  | { ok: true; point: GeoPoint; chains: NearbyChain[]; withPrices: string[] }
+  | { ok: true; point: GeoPoint; chains: NearbyChain[]; stores: Store[]; withPrices: string[] }
   | { ok: false; error: string };
 
 async function chainsWithPrices(): Promise<string[]> {
@@ -16,13 +18,13 @@ async function chainsWithPrices(): Promise<string[]> {
 }
 
 async function finish(point: GeoPoint): Promise<LocateResult> {
+  const withPrices = await chainsWithPrices();
   try {
-    const [chains, withPrices] = await Promise.all([nearbyChains(point.lat, point.lng), chainsWithPrices()]);
-    return { ok: true, point, chains, withPrices };
+    const { chains, stores } = await nearbyChains(point.lat, point.lng);
+    return { ok: true, point, chains, stores, withPrices };
   } catch {
     // Overpass caído o lento: dejamos elegir a mano entre las cadenas con precios
-    const withPrices = await chainsWithPrices();
-    return { ok: true, point, chains: [], withPrices };
+    return { ok: true, point, chains: [], stores: [], withPrices };
   }
 }
 
@@ -30,7 +32,7 @@ export async function locateByAddress(query: string): Promise<LocateResult> {
   await requireUser();
   const q = query.trim();
   if (q.length < 3) return { ok: false, error: "Escribe tu código postal o tu dirección." };
-  const point = await geocode(q);
+  const point = await geocode(q).catch(() => null);
   if (!point) return { ok: false, error: "No encuentro esa dirección. Prueba con el código postal o añade la ciudad." };
   return finish(point);
 }
@@ -38,17 +40,32 @@ export async function locateByAddress(query: string): Promise<LocateResult> {
 export async function locateByCoords(lat: number, lng: number): Promise<LocateResult> {
   await requireUser();
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return { ok: false, error: "Ubicación no válida." };
-  const label = await reverseGeocode(lat, lng);
+  const label = await reverseGeocode(lat, lng).catch(() => `${lat.toFixed(4)}, ${lng.toFixed(4)}`);
   return finish({ lat, lng, label });
 }
 
 export type ChainChoice = { id: string; name: string };
 
-export async function saveOnboarding(input: { point: GeoPoint; postalCode: string | null; chains: ChainChoice[]; displayName?: string }) {
+export type OnboardingInput = {
+  point: GeoPoint;
+  postalCode: string | null;
+  chains: ChainChoice[];
+  displayName?: string;
+  householdSize: number;
+  planningMeals: string[];
+  mainSupermarket: string | null;
+  compareMode: string | null;
+  diet: string | null;
+  allergies: string[];
+  avoidFoods: string[];
+  goals: string[];
+};
+
+/** Guarda todo el onboarding y, si la semana está vacía, genera el primer menú. */
+export async function saveOnboarding(input: OnboardingInput) {
   const { supabase, user } = await requireUser();
   if (input.chains.length === 0) throw new Error("Elige al menos un supermercado.");
 
-  // Cadenas nuevas vistas en el mapa: alta en supermarkets (función security definer)
   for (const c of input.chains) {
     const { error } = await supabase.rpc("ensure_supermarket", { p_id: c.id, p_name: c.name });
     if (error) throw new Error(error.message);
@@ -62,6 +79,14 @@ export async function saveOnboarding(input: { point: GeoPoint; postalCode: strin
       address: input.point.label,
       postal_code: input.postalCode,
       display_name: input.displayName?.trim() || null,
+      household_size: Math.min(12, Math.max(1, Math.round(input.householdSize || 2))),
+      planning_meals: input.planningMeals.length ? input.planningMeals : ["comida", "cena"],
+      main_supermarket: input.mainSupermarket,
+      compare_mode: input.compareMode,
+      diet: input.diet,
+      allergies: input.allergies,
+      avoid_foods: input.avoidFoods.map((s) => s.trim().toLowerCase()).filter(Boolean),
+      goals: input.goals,
       onboarded_at: new Date().toISOString(),
     },
     { onConflict: "id" }
@@ -74,6 +99,15 @@ export async function saveOnboarding(input: { point: GeoPoint; postalCode: strin
     .insert(input.chains.map((c) => ({ user_id: user.id, supermarket_id: c.id })));
   if (sErr) throw new Error(sErr.message);
 
+  // Primer menú: solo si la semana actual está vacía
+  const week = currentWeekStart();
+  const menu = await getOrCreateMenu(supabase, user.id, week, input.householdSize || 2);
+  const slots = await loadSlots(supabase, menu.id);
+  if (!slots.some((s) => s.recipe_id !== null)) {
+    await supabase.from("weekly_menus").update({ servings: input.householdSize || 2 }).eq("id", menu.id);
+    await generateWeekFor(supabase, user.id, week);
+  }
+
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/menu");
 }

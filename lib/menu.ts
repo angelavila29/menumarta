@@ -19,7 +19,7 @@ export function currentWeekStart(offsetWeeks = 0): string {
   return d.toISOString().slice(0, 10);
 }
 
-export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart: string): Promise<Menu> {
+export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart: string, defaultServings = 2): Promise<Menu> {
   const { data } = await supabase
     .from("weekly_menus")
     .select("id,week_start,servings")
@@ -29,7 +29,7 @@ export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart:
   if (data) return data as Menu;
   const { data: created, error } = await supabase
     .from("weekly_menus")
-    .insert({ user_id: userId, week_start: weekStart, servings: 2 })
+    .insert({ user_id: userId, week_start: weekStart, servings: defaultServings })
     .select("id,week_start,servings")
     .single();
   if (error) throw new Error(error.message);
@@ -39,6 +39,18 @@ export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart:
 export async function loadRecipes(supabase: Supa): Promise<Recipe[]> {
   const { data } = await supabase.from("recipes").select("id,name,meal,servings,tags").order("name");
   return (data ?? []) as Recipe[];
+}
+
+/** Nombres de ingredientes por receta (para filtrar por dieta/alergias). */
+export async function loadIngredientNames(supabase: Supa): Promise<Map<number, string[]>> {
+  const { data } = await supabase.from("recipe_ingredients").select("recipe_id,ingredient_name");
+  const m = new Map<number, string[]>();
+  for (const r of data ?? []) {
+    const list = m.get(r.recipe_id as number) ?? [];
+    list.push(r.ingredient_name as string);
+    m.set(r.recipe_id as number, list);
+  }
+  return m;
 }
 
 export async function loadSlots(supabase: Supa, menuId: string): Promise<Slot[]> {

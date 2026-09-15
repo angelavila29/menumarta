@@ -4,16 +4,30 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getOrCreateActiveList } from "@/lib/lists";
-import { currentWeekStart, generateWeek, getOrCreateMenu, loadRecipes } from "@/lib/menu";
+import { currentWeekStart, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes } from "@/lib/menu";
+import { recipeAllowed } from "@/lib/prefs";
 
 export async function generateWeekAction(weekStart: string) {
   const { supabase, user } = await requireUser();
-  const menu = await getOrCreateMenu(supabase, user.id, weekStart || currentWeekStart());
-  const recipes = await loadRecipes(supabase);
-  const slots = generateWeek(recipes).map((s) => ({ ...s, menu_id: menu.id }));
+  await generateWeekFor(supabase, user.id, weekStart || currentWeekStart());
+  revalidatePath("/menu");
+}
+
+/** Genera la semana respetando dieta, alergias y alimentos a evitar del perfil. */
+export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("household_size,diet,allergies,avoid_foods")
+    .eq("id", userId)
+    .maybeSingle();
+  const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
+  const [recipes, ingredients] = await Promise.all([loadRecipes(supabase), loadIngredientNames(supabase)]);
+  const prefs = { diet: profile?.diet ?? null, allergies: profile?.allergies ?? [], avoid: profile?.avoid_foods ?? [] };
+  let allowed = recipes.filter((r) => recipeAllowed(r, ingredients.get(r.id) ?? [], prefs));
+  if (allowed.length < 6) allowed = recipes; // demasiado restrictivo: mejor un menú que ninguno
+  const slots = generateWeek(allowed).map((s) => ({ ...s, menu_id: menu.id }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
-  revalidatePath("/menu");
 }
 
 export async function setSlotAction(menuId: string, day: number, meal: "comida" | "cena", recipeId: number | null) {

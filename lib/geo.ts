@@ -17,7 +17,7 @@ export async function geocode(query: string): Promise<GeoPoint | null> {
   url.searchParams.set("limit", "1");
   url.searchParams.set("countrycodes", "es");
   url.searchParams.set("accept-language", "es");
-  const r = await fetch(url, { headers: { "User-Agent": UA }, cache: "no-store" });
+  const r = await fetch(url, { headers: { "User-Agent": UA }, cache: "no-store", signal: AbortSignal.timeout(8000) });
   if (!r.ok) return null;
   const data = (await r.json()) as { lat: string; lon: string; display_name: string }[];
   if (!data[0]) return null;
@@ -30,7 +30,7 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string> 
   url.searchParams.set("lon", String(lng));
   url.searchParams.set("format", "jsonv2");
   url.searchParams.set("accept-language", "es");
-  const r = await fetch(url, { headers: { "User-Agent": UA }, cache: "no-store" });
+  const r = await fetch(url, { headers: { "User-Agent": UA }, cache: "no-store", signal: AbortSignal.timeout(8000) });
   if (!r.ok) return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   const data = (await r.json()) as { display_name?: string };
   return data.display_name ? shortLabel(data.display_name) : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
@@ -50,7 +50,10 @@ export type NearbyChain = {
   stores: number;
   nearestM: number; // distancia a la tienda más cercana, en metros
   nearestName: string;
+  nearestAddress: string | null; // "C. de Embajadores, 123" si OSM lo tiene
 };
+export type Store = { chainId: string; name: string; lat: number; lng: number; distM: number; address: string | null };
+export type NearbyResult = { chains: NearbyChain[]; stores: Store[] };
 
 // Patrón sobre brand/name (sin tildes, minúsculas) → id canónico y nombre
 const CHAIN_RULES: [RegExp, string, string][] = [
@@ -113,18 +116,45 @@ function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): num
 
 type OsmElement = { lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> };
 
-export async function nearbyChains(lat: number, lng: number, radiusM = 2500): Promise<NearbyChain[]> {
-  const query = `[out:json][timeout:25];(nwr["shop"~"^(supermarket|hypermarket|convenience)$"](around:${radiusM},${lat},${lng}););out center tags;`;
-  const r = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST",
-    headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" },
-    body: "data=" + encodeURIComponent(query),
-    cache: "no-store",
-  });
-  if (!r.ok) throw new Error(`Overpass ${r.status}`);
-  const data = (await r.json()) as { elements: OsmElement[] };
+function addressOf(tags: Record<string, string>): string | null {
+  const street = tags["addr:street"];
+  if (!street) return null;
+  return tags["addr:housenumber"] ? `${street}, ${tags["addr:housenumber"]}` : street;
+}
+
+// Servidores de Overpass: se prueban en orden, cada uno con tiempo máximo
+const OVERPASS = [
+  "https://z.overpass-api.de/api/interpreter",
+  "https://lz4.overpass-api.de/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+];
+
+async function overpass(query: string): Promise<{ elements: OsmElement[] }> {
+  let lastError: unknown = null;
+  for (const url of OVERPASS) {
+    try {
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "User-Agent": UA, "Content-Type": "application/x-www-form-urlencoded" },
+        body: "data=" + encodeURIComponent(query),
+        cache: "no-store",
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!r.ok) throw new Error(`Overpass ${r.status}`);
+      return (await r.json()) as { elements: OsmElement[] };
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  throw lastError ?? new Error("Overpass no disponible");
+}
+
+export async function nearbyChains(lat: number, lng: number, radiusM = 2500): Promise<NearbyResult> {
+  const query = `[out:json][timeout:10];(nwr["shop"~"^(supermarket|hypermarket|convenience)$"](around:${radiusM},${lat},${lng}););out center tags;`;
+  const data = await overpass(query);
 
   const byChain = new Map<string, NearbyChain>();
+  const stores: Store[] = [];
   for (const el of data.elements) {
     const tags = el.tags ?? {};
     const chain = canonicalChain(tags.brand, tags.name);
@@ -133,18 +163,22 @@ export async function nearbyChains(lat: number, lng: number, radiusM = 2500): Pr
     const plng = el.lon ?? el.center?.lon;
     if (plat === undefined || plng === undefined) continue;
     const d = Math.round(haversineM(lat, lng, plat, plng));
+    const address = addressOf(tags);
+    stores.push({ chainId: chain.id, name: tags.name ?? chain.name, lat: plat, lng: plng, distM: d, address });
     const cur = byChain.get(chain.id);
     if (!cur) {
-      byChain.set(chain.id, { id: chain.id, name: chain.name, stores: 1, nearestM: d, nearestName: tags.name ?? chain.name });
+      byChain.set(chain.id, { id: chain.id, name: chain.name, stores: 1, nearestM: d, nearestName: tags.name ?? chain.name, nearestAddress: address });
     } else {
       cur.stores += 1;
       if (d < cur.nearestM) {
         cur.nearestM = d;
         cur.nearestName = tags.name ?? chain.name;
+        cur.nearestAddress = address;
       }
     }
   }
-  return Array.from(byChain.values()).sort((a, b) => a.nearestM - b.nearestM);
+  stores.sort((a, b) => a.distM - b.distM);
+  return { chains: Array.from(byChain.values()).sort((a, b) => a.nearestM - b.nearestM), stores: stores.slice(0, 80) };
 }
 
 export function formatDistance(m: number): string {
