@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Caveat } from "next/font/google";
 import "./globals.css";
+
+const hand = Caveat({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-hand" });
 
 export const metadata: Metadata = {
   title: "Sobremesa",
@@ -17,7 +20,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className="h-full antialiased">
+    <html lang="es" className={`h-full antialiased ${hand.variable}`}>
       <body className="min-h-full flex flex-col bg-cream text-ink">
         {children}
       </body>

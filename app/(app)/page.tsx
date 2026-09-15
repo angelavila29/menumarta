@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CartIcon, ChartIcon, ChevronRight, PiggyIcon, SearchIcon } from "@/components/icons";
+import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, ChevronRight, HeartIcon, PiggyIcon, PlusIcon, SearchIcon } from "@/components/icons";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { compareList } from "@/lib/compare";
 import { euro, superName, superStyle } from "@/lib/format";
@@ -63,28 +63,40 @@ export default async function HomePage() {
           {name.charAt(0).toUpperCase() || "?"}
         </Link>
       </header>
-      <div>
-        <h1 className="text-3xl font-bold">Hola, {name} 👋</h1>
-        <p className="mt-1 text-muted">Tu semana {formatWeekRange(weekStart)}</p>
+      <div className="flex items-start justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-bold md:text-4xl">Hola, {name} 👋</h1>
+          <p className="mt-1 text-lg text-muted">Tu semana {formatWeekRange(weekStart)}</p>
+          <p className="hidden text-muted md:block">Comidas sanas, sencillas y a buen precio.</p>
+        </div>
+        <p className="font-hand hidden -rotate-6 pr-10 pt-4 text-3xl leading-tight text-brand lg:block">
+          &ldquo;Buenas comidas,<br />mejores días.&rdquo;
+        </p>
       </div>
 
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr_1fr]">
       {/* Menú de la semana */}
       <section className="rounded-2xl bg-white p-4 shadow-sm">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 className="text-lg font-bold">Tu menú de esta semana</h2>
-            <p className="text-sm text-muted">Comidas sencillas y a buen precio</p>
+          <div className="flex items-center gap-3">
+            <span className="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand md:flex">
+              <CalendarIcon className="h-6 w-6" />
+            </span>
+            <div>
+              <h2 className="text-lg font-bold md:whitespace-nowrap">Tu menú de esta semana</h2>
+              <p className="text-sm text-muted md:hidden">Comidas sencillas y a buen precio</p>
+            </div>
           </div>
           <Link href="/menu" className="flex shrink-0 items-center gap-1 text-sm font-medium text-brand">
-            {hasMenu ? "Ver completo" : "Generar"} <ArrowRight className="h-4 w-4" />
+            {hasMenu ? "Ver menú completo" : "Generar"} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
         {hasMenu ? (
-          <div className="no-scrollbar -mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 lg:grid-cols-7">
+          <div className="no-scrollbar -mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0">
             {orderedDays.map((d, i) => (
               <div
                 key={d.day}
-                className={`w-44 shrink-0 rounded-xl border p-3 md:w-auto ${
+                className={`w-44 shrink-0 rounded-xl border p-3 md:w-auto ${i >= 4 ? "md:hidden" : ""} ${
                   i === 0 ? "border-brand-soft bg-brand-soft/60" : "border-cream-dark bg-cream/60"
                 }`}
               >
@@ -105,7 +117,6 @@ export default async function HomePage() {
       </section>
 
       {/* Compra + comparativa */}
-      <div className="grid gap-4 sm:grid-cols-2">
         <section className="rounded-2xl bg-white p-4 shadow-sm">
           <Link href="/lista" className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-white">
@@ -128,7 +139,7 @@ export default async function HomePage() {
             <span className="text-2xl font-bold">{euro(listTotal)}</span>
           </p>
           <Link href="/lista" className="mt-3 block rounded-xl bg-brand px-4 py-3 text-center font-semibold text-white">
-            Ver lista
+            Ver lista de la compra
           </Link>
         </section>
 
@@ -192,8 +203,10 @@ export default async function HomePage() {
         </section>
       </div>
 
-      {/* Buscador */}
-      <form action="/buscar" className="relative">
+      {/* Fila 2: buscador + favoritos */}
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_1.4fr]">
+      {/* Buscador (móvil: barra simple; escritorio: tarjeta) */}
+      <form action="/buscar" className="relative md:hidden">
         <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
         <input
           type="search"
@@ -202,13 +215,40 @@ export default async function HomePage() {
           className="w-full rounded-2xl border border-cream-dark bg-white py-3.5 pl-12 pr-4 text-base shadow-sm outline-none focus:border-brand"
         />
       </form>
+      <section className="hidden rounded-2xl bg-white p-4 shadow-sm md:block">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white">
+            <SearchIcon className="h-5 w-5" />
+          </span>
+          <div>
+            <h2 className="text-lg font-bold">Buscar un producto</h2>
+            <p className="text-sm text-muted">Consulta precios reales en tus supermercados</p>
+          </div>
+        </div>
+        <form action="/buscar" className="mt-4 flex gap-2">
+          <input
+            type="search"
+            name="q"
+            placeholder="Leche, pasta, huevos, aceite…"
+            className="min-w-0 flex-1 rounded-xl border border-cream-dark bg-cream px-4 py-3 outline-none focus:border-brand"
+          />
+          <button type="submit" className="rounded-xl bg-brand px-5 py-3 font-semibold text-white hover:bg-brand-dark">
+            Buscar
+          </button>
+        </form>
+      </section>
 
       {/* Favoritos */}
       <section className="rounded-2xl bg-white p-4 shadow-sm">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 className="text-lg font-bold">Tus favoritos</h2>
-            <p className="text-sm text-muted">Accede rápido a tus productos habituales</p>
+          <div className="flex items-center gap-3">
+            <span className="hidden h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand md:flex">
+              <HeartIcon className="h-6 w-6" />
+            </span>
+            <div>
+              <h2 className="text-lg font-bold">Tus favoritos</h2>
+              <p className="text-sm text-muted md:hidden">Accede rápido a tus productos habituales</p>
+            </div>
           </div>
           <Link href="/favoritos" className="flex shrink-0 items-center gap-1 text-sm font-medium text-brand">
             Ver todos <ArrowRight className="h-4 w-4" />
@@ -217,8 +257,8 @@ export default async function HomePage() {
         {favorites.length === 0 ? (
           <p className="mt-3 text-sm text-muted">Marca productos con ★ en el buscador y aparecerán aquí.</p>
         ) : (
-          <ul className="no-scrollbar -mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0">
-            {favorites.map((p) => (
+          <ul className="no-scrollbar -mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0">
+            {favorites.slice(0, 4).map((p) => (
               <li key={p.id} className="flex w-36 shrink-0 gap-2 rounded-xl border border-cream-dark p-2 md:w-auto">
                 <div className="flex h-12 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cream">
                   {p.image_url ? (
@@ -235,8 +275,44 @@ export default async function HomePage() {
                 </div>
               </li>
             ))}
+            <li className="hidden w-28 shrink-0 md:block">
+              <Link
+                href="/buscar"
+                className="flex h-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-cream-dark text-xs text-muted hover:border-brand hover:text-brand"
+              >
+                <PlusIcon className="h-6 w-6" />
+                Añadir favorito
+              </Link>
+            </li>
           </ul>
         )}
+      </section>
+      </div>
+
+      {/* Banner: crear menú */}
+      <section className="overflow-hidden rounded-2xl bg-white shadow-sm md:grid md:grid-cols-[minmax(200px,1fr)_2fr_auto] md:items-center">
+        <div className="hidden h-full min-h-48 items-center justify-center bg-gradient-to-br from-brand-soft to-olive-soft text-7xl md:flex">
+          🥗
+        </div>
+        <div className="p-5 md:p-6">
+          <h2 className="text-xl font-bold">¿Sin ideas para la próxima semana?</h2>
+          <p className="mt-1 text-sm text-muted">
+            Te ayudamos a crear un menú equilibrado con recetas sencillas y generamos la lista de la compra automáticamente.
+          </p>
+          <Link href="/menu?semana=siguiente" className="mt-4 inline-block rounded-xl bg-brand px-6 py-3 font-semibold text-white hover:bg-brand-dark">
+            Crear menú semanal
+          </Link>
+        </div>
+        <div className="hidden pr-8 md:block">
+          <ul className="flex flex-col gap-2 text-sm">
+            {["Recetas sanas y rápidas", "Adaptado a tus gustos", "Con precios reales", "Lista de la compra al momento"].map((t) => (
+              <li key={t} className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-olive" /> {t}
+              </li>
+            ))}
+          </ul>
+          <p className="font-hand mt-4 -rotate-3 text-2xl leading-tight text-brand">Más tiempo<br />para lo importante ♥</p>
+        </div>
       </section>
     </main>
   );
@@ -244,8 +320,8 @@ export default async function HomePage() {
 
 function Meal({ label, recipe }: { label: string; recipe: { name: string; tags: string[] } | null }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-2xl shadow-sm">
+    <div className="flex items-center gap-2 md:flex-col md:items-start md:gap-1">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-2xl shadow-sm md:h-14 md:w-14 md:text-3xl">
         {recipe ? recipeEmoji(recipe.tags, recipe.name) : "·"}
       </span>
       <div className="min-w-0">

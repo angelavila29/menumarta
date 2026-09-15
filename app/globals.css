@@ -30,3 +30,7 @@ body {
 .no-scrollbar {
   scrollbar-width: none;
 }
+
+.font-hand {
+  font-family: var(--font-hand), "Segoe Script", cursive;
+}
