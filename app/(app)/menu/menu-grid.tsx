@@ -6,7 +6,7 @@ import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, Set
 import { euro } from "@/lib/format";
 import { DAYS, MEALS, type Menu, type Recipe, type Slot } from "@/lib/menu";
 import { generateWeekAction, setServingsAction, setSlotAction } from "@/lib/menu-actions";
-import { recipeEmoji } from "@/lib/recipe-emoji";
+import { RecipeArt } from "@/components/recipe-art";
 
 export type MenuSettings = { meals: string; diet: string; chains: string; prefs: string };
 export type BalanceItem = { label: string; emoji: string; bg: string; n: number };
@@ -117,6 +117,7 @@ export function MenuGrid(p: Props) {
                 {MEALS.map((meal) => (
                   <MealSlot
                     key={meal}
+                    day={day}
                     label={meal === "comida" ? "Comida" : "Cena"}
                     meal={meal}
                     recipe={recipeAt(day, meal)}
@@ -181,7 +182,7 @@ export function MenuGrid(p: Props) {
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold"><SettingsIcon className="h-5 w-5" /> Ajustes del menú</h2>
-            <Link href="/onboarding" className="text-sm font-semibold text-brand hover:underline">Editar</Link>
+            <Link href="/ajustes#alimentacion" className="text-sm font-semibold text-brand hover:underline">Editar</Link>
           </div>
           <ul className="mt-3 flex flex-col gap-2.5 text-sm">
             <li className="flex items-center gap-3">
@@ -216,9 +217,10 @@ function Stat({ icon, iconBg, big, small, label, bigClass = "text-3xl" }: { icon
   );
 }
 
-function MealSlot({ label, meal, recipe, recipes, disabled, ariaLabel, onChange }: {
+function MealSlot({ label, meal, day, recipe, recipes, disabled, ariaLabel, onChange }: {
   label: string;
   meal: string;
+  day: number;
   recipe: Recipe | null;
   recipes: Recipe[];
   disabled: boolean;
@@ -228,17 +230,15 @@ function MealSlot({ label, meal, recipe, recipes, disabled, ariaLabel, onChange 
   return (
     <div>
       <p className="mb-1 text-xs font-semibold">{label}</p>
-      <div className="group relative">
+      {/* La imagen abre el selector para cambiar el plato; el nombre abre la receta */}
+      <div className="group relative" title="Cambiar plato">
         {recipe ? (
-          <div className={`flex aspect-[4/3] items-center justify-center rounded-xl bg-gradient-to-br text-5xl transition group-hover:brightness-95 ${tileBg(recipe.tags)}`}>
-            {recipeEmoji(recipe.tags, recipe.name)}
-          </div>
+          <RecipeArt tags={recipe.tags} name={recipe.name} className="aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95" />
         ) : (
           <div className="flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-cream-dark text-xs text-muted group-hover:border-brand group-hover:text-brand">
             <PlusIcon className="h-5 w-5" /> Añadir
           </div>
         )}
-        <p className={`mt-1.5 line-clamp-2 min-h-[2.5em] text-sm leading-tight ${recipe ? "" : "text-muted"}`}>{recipe?.name ?? "Sin plato"}</p>
         <select
           value={recipe?.id ?? ""}
           disabled={disabled}
@@ -254,24 +254,15 @@ function MealSlot({ label, meal, recipe, recipes, disabled, ariaLabel, onChange 
             ))}
         </select>
       </div>
+      {recipe ? (
+        <Link href={`/recetas/${recipe.id}?dia=${day}`} className="mt-1.5 line-clamp-2 block min-h-[2.5em] text-sm leading-tight hover:text-brand hover:underline">
+          {recipe.name}
+        </Link>
+      ) : (
+        <p className="mt-1.5 min-h-[2.5em] text-sm leading-tight text-muted">Sin plato</p>
+      )}
     </div>
   );
-}
-
-const TILE_BG: Record<string, string> = {
-  legumbre: "from-amber-100 to-amber-50",
-  pescado: "from-sky-100 to-sky-50",
-  carne: "from-rose-100 to-rose-50",
-  pasta: "from-yellow-100 to-yellow-50",
-  arroz: "from-yellow-100 to-orange-50",
-  huevo: "from-orange-100 to-amber-50",
-  sopa: "from-amber-100 to-orange-50",
-  ensalada: "from-lime-100 to-green-50",
-  verdura: "from-lime-100 to-green-50",
-  guiso: "from-orange-100 to-rose-50",
-};
-function tileBg(tags: string[]) {
-  return TILE_BG[tags[0] ?? ""] ?? "from-cream-dark to-cream";
 }
 
 function dayDate(weekStart: string, d: number) {

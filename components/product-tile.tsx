@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { addToList, toggleFavorite } from "@/lib/actions";
 import { euro, packSize, superName, unitPrice } from "@/lib/format";
@@ -78,7 +79,7 @@ export function ProductTile({ result, initialFavorite, view }: { result: SearchR
       <li className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
         {image("h-16 w-16", "text-3xl")}
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 font-semibold leading-tight">{p.name}</p>
+          <Link href={`/producto/${p.id}`} className="line-clamp-2 font-semibold leading-tight hover:text-brand">{p.name}</Link>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
             {chain}
             {p.pack_size && <span>{packSize(p.pack_size)}</span>}
@@ -101,7 +102,7 @@ export function ProductTile({ result, initialFavorite, view }: { result: SearchR
   return (
     <li className="flex flex-col rounded-2xl bg-white p-3 shadow-sm">
       {image("h-32 md:h-36", "text-5xl")}
-      <p className="mt-2 line-clamp-2 min-h-[2.6em] font-semibold leading-tight">{p.name}</p>
+      <Link href={`/producto/${p.id}`} className="mt-2 line-clamp-2 min-h-[2.6em] font-semibold leading-tight hover:text-brand">{p.name}</Link>
       <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted">
         {chain}
         {p.pack_size && <span>{packSize(p.pack_size)}</span>}

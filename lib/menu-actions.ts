@@ -17,13 +17,23 @@ export async function generateWeekAction(weekStart: string) {
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
-  const [recipes, ingredients] = await Promise.all([loadRecipes(supabase), loadIngredientNames(supabase)]);
+  const [recipes, ingredients, { data: times }] = await Promise.all([
+    loadRecipes(supabase),
+    loadIngredientNames(supabase),
+    supabase.from("recipes").select("id,time_minutes"),
+  ]);
+  const minutes = new Map((times ?? []).map((t) => [t.id as number, t.time_minutes as number | null]));
+  const maxMinutes = profile?.max_recipe_minutes ?? null;
   const prefs = { diet: profile?.diet ?? null, allergies: profile?.allergies ?? [], avoid: profile?.avoid_foods ?? [] };
-  let allowed = recipes.filter((r) => recipeAllowed(r, ingredients.get(r.id) ?? [], prefs));
+  let allowed = recipes.filter(
+    (r) =>
+      recipeAllowed(r, ingredients.get(r.id) ?? [], prefs) &&
+      (maxMinutes === null || (minutes.get(r.id) ?? 0) <= maxMinutes)
+  );
   if (allowed.length < 6) allowed = recipes; // demasiado restrictivo: mejor un menú que ninguno
   const slots = generateWeek(allowed).map((s) => ({ ...s, menu_id: menu.id }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });

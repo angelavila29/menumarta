@@ -384,7 +384,7 @@ function Row({ item, showChain, chainName, disabled, start }: { item: ListItem; 
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className={`font-medium leading-snug ${item.checked ? "text-muted line-through" : ""}`}>{p.name}</p>
+        <Link href={`/producto/${p.id}`} className={`block font-medium leading-snug hover:text-brand ${item.checked ? "text-muted line-through" : ""}`}>{p.name}</Link>
         <p className="text-xs text-muted">
           {item.quantity !== 1 && <>{item.quantity} × </>}{packSize(p.pack_size) || unitPrice(p.unit_price, p.unit)}
           {showChain && <> · {chainName}</>}

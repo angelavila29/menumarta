@@ -74,7 +74,8 @@ export async function equivalentIn(supabase: Supa, product: Product, chainId: st
     .not("price", "is", null);
   if (product.unit) req = req.eq("unit", product.unit);
   for (const w of words) req = req.filter("name_norm", "match", wordRegex(w));
-  const { data } = await req.order("unit_price", { ascending: true, nullsFirst: false }).limit(1);
+  // A igual precio por unidad, el envase más barato (el brik suelto antes que el pack de 6)
+  const { data } = await req.order("unit_price", { ascending: true, nullsFirst: false }).order("price", { ascending: true }).limit(1);
   const eq = (data?.[0] as Product | undefined) ?? null;
   // Diferencia de precio por unidad desproporcionada: casi seguro es otro producto
   if (eq && product.unit_price && eq.unit_price) {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { addToList, toggleFavorite } from "@/lib/actions";
 import { ChainLogo } from "./chain-logo";
@@ -51,7 +52,7 @@ export function ProductCard({
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-sm font-medium leading-snug">{product.name}</p>
+        <Link href={`/producto/${product.id}`} className="line-clamp-2 text-sm font-medium leading-snug hover:text-brand">{product.name}</Link>
         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-zinc-600">
           <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium ${superStyle(product.supermarket_id).badge}`}>
             <ChainLogo id={product.supermarket_id} size={14} />

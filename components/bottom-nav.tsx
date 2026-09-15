@@ -18,7 +18,7 @@ const MAIN = [
 ];
 const SECONDARY = [
   { href: "/favoritos", label: "Favoritos", Icon: HeartIcon },
-  { href: "/onboarding", label: "Supermercados", Icon: StoreIcon },
+  { href: "/ajustes#supermercados", label: "Supermercados", Icon: StoreIcon },
   { href: "/historico", label: "Histórico", Icon: ChartIcon, soon: true },
 ];
 const FOOTER = [

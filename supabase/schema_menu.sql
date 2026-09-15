@@ -69,3 +69,20 @@ create policy "weekly_menu_slots propio" on weekly_menu_slots
 drop policy if exists "ingredient_product_map propio" on ingredient_product_map;
 create policy "ingredient_product_map propio" on ingredient_product_map
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Detalle de receta: descripción, tiempo, dificultad y pasos
+alter table recipes add column if not exists description text;
+alter table recipes add column if not exists time_minutes int;
+alter table recipes add column if not exists difficulty text;
+alter table recipes add column if not exists steps text[] not null default '{}';
+
+-- Recetas favoritas
+create table if not exists favorite_recipes (
+  user_id   uuid   not null references profiles(id) on delete cascade,
+  recipe_id bigint not null references recipes(id) on delete cascade,
+  primary key (user_id, recipe_id)
+);
+alter table favorite_recipes enable row level security;
+drop policy if exists "favorite_recipes propio" on favorite_recipes;
+create policy "favorite_recipes propio" on favorite_recipes
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

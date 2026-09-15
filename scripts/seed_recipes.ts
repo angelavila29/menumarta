@@ -27,6 +27,10 @@ type Recipe = {
   meal: "comida" | "cena" | "ambas";
   servings: number;
   tags: string[];
+  description?: string;
+  time_minutes?: number;
+  difficulty?: string;
+  steps?: string[];
   ingredients: { ingredient: string; qty: number; unit: string }[];
 };
 
@@ -38,7 +42,19 @@ async function main() {
   for (const r of recipes) {
     const { data: rec, error } = await supabase
       .from("recipes")
-      .upsert({ name: r.name, meal: r.meal, servings: r.servings, tags: r.tags }, { onConflict: "name" })
+      .upsert(
+        {
+          name: r.name,
+          meal: r.meal,
+          servings: r.servings,
+          tags: r.tags,
+          description: r.description ?? null,
+          time_minutes: r.time_minutes ?? null,
+          difficulty: r.difficulty ?? null,
+          steps: r.steps ?? [],
+        },
+        { onConflict: "name" }
+      )
       .select("id")
       .single();
     if (error) throw new Error(`${r.name}: ${error.message}`);

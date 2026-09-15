@@ -69,3 +69,12 @@ alter table profiles add column if not exists diet text;                -- 'todo
 alter table profiles add column if not exists allergies text[] not null default '{}';
 alter table profiles add column if not exists avoid_foods text[] not null default '{}';
 alter table profiles add column if not exists goals text[] not null default '{}';
+
+-- Configuración y perfil
+alter table profiles add column if not exists phone text;
+alter table profiles add column if not exists weekly_budget int;
+alter table profiles add column if not exists max_recipe_minutes int;
+alter table profiles add column if not exists notify_menu boolean not null default true;
+alter table profiles add column if not exists notify_savings boolean not null default true;
+alter table profiles add column if not exists notify_price_drops boolean not null default false;
+alter table profiles add column if not exists notify_summary boolean not null default true;

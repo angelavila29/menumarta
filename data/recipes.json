@@ -53,6 +53,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 45,
+    "difficulty": "Fácil",
+    "description": "Guiso de cuchara reconfortante, barato y lleno de fibra.",
+    "steps": [
+      "Pica la cebolla, el pimiento, el ajo y la zanahoria; pela y trocea la patata.",
+      "Sofríe la cebolla, el pimiento y el ajo con el aceite durante 5 minutos.",
+      "Añade la zanahoria y el pimentón y remueve un momento sin que se queme.",
+      "Incorpora las lentejas lavadas, la patata y el laurel, y cubre con agua.",
+      "Cuece a fuego medio 35-40 minutos hasta que estén tiernas y rectifica de sal."
     ]
   },
   {
@@ -94,6 +104,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Plato sevillano rápido con garbanzos de bote.",
+    "steps": [
+      "Dora el pan en rebanadas y los ajos laminados con el aceite; reserva.",
+      "Machaca el pan y los ajos con el pimentón y un chorrito de agua.",
+      "Saltea las espinacas en la misma sartén hasta que reduzcan.",
+      "Añade los garbanzos escurridos y la pasta de pan y ajo.",
+      "Cocina 5 minutos removiendo, sala y sirve caliente."
     ]
   },
   {
@@ -140,6 +160,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "description": "Cuchara de invierno. Pon las alubias en remojo la noche antes.",
+    "steps": [
+      "Deja las alubias en remojo en agua fría la noche anterior.",
+      "Sofríe la cebolla, el pimiento y el ajo picados con el aceite.",
+      "Añade el chorizo en rodajas y rehoga 2 minutos.",
+      "Incorpora las alubias escurridas y el laurel, y cubre con agua fría.",
+      "Cuece a fuego suave unos 75 minutos, añadiendo un chorrito de agua fría dos veces, hasta que estén tiernas."
     ]
   },
   {
@@ -191,6 +221,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 45,
+    "difficulty": "Media",
+    "description": "Arroz de domingo hecho en una sola cazuela.",
+    "steps": [
+      "Salpimienta el pollo y dóralo con el aceite en una cazuela ancha; reserva.",
+      "Sofríe los pimientos y el ajo picados, añade el tomate rallado y deja reducir.",
+      "Vuelve a poner el pollo, añade el arroz y remueve un minuto.",
+      "Vierte el caldo caliente, sala y cuece 18 minutos sin remover.",
+      "Deja reposar 5 minutos tapado antes de servir."
     ]
   },
   {
@@ -242,6 +282,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "description": "Arroz meloso de temporada, sin carne.",
+    "steps": [
+      "Trocea el calabacín, el pimiento, la zanahoria y las judías verdes.",
+      "Sofríe el ajo y las verduras con el aceite durante 8 minutos.",
+      "Añade el tomate rallado y cocina hasta que pierda el agua.",
+      "Incorpora el arroz, remueve y cubre con el doble de agua caliente.",
+      "Cuece 18 minutos, sala y deja reposar 5 minutos."
     ]
   },
   {
@@ -283,6 +333,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "El clásico de diario que gusta a todos.",
+    "steps": [
+      "Cuece los macarrones en agua con sal según el paquete.",
+      "Mientras, sofríe la cebolla picada con el aceite hasta que esté transparente.",
+      "Añade el tomate frito y el atún escurrido, y calienta 3 minutos.",
+      "Mezcla la salsa con la pasta escurrida.",
+      "Sirve con el queso rallado por encima."
     ]
   },
   {
@@ -334,6 +394,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "description": "Salsa de carne casera con zanahoria y cebolla.",
+    "steps": [
+      "Pica la cebolla, la zanahoria y el ajo y sofríelos con el aceite 8 minutos.",
+      "Añade la carne picada, sala y cocina hasta que pierda el color rosado.",
+      "Incorpora el tomate frito y cuece a fuego suave 15 minutos.",
+      "Cuece los espaguetis en agua con sal y escúrrelos.",
+      "Sirve la pasta con la salsa y el queso rallado."
     ]
   },
   {
@@ -374,6 +444,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 45,
+    "difficulty": "Fácil",
+    "description": "Pollo dorado con ajos y un toque de vino blanco.",
+    "steps": [
+      "Pela y corta las patatas en dados; fríelas o ásalas hasta que estén doradas.",
+      "Salpimienta el pollo y dóralo con el aceite a fuego medio-alto.",
+      "Añade los ajos machacados y cocina 5 minutos más.",
+      "Vierte el vino blanco y deja reducir 10 minutos.",
+      "Junta con las patatas y termina con perejil picado."
     ]
   },
   {
@@ -409,6 +489,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Plancha rápida con guarnición de pimientos fritos.",
+    "steps": [
+      "Corta las patatas en gajos y ásalas o fríelas.",
+      "Fríe los pimientos verdes enteros a fuego suave con el aceite y el ajo hasta que estén blandos.",
+      "Sala los filetes y hazlos a la plancha muy caliente 1-2 minutos por cada lado.",
+      "Sirve los filetes con los pimientos y las patatas."
     ]
   },
   {
@@ -455,6 +544,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Cena ligera y rápida de plancha y ensalada.",
+    "steps": [
+      "Lava y corta la lechuga, el tomate y la cebolla en juliana.",
+      "Aliña la ensalada con aceite, sal, zumo de limón y las aceitunas.",
+      "Sala el lomo y hazlo a la plancha 2-3 minutos por cada lado.",
+      "Sirve el lomo con la ensalada al lado."
     ]
   },
   {
@@ -505,6 +603,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 50,
+    "difficulty": "Media",
+    "description": "Albóndigas caseras en salsa con arroz blanco.",
+    "steps": [
+      "Mezcla la carne con el huevo, el pan rallado, el ajo picado y sal; forma bolas.",
+      "Dóralas en el aceite y resérvalas.",
+      "Sofríe la cebolla picada en la misma sartén, añade el tomate frito y un vaso de agua.",
+      "Incorpora las albóndigas y cuece tapado 20 minutos.",
+      "Cuece el arroz aparte y sírvelo con las albóndigas."
     ]
   },
   {
@@ -555,6 +663,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 35,
+    "difficulty": "Media",
+    "description": "Merluza con guisantes y patatas en una salsa suave de perejil.",
+    "steps": [
+      "Corta las patatas en rodajas y cuécelas 10 minutos en agua con sal.",
+      "Dora el ajo picado con el aceite, añade la harina y remueve un minuto.",
+      "Vierte el vino y un vaso de agua poco a poco hasta tener una salsa ligera.",
+      "Añade la merluza, los guisantes y el perejil, y cocina 6-8 minutos moviendo la cazuela.",
+      "Sirve con las patatas."
     ]
   },
   {
@@ -600,6 +718,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "description": "Bandeja única al horno, sin apenas manchar.",
+    "steps": [
+      "Precalienta el horno a 200 °C.",
+      "Corta la patata en rodajas finas y el calabacín, el pimiento y la cebolla en tiras.",
+      "Hornea las verduras con aceite y sal durante 20 minutos.",
+      "Coloca el salmón encima con unas rodajas de limón y hornea 12 minutos más."
     ]
   },
   {
@@ -645,6 +772,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "description": "Bacalao en salsa de tomate y pimiento. Si es salado, desálalo antes.",
+    "steps": [
+      "Si el bacalao es salado, desálalo en agua 24-36 horas cambiando el agua varias veces.",
+      "Sofríe la cebolla, el ajo y el pimiento picados con el aceite.",
+      "Añade el tomate frito y cocina 5 minutos.",
+      "Pon el bacalao en la salsa y cuece a fuego suave 8-10 minutos.",
+      "Sirve con el arroz cocido aparte."
     ]
   },
   {
@@ -691,6 +828,15 @@
         "qty": 1000,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 40,
+    "difficulty": "Media",
+    "description": "Versión rápida del cocido con garbanzos de bote.",
+    "steps": [
+      "Hierve el caldo con el pollo, la zanahoria y la patata troceadas durante 25 minutos.",
+      "Añade el chorizo en rodajas y los garbanzos escurridos y cuece 5 minutos.",
+      "Separa un poco de caldo, cuece los fideos en él 4 minutos y sírvelo de primero.",
+      "Sirve los garbanzos con las carnes y la verdura de segundo."
     ]
   },
   {
@@ -742,6 +888,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 45,
+    "difficulty": "Fácil",
+    "description": "Verduras pochadas despacio con un huevo encima.",
+    "steps": [
+      "Pica la cebolla, los pimientos, la berenjena y el calabacín en dados.",
+      "Pocha la cebolla y los pimientos con el aceite durante 10 minutos.",
+      "Añade la berenjena y el calabacín y cocina 15 minutos a fuego medio.",
+      "Incorpora el tomate frito y cocina 10 minutos más.",
+      "Cuaja los huevos encima o fríelos aparte y sirve."
     ]
   },
   {
@@ -783,6 +939,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Arroz blanco con tomate, huevo frito y plátano.",
+    "steps": [
+      "Sofríe el ajo con un poco de aceite, añade el arroz y el doble de agua con sal.",
+      "Cuece 18 minutos y deja reposar.",
+      "Calienta el tomate frito.",
+      "Fríe los huevos y los plátanos cortados a lo largo.",
+      "Sirve el arroz con el tomate, el huevo y el plátano."
     ]
   },
   {
@@ -844,6 +1010,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 75,
+    "difficulty": "Media",
+    "description": "Guiso tradicional de ternera y patata.",
+    "steps": [
+      "Trocea la carne, sálala y dórala con el aceite; resérvala.",
+      "Sofríe la cebolla, el pimiento, la zanahoria y el ajo picados.",
+      "Añade el pimentón, la carne y el vino, y deja evaporar el alcohol.",
+      "Cubre con el caldo y cuece tapado 40 minutos.",
+      "Añade las patatas troceadas y cuece 20 minutos más hasta que estén tiernas."
     ]
   },
   {
@@ -890,6 +1066,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Pasta cremosa con champiñones y calabacín.",
+    "steps": [
+      "Cuece los macarrones en agua con sal.",
+      "Saltea el ajo, el calabacín y los champiñones laminados con el aceite 8 minutos.",
+      "Añade la nata y el queso rallado y deja espesar 3 minutos.",
+      "Mezcla con la pasta escurrida y sirve enseguida."
     ]
   },
   {
@@ -941,6 +1126,16 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 50,
+    "difficulty": "Fácil",
+    "description": "Pollo en salsa con champiñones y arroz blanco.",
+    "steps": [
+      "Salpimienta el pollo, pásalo por harina y dóralo con el aceite.",
+      "Añade la cebolla y el ajo picados y cocina 5 minutos.",
+      "Incorpora los champiñones y el vino y deja reducir.",
+      "Cubre con agua y cuece tapado 30 minutos.",
+      "Sirve con el arroz cocido aparte."
     ]
   },
   {
@@ -977,6 +1172,16 @@
         "qty": 100,
         "unit": "g"
       }
+    ],
+    "time_minutes": 40,
+    "difficulty": "Media",
+    "description": "La tortilla de siempre, jugosa por dentro.",
+    "steps": [
+      "Pela y corta las patatas y la cebolla en láminas finas.",
+      "Pocha ambas en el aceite a fuego suave durante 20 minutos y escúrrelas.",
+      "Bate los huevos con sal y mézclalos con las patatas.",
+      "Cuaja la mezcla en una sartén con un poco de aceite, dale la vuelta con un plato y termina 1-2 minutos.",
+      "Acompaña con pan."
     ]
   },
   {
@@ -1018,6 +1223,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Crema suave y ligera para cenar.",
+    "steps": [
+      "Trocea el calabacín, la patata y la cebolla.",
+      "Rehoga la cebolla con el aceite 5 minutos y añade el calabacín y la patata.",
+      "Cubre con el caldo y cuece 20 minutos.",
+      "Tritura con el queso fresco hasta que quede fina y ajusta de sal."
     ]
   },
   {
@@ -1069,6 +1283,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Ensalada completa para una cena rápida.",
+    "steps": [
+      "Cuece los huevos 10 minutos, enfríalos y pélalos.",
+      "Lava y corta la lechuga, el tomate y la cebolla.",
+      "Añade el atún, el maíz escurrido, las aceitunas y los huevos en cuartos.",
+      "Aliña con aceite y sal justo antes de servir."
     ]
   },
   {
@@ -1110,6 +1333,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Revuelto jugoso listo en 15 minutos.",
+    "steps": [
+      "Lamina los champiñones y el ajo.",
+      "Saltéalos con el aceite 5 minutos y añade las espinacas hasta que reduzcan.",
+      "Incorpora los huevos batidos con sal y remueve a fuego suave hasta que cuajen.",
+      "Sirve con pan."
     ]
   },
   {
@@ -1145,6 +1377,15 @@
         "qty": 1,
         "unit": "ud"
       }
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Sopa casera reconfortante.",
+    "steps": [
+      "Hierve el caldo con la zanahoria en rodajas y la pechuga durante 15 minutos.",
+      "Saca la pechuga, desmígala y vuelve a echarla al caldo.",
+      "Añade los fideos y cuece 4-5 minutos.",
+      "Incorpora el huevo cocido picado y sirve caliente."
     ]
   },
   {
@@ -1186,6 +1427,15 @@
         "qty": 60,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "La tapa clásica convertida en cena.",
+    "steps": [
+      "Pela las gambas si vienen enteras y sécalas.",
+      "Calienta el aceite con los ajos laminados y la guindilla sin que se quemen.",
+      "Añade las gambas, sala y cocina 2 minutos removiendo.",
+      "Espolvorea perejil picado y sirve con pan para mojar."
     ]
   },
   {
@@ -1232,6 +1482,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "description": "Puré dulce y cremoso de otoño.",
+    "steps": [
+      "Pela y trocea la calabaza, la patata, la cebolla y la zanahoria.",
+      "Rehoga la cebolla con el aceite y añade el resto de verduras.",
+      "Cubre con el caldo y cuece 25 minutos.",
+      "Tritura con la nata y ajusta de sal."
     ]
   },
   {
@@ -1273,6 +1532,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "Cena de diez minutos para los días sin tiempo.",
+    "steps": [
+      "Monta los sándwiches con el jamón y el queso.",
+      "Tuéstalos en sartén o sandwichera hasta que el queso se funda.",
+      "Prepara una ensalada de lechuga y tomate aliñada con aceite y sal.",
+      "Sirve los sándwiches cortados con la ensalada."
     ]
   },
   {
@@ -1303,6 +1571,15 @@
         "qty": 80,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Patatas, huevo y jamón: éxito asegurado.",
+    "steps": [
+      "Corta las patatas en bastones finos y fríelas en el aceite hasta que estén doradas.",
+      "Escúrrelas y colócalas en una fuente.",
+      "Fríe los huevos dejando la yema líquida.",
+      "Pon los huevos sobre las patatas con el jamón y rómpelos al servir."
     ]
   },
   {
@@ -1344,6 +1621,15 @@
         "qty": 30,
         "unit": "ml"
       }
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Verdura salteada con huevo, ligera y saciante.",
+    "steps": [
+      "Separa el brócoli en ramilletes y cuécelo 4 minutos; escúrrelo.",
+      "Dora el ajo laminado con el aceite y saltea el brócoli 3 minutos.",
+      "Añade los huevos batidos con sal y remueve hasta que cuajen.",
+      "Termina con unas gotas de limón y acompaña con pan."
     ]
   }
 ]
