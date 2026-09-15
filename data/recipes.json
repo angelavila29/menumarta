@@ -1,0 +1,1349 @@
+[
+  {
+    "name": "Lentejas con verduras",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "legumbre",
+      "económico"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "lentejas",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "laurel",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Garbanzos con espinacas",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "legumbre",
+      "vegetariano"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "garbanzos cocidos",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "espinacas",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Alubias blancas con chorizo",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "legumbre",
+      "económico"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "alubias blancas",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "chorizo",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "laurel",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Arroz con pollo",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "arroz",
+      "carne"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "arroz",
+        "qty": 320,
+        "unit": "g"
+      },
+      {
+        "ingredient": "muslo de pollo",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 750,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Arroz con verduras",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "arroz",
+      "vegetariano"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "arroz",
+        "qty": 320,
+        "unit": "g"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "judías verdes",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Macarrones con tomate y atún",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "económico"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "macarrones",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Espaguetis a la boloñesa",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "carne"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "espaguetis",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "carne picada",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 60,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Pollo al ajillo con patatas",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "muslo de pollo",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 6,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "vino blanco",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "perejil",
+        "qty": 10,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Filete de ternera con pimientos",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "filete de ternera",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Lomo de cerdo a la plancha con ensalada",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "rápido"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "lomo de cerdo",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "lechuga",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceitunas",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Albóndigas en salsa de tomate",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "carne picada",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan rallado",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 240,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Merluza en salsa verde",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pescado"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "merluza",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "perejil",
+        "qty": 15,
+        "unit": "g"
+      },
+      {
+        "ingredient": "harina",
+        "qty": 20,
+        "unit": "g"
+      },
+      {
+        "ingredient": "vino blanco",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "guisantes",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Salmón al horno con verduras",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pescado"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "salmón",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Bacalao con tomate",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pescado"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "bacalao",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 240,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Cocido rápido de garbanzos",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "legumbre",
+      "carne"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "garbanzos cocidos",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "muslo de pollo",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "chorizo",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "fideos",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 1000,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Pisto con huevo",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "verdura",
+      "vegetariano"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "berenjena",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Arroz a la cubana",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "arroz",
+      "económico"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "arroz",
+        "qty": 320,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "plátano",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Guiso de patatas con carne",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "guiso",
+      "carne"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ternera para guisar",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "vino blanco",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 500,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Pasta con verduras y queso",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "vegetariano"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "macarrones",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "champiñones",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "nata",
+        "qty": 200,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Pollo guisado con champiñones",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "guiso"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "muslo de pollo",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "champiñones",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "vino blanco",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "harina",
+        "qty": 15,
+        "unit": "g"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 240,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Tortilla de patatas",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo",
+      "económico"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 6,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 100,
+        "unit": "g"
+      }
+    ]
+  },
+  {
+    "name": "Crema de calabacín",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "sopa",
+      "vegetariano"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "calabacín",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso fresco",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 500,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Ensalada de atún con huevo",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "ensalada",
+      "rápido"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "lechuga",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "maíz en lata",
+        "qty": 140,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceitunas",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Revuelto de champiñones y espinacas",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo",
+      "vegetariano"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "huevo",
+        "qty": 6,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "champiñones",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "espinacas",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Sopa de pollo con fideos",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "sopa"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 1000,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "fideos",
+        "qty": 120,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 1,
+        "unit": "ud"
+      }
+    ]
+  },
+  {
+    "name": "Gambas al ajillo con pan",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "pescado",
+      "rápido"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "gambas",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "guindilla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "perejil",
+        "qty": 10,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 60,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Puré de calabaza",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "sopa",
+      "vegetariano"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "calabaza",
+        "qty": 700,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 500,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "nata",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Sándwich de jamón y queso con ensalada",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "rápido",
+      "económico"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "pan de molde",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "jamón cocido",
+        "qty": 120,
+        "unit": "g"
+      },
+      {
+        "ingredient": "queso en lonchas",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "lechuga",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Huevos rotos con jamón",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "jamón serrano",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 80,
+        "unit": "ml"
+      }
+    ]
+  },
+  {
+    "name": "Brócoli salteado con ajo y huevo",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "verdura",
+      "vegetariano"
+    ],
+    "ingredients": [
+      {
+        "ingredient": "brócoli",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ]
+  }
+]

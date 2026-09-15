@@ -169,3 +169,20 @@ insert into supermarkets (id, name) values
   ('mercadona', 'Mercadona'),
   ('dia', 'Dia')
 on conflict (id) do update set name = excluded.name;
+
+-- ---------------------------------------------------------------------
+-- Búsqueda sin tildes: columna generada name_norm (minúsculas, sin acentos)
+-- ---------------------------------------------------------------------
+create extension if not exists unaccent;
+
+create or replace function public.immutable_unaccent(text)
+returns text language sql immutable parallel safe strict as $$
+  select public.unaccent('public.unaccent', $1)
+$$;
+
+alter table products
+  add column if not exists name_norm text
+  generated always as (public.immutable_unaccent(lower(name))) stored;
+
+create index if not exists products_name_norm_trgm_idx
+  on products using gin (name_norm gin_trgm_ops);

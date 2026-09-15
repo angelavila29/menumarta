@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { getOrCreateActiveList } from "@/lib/lists";
+import { unaccent } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
 export async function signOut() {
@@ -23,9 +24,9 @@ export async function searchProducts(query: string): Promise<Product[]> {
   if (supers.length === 0) return [];
 
   let req = supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", supers);
-  // Cada palabra debe aparecer en el nombre (usa el índice pg_trgm)
+  // Cada palabra debe aparecer en el nombre, sin distinguir tildes (índice pg_trgm sobre name_norm)
   for (const word of q.split(/\s+/).filter(Boolean)) {
-    req = req.ilike("name", `%${word}%`);
+    req = req.ilike("name_norm", `%${unaccent(word)}%`);
   }
   const { data, error } = await req
     .order("unit_price", { ascending: true, nullsFirst: false })
