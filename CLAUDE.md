@@ -2,7 +2,7 @@
 
 # Contexto del proyecto
 
-Web app para planificar el menú semanal y la lista de la compra con precios reales
+App "Sobremesa": web app para planificar el menú semanal y la lista de la compra con precios reales
 de supermercados españoles (Madrid). Usuarios: dos personas (uso personal).
 
 ## Stack (todo gratuito, no proponer nada de pago)

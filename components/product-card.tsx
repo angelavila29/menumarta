@@ -2,13 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { addToList, toggleFavorite } from "@/lib/actions";
-import { euro, packSize, superName, unitPrice } from "@/lib/format";
+import { euro, packSize, superName, superStyle, unitPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
-
-const SUPER_COLOR: Record<string, string> = {
-  mercadona: "bg-emerald-100 text-emerald-800",
-  dia: "bg-red-100 text-red-800",
-};
 
 export function ProductCard({
   product,
@@ -57,7 +52,7 @@ export function ProductCard({
       <div className="min-w-0 flex-1">
         <p className="line-clamp-2 text-sm font-medium leading-snug">{product.name}</p>
         <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-zinc-600">
-          <span className={`rounded px-1.5 py-0.5 font-medium ${SUPER_COLOR[product.supermarket_id] ?? "bg-zinc-100"}`}>
+          <span className={`rounded px-1.5 py-0.5 font-medium ${superStyle(product.supermarket_id).badge}`}>
             {superName(product.supermarket_id)}
           </span>
           {product.pack_size && <span>{packSize(product.pack_size)}</span>}

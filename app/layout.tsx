@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Compra",
+  title: "Sobremesa",
   description: "Menú semanal y lista de la compra con precios reales",
-  applicationName: "Compra",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Compra" },
+  applicationName: "Sobremesa",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Sobremesa" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
 };
 

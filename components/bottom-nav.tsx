@@ -46,8 +46,8 @@ export function SideNav({ email }: { email: string | null }) {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-zinc-200 bg-white px-4 py-6 md:flex">
       <Link href="/" className="mb-8 flex items-center gap-2 px-2 text-2xl font-bold">
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-600 text-lg text-white">C</span>
-        Compra
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-600 text-lg text-white">S</span>
+        Sobremesa
       </Link>
       <ul className="flex flex-col gap-1">
         {TABS.map((t) => {

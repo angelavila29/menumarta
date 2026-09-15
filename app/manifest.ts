@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Compra",
-    short_name: "Compra",
+    name: "Sobremesa",
+    short_name: "Sobremesa",
     description: "Menú semanal y lista de la compra con precios reales",
     start_url: "/",
     display: "standalone",

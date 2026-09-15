@@ -24,3 +24,13 @@ export function packSize(s: string | null | undefined): string {
   if (!s) return "";
   return s.replace(/\bl\b/, "L").replace(/(\d)\.(\d)/, "$1,$2");
 }
+
+/** Colores por cadena para etiquetas y cabeceras. */
+export const SUPER_STYLE: Record<string, { badge: string; band: string; border: string }> = {
+  mercadona: { badge: "bg-emerald-100 text-emerald-800", band: "bg-emerald-600", border: "border-l-emerald-500" },
+  dia: { badge: "bg-red-100 text-red-800", band: "bg-red-600", border: "border-l-red-500" },
+};
+const DEFAULT_STYLE = { badge: "bg-zinc-100 text-zinc-700", band: "bg-zinc-600", border: "border-l-zinc-400" };
+export function superStyle(id: string) {
+  return SUPER_STYLE[id] ?? DEFAULT_STYLE;
+}

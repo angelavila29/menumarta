@@ -1,4 +1,4 @@
-# Compra
+# Sobremesa
 
 Menú semanal y lista de la compra con precios reales de Mercadona (Madrid) y Dia.
 

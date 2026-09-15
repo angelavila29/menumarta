@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { clearChecked, removeItem, setItemChecked, setItemQuantity } from "@/lib/actions";
-import { euro, packSize, superName, unitPrice } from "@/lib/format";
+import { euro, packSize, superName, superStyle, unitPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
 export type ListItem = {
@@ -34,8 +34,12 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
   );
   const checkedCount = items.filter((i) => i.checked).length;
 
-  function share() {
-    const text = buildShareText(items, chains, totals, grand);
+  const chainsWithItems = chains.filter((c) => items.some((i) => i.product.supermarket_id === c));
+
+  function share(onlyChain?: string) {
+    const text = onlyChain
+      ? buildShareText(items.filter((i) => i.product.supermarket_id === onlyChain), [onlyChain], totals, totals[onlyChain] ?? 0)
+      : buildShareText(items, chains, totals, grand);
     startTransition(async () => {
       if (typeof navigator !== "undefined" && navigator.share) {
         try {
@@ -53,7 +57,8 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
   }
 
   const summary = (
-    <div className="mb-4 rounded-xl bg-white p-3 shadow-sm md:sticky md:top-8 md:mb-0 md:p-5">
+    <div className="mb-4 rounded-xl bg-white p-3 shadow-sm md:flex md:items-center md:justify-between md:gap-6 md:p-4">
+      <div>
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
           {chains.map((c) => (
             <div key={c}>
@@ -66,16 +71,17 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
           <span className="text-zinc-500">Total: </span>
           <span className="font-bold">{euro(grand)}</span>
         </div>
+      </div>
         {items.length > 0 && (
-          <div className="mt-4 hidden flex-col gap-2 md:flex">
-            <button type="button" onClick={share} className="rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700">
-              {shared === "copiado" ? "Copiado al portapapeles ✓" : "Compartir"}
-            </button>
+          <div className="hidden gap-2 md:flex">
             {checkedCount > 0 && (
-              <button type="button" disabled={pending} onClick={() => startTransition(() => clearChecked())} className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg font-medium text-zinc-700">
+              <button type="button" disabled={pending} onClick={() => startTransition(() => clearChecked())} className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 font-medium text-zinc-700">
                 Vaciar comprados ({checkedCount})
               </button>
             )}
+            <button type="button" onClick={() => share()} className="rounded-xl bg-green-600 px-5 py-2.5 font-semibold text-white active:bg-green-700">
+              {shared === "copiado" ? "Copiado ✓" : "Compartir todo"}
+            </button>
           </div>
         )}
       </div>
@@ -84,37 +90,46 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
   return (
     <main>
       <h1 className="mb-3 text-2xl font-bold">Lista</h1>
-      <div className="md:grid md:grid-cols-[1fr_280px] md:items-start md:gap-6">
-      <div className="md:hidden">{summary}</div>
-      <div>
+      {summary}
       {items.length === 0 ? (
         <p className="text-zinc-600">Tu lista está vacía. Añade productos desde el buscador o favoritos.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {chains
-            .filter((c) => items.some((i) => i.product.supermarket_id === c))
-            .map((c) => (
-              <li key={c}>
-                <h2 className="mb-1 mt-2 text-sm font-semibold uppercase tracking-wide text-zinc-500">
-                  {nameOf(c)}
-                </h2>
-                <ul className="flex flex-col gap-2">
-                  {items
-                    .filter((i) => i.product.supermarket_id === c)
-                    .map((i) => (
-                      <Row key={i.id} item={i} disabled={pending} start={startTransition} />
-                    ))}
+        <div className={`grid gap-4 ${chainsWithItems.length > 1 ? "lg:grid-cols-2" : ""}`}>
+          {chainsWithItems.map((c) => {
+            const mine = items.filter((i) => i.product.supermarket_id === c);
+            return (
+              <section key={c} className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+                <header className={`flex items-center justify-between px-4 py-3 text-white ${superStyle(c).band}`}>
+                  <span className="text-lg font-bold">{nameOf(c)}</span>
+                  <span className="text-sm">
+                    {mine.length} {mine.length === 1 ? "producto" : "productos"} · <b>{euro(totals[c] ?? 0)}</b>
+                  </span>
+                </header>
+                <ul className="flex flex-col gap-2 p-3">
+                  {mine.map((i) => (
+                    <Row key={i.id} item={i} disabled={pending} start={startTransition} />
+                  ))}
                 </ul>
-              </li>
-            ))}
-        </ul>
+                <footer className="border-t border-zinc-100 px-3 py-2">
+                  <button
+                    type="button"
+                    onClick={() => share(c)}
+                    className="text-sm font-medium text-green-700 underline"
+                  >
+                    Compartir solo la lista de {nameOf(c)}
+                  </button>
+                </footer>
+              </section>
+            );
+          })}
+        </div>
       )}
 
       {items.length > 0 && (
         <div className="mt-6 flex flex-col gap-2 md:hidden">
           <button
             type="button"
-            onClick={share}
+            onClick={() => share()}
             className="rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700"
           >
             {shared === "copiado" ? "Copiado al portapapeles ✓" : "Compartir"}
@@ -131,9 +146,6 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
           )}
         </div>
       )}
-      </div>
-      <div className="hidden md:block">{summary}</div>
-      </div>
     </main>
   );
 }
@@ -149,7 +161,9 @@ function Row({
 }) {
   const p = item.product;
   return (
-    <li className={`rounded-xl border border-zinc-200 bg-white p-3 ${item.checked ? "opacity-60" : ""}`}>
+    <li
+      className={`rounded-xl border border-zinc-200 bg-zinc-50 p-3 ${item.checked ? "opacity-60" : ""}`}
+    >
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
