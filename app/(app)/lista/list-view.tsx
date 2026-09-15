@@ -79,7 +79,7 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
                 Vaciar comprados ({checkedCount})
               </button>
             )}
-            <button type="button" onClick={() => share()} className="rounded-xl bg-green-600 px-5 py-2.5 font-semibold text-white active:bg-green-700">
+            <button type="button" onClick={() => share()} className="rounded-xl bg-brand px-5 py-2.5 font-semibold text-white active:bg-brand-dark">
               {shared === "copiado" ? "Copiado ✓" : "Compartir todo"}
             </button>
           </div>
@@ -114,7 +114,7 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
                   <button
                     type="button"
                     onClick={() => share(c)}
-                    className="text-sm font-medium text-green-700 underline"
+                    className="text-sm font-medium text-brand underline"
                   >
                     Compartir solo la lista de {nameOf(c)}
                   </button>
@@ -130,7 +130,7 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
           <button
             type="button"
             onClick={() => share()}
-            className="rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700"
+            className="rounded-xl bg-brand px-4 py-3 text-lg font-semibold text-white active:bg-brand-dark"
           >
             {shared === "copiado" ? "Copiado al portapapeles ✓" : "Compartir"}
           </button>
@@ -170,7 +170,7 @@ function Row({
           checked={item.checked}
           disabled={disabled}
           onChange={(e) => start(() => setItemChecked(item.id, e.target.checked))}
-          className="mt-1 h-6 w-6 shrink-0 accent-green-600"
+          className="mt-1 h-6 w-6 shrink-0 accent-brand"
           aria-label="Comprado"
         />
         <div className="min-w-0 flex-1">

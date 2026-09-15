@@ -26,7 +26,7 @@ export default async function SettingsPage() {
           {chains.map((c) => (
             <li
               key={c.id}
-              className={`rounded-full px-3 py-1 text-sm ${c.has_prices ? "bg-green-100 text-green-800" : "bg-zinc-100 text-zinc-600"}`}
+              className={`rounded-full px-3 py-1 text-sm ${c.has_prices ? "bg-brand-soft text-brand-dark" : "bg-zinc-100 text-zinc-600"}`}
               title={c.has_prices ? "Con precios" : "Sin precios todavía"}
             >
               {c.name}
@@ -37,7 +37,7 @@ export default async function SettingsPage() {
 
         <Link
           href="/onboarding"
-          className="mt-5 inline-block rounded-xl bg-green-600 px-5 py-3 font-semibold text-white active:bg-green-700"
+          className="mt-5 inline-block rounded-xl bg-brand px-5 py-3 font-semibold text-white active:bg-brand-dark"
         >
           Cambiar ubicación o supermercados
         </Link>

@@ -26,12 +26,12 @@ export function LoginForm() {
 
   if (status === "sent") {
     return (
-      <div className="rounded-xl bg-green-50 p-5 text-center">
-        <p className="text-lg font-semibold text-green-800">Revisa tu correo</p>
-        <p className="mt-1 text-sm text-green-700">
+      <div className="rounded-xl bg-brand-soft p-5 text-center">
+        <p className="text-lg font-semibold text-brand-dark">Revisa tu correo</p>
+        <p className="mt-1 text-sm text-brand">
           Te hemos enviado un enlace a <b>{email}</b>. Ábrelo desde este mismo móvil.
         </p>
-        <button onClick={() => setStatus("idle")} className="mt-4 text-sm text-green-800 underline">
+        <button onClick={() => setStatus("idle")} className="mt-4 text-sm text-brand-dark underline">
           Usar otro correo
         </button>
       </div>
@@ -52,12 +52,12 @@ export function LoginForm() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="tu@correo.com"
-        className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg outline-none focus:border-green-600"
+        className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg outline-none focus:border-brand"
       />
       <button
         type="submit"
         disabled={status === "sending"}
-        className="rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700 disabled:opacity-60"
+        className="rounded-xl bg-brand px-4 py-3 text-lg font-semibold text-white active:bg-brand-dark disabled:opacity-60"
       >
         {status === "sending" ? "Enviando…" : "Enviarme el enlace"}
       </button>

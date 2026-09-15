@@ -17,10 +17,10 @@ export function MenuGrid({ menu, recipes, slots, offset }: { menu: Menu; recipes
       <div className="mb-3 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Menú</h1>
         <div className="flex gap-1 text-sm">
-          <Link href="/menu" className={`rounded-lg px-2 py-1 ${offset === 0 ? "bg-green-100 font-semibold text-green-800" : "text-zinc-500"}`}>
+          <Link href="/menu" className={`rounded-lg px-2 py-1 ${offset === 0 ? "bg-brand-soft font-semibold text-brand-dark" : "text-zinc-500"}`}>
             Esta semana
           </Link>
-          <Link href="/menu?semana=siguiente" className={`rounded-lg px-2 py-1 ${offset === 1 ? "bg-green-100 font-semibold text-green-800" : "text-zinc-500"}`}>
+          <Link href="/menu?semana=siguiente" className={`rounded-lg px-2 py-1 ${offset === 1 ? "bg-brand-soft font-semibold text-brand-dark" : "text-zinc-500"}`}>
             Siguiente
           </Link>
         </div>
@@ -56,7 +56,7 @@ export function MenuGrid({ menu, recipes, slots, offset }: { menu: Menu; recipes
         type="button"
         disabled={pending}
         onClick={() => start(() => generateWeekAction(menu.week_start))}
-        className="mb-4 w-full rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700 disabled:opacity-60 md:w-auto md:px-8"
+        className="mb-4 w-full rounded-xl bg-brand px-4 py-3 text-lg font-semibold text-white active:bg-brand-dark disabled:opacity-60 md:w-auto md:px-8"
       >
         {pending ? "Un momento…" : filled > 0 ? "Generar otra semana" : "Generar semana"}
       </button>

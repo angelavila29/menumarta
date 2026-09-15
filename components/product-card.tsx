@@ -76,7 +76,7 @@ export function ProductCard({
           onClick={onAdd}
           disabled={pending}
           className={`rounded-lg px-2 py-1 text-sm font-semibold ${
-            added ? "bg-green-600 text-white" : "bg-green-100 text-green-800"
+            added ? "bg-brand text-white" : "bg-brand-soft text-brand-dark"
           }`}
         >
           {added ? "✓" : "+ lista"}

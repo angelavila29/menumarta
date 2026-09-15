@@ -50,7 +50,7 @@ export function Review({ rows, servings }: { rows: ReviewRow[]; servings: number
                 </p>
               </div>
               <label className="flex shrink-0 items-center gap-1 text-xs text-zinc-500">
-                <input type="checkbox" checked={!r.skip} onChange={(e) => update(i, { skip: !e.target.checked })} className="h-5 w-5 accent-green-600" />
+                <input type="checkbox" checked={!r.skip} onChange={(e) => update(i, { skip: !e.target.checked })} className="h-5 w-5 accent-brand" />
                 añadir
               </label>
             </div>
@@ -83,7 +83,7 @@ export function Review({ rows, servings }: { rows: ReviewRow[]; servings: number
                 onClose={() => setEditing(null)}
               />
             ) : (
-              <button type="button" onClick={() => setEditing(i)} className="mt-2 text-sm text-green-700 underline">
+              <button type="button" onClick={() => setEditing(i)} className="mt-2 text-sm text-brand underline">
                 {r.product ? "Cambiar producto" : "Buscar producto"}
               </button>
             )}
@@ -99,7 +99,7 @@ export function Review({ rows, servings }: { rows: ReviewRow[]; servings: number
         type="button"
         disabled={pending || chosen.length === 0}
         onClick={confirm}
-        className="mt-3 w-full rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700 disabled:opacity-60 md:w-auto md:px-8"
+        className="mt-3 w-full rounded-xl bg-brand px-4 py-3 text-lg font-semibold text-white active:bg-brand-dark disabled:opacity-60 md:w-auto md:px-8"
       >
         {pending ? "Añadiendo…" : "Añadir a la lista"}
       </button>
@@ -135,7 +135,7 @@ function Picker({ onPick, onClose }: { onPick: (p: Product) => void; onClose: ()
       <ul className="mt-2 flex max-h-64 flex-col gap-1 overflow-y-auto">
         {results.slice(0, 12).map((p) => (
           <li key={p.id}>
-            <button type="button" onClick={() => onPick(p)} className="w-full rounded-lg bg-white px-3 py-2 text-left text-sm active:bg-green-50">
+            <button type="button" onClick={() => onPick(p)} className="w-full rounded-lg bg-white px-3 py-2 text-left text-sm active:bg-brand-soft">
               <span className="line-clamp-1">{p.name}</span>
               <span className="text-xs text-zinc-500">
                 {superName(p.supermarket_id)} · {euro(p.price)} · {unitPrice(p.unit_price, p.unit)}

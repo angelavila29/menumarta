@@ -28,7 +28,7 @@ export default async function MenuListPage(props: PageProps<"/menu/lista">) {
       <main>
         <h1 className="mb-3 text-2xl font-bold">Lista del menú</h1>
         <p className="text-zinc-600">El menú está vacío. Genera la semana primero.</p>
-        <Link href="/menu" className="mt-3 inline-block text-green-700 underline">Volver al menú</Link>
+        <Link href="/menu" className="mt-3 inline-block text-brand underline">Volver al menú</Link>
       </main>
     );
   }

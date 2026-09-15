@@ -5,8 +5,8 @@ import { searchProducts } from "@/lib/actions";
 import type { Product } from "@/lib/types";
 import { ProductCard } from "./product-card";
 
-export function Search({ favoriteIds }: { favoriteIds: number[] }) {
-  const [q, setQ] = useState("");
+export function Search({ favoriteIds, initialQuery = "" }: { favoriteIds: number[]; initialQuery?: string }) {
+  const [q, setQ] = useState(initialQuery);
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const seq = useRef(0);
@@ -40,7 +40,7 @@ export function Search({ favoriteIds }: { favoriteIds: number[] }) {
         onChange={(e) => setQ(e.target.value)}
         placeholder="Busca: leche, arroz, tomate…"
         autoFocus
-        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg outline-none focus:border-green-600 md:max-w-xl"
+        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg outline-none focus:border-brand md:max-w-xl"
       />
       {loading && <p className="mt-3 text-sm text-zinc-500">Buscando…</p>}
       {!loading && q.trim().length >= 2 && results.length === 0 && (

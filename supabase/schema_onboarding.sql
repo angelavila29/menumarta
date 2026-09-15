@@ -57,3 +57,5 @@ end;
 $$;
 revoke all on function public.ensure_supermarket(text, text) from public;
 grant execute on function public.ensure_supermarket(text, text) to authenticated;
+
+alter table profiles add column if not exists display_name text;

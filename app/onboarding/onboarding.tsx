@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { formatDistance, type GeoPoint, type NearbyChain } from "@/lib/geo";
+import { formatDistance, type NearbyChain } from "@/lib/geo";
 import { locateByAddress, locateByCoords, saveOnboarding, type LocateResult } from "@/lib/onboarding-actions";
 
-type Props = { initialAddress: string; initialChains: string[]; isFirstTime: boolean };
+type Props = { initialAddress: string; initialName: string; initialChains: string[]; isFirstTime: boolean };
 
-export function Onboarding({ initialAddress, initialChains, isFirstTime }: Props) {
+export function Onboarding({ initialAddress, initialName, initialChains, isFirstTime }: Props) {
   const [address, setAddress] = useState(initialAddress);
+  const [displayName, setDisplayName] = useState(initialName);
   const [result, setResult] = useState<Extract<LocateResult, { ok: true }> | null>(null);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set(initialChains));
@@ -59,7 +60,7 @@ export function Onboarding({ initialAddress, initialChains, isFirstTime }: Props
     const postal = address.trim().match(/\b\d{5}\b/)?.[0] ?? null;
     startSave(async () => {
       try {
-        await saveOnboarding({ point: result.point, postalCode: postal, chains });
+        await saveOnboarding({ point: result.point, postalCode: postal, chains, displayName });
       } catch (e) {
         setError(e instanceof Error ? e.message : "No se ha podido guardar.");
       }
@@ -73,29 +74,37 @@ export function Onboarding({ initialAddress, initialChains, isFirstTime }: Props
 
       {/* Paso 1: ubicación */}
       <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5">
-        <h2 className="mb-3 text-lg font-semibold">1. ¿Dónde vives?</h2>
+        <h2 className="mb-3 text-lg font-semibold">1. ¿Cómo te llamas y dónde vives?</h2>
+        <input
+          type="text"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          placeholder="Tu nombre (ej. Marta)"
+          autoComplete="given-name"
+          className="mb-2 w-full rounded-xl border border-zinc-300 px-4 py-3 text-lg outline-none focus:border-brand sm:max-w-xs"
+        />
         <form onSubmit={byAddress} className="flex flex-col gap-2 sm:flex-row">
           <input
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Código postal o dirección (ej. 28001, o Calle Alcalá 50, Madrid)"
-            className="min-w-0 flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-lg outline-none focus:border-green-600"
+            className="min-w-0 flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-lg outline-none focus:border-brand"
           />
           <button
             type="submit"
             disabled={pending}
-            className="rounded-xl bg-green-600 px-5 py-3 text-lg font-semibold text-white active:bg-green-700 disabled:opacity-60"
+            className="rounded-xl bg-brand px-5 py-3 text-lg font-semibold text-white active:bg-brand-dark disabled:opacity-60"
           >
             {pending ? "Buscando…" : "Buscar"}
           </button>
         </form>
-        <button type="button" onClick={byGps} disabled={pending} className="mt-3 text-sm text-green-700 underline">
+        <button type="button" onClick={byGps} disabled={pending} className="mt-3 text-sm text-brand underline">
           📍 Usar mi ubicación actual
         </button>
         {error && <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
         {result && (
-          <p className="mt-3 rounded-lg bg-green-50 p-3 text-sm text-green-800">
+          <p className="mt-3 rounded-lg bg-brand-soft p-3 text-sm text-brand-dark">
             📍 {result.point.label}
           </p>
         )}
@@ -120,12 +129,12 @@ export function Onboarding({ initialAddress, initialChains, isFirstTime }: Props
                     type="button"
                     onClick={() => toggle(c.id)}
                     className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left ${
-                      on ? "border-green-600 bg-green-50" : "border-zinc-200"
+                      on ? "border-brand bg-brand-soft" : "border-zinc-200"
                     }`}
                   >
                     <span
                       className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-sm ${
-                        on ? "border-green-600 bg-green-600 text-white" : "border-zinc-300 bg-white"
+                        on ? "border-brand bg-brand text-white" : "border-zinc-300 bg-white"
                       }`}
                     >
                       {on ? "✓" : ""}
@@ -157,7 +166,7 @@ export function Onboarding({ initialAddress, initialChains, isFirstTime }: Props
               type="button"
               onClick={save}
               disabled={saving || selected.size === 0}
-              className="rounded-xl bg-green-600 px-5 py-3 text-lg font-semibold text-white active:bg-green-700 disabled:opacity-60"
+              className="rounded-xl bg-brand px-5 py-3 text-lg font-semibold text-white active:bg-brand-dark disabled:opacity-60"
             >
               {saving ? "Guardando…" : "Guardar y empezar"}
             </button>

@@ -44,7 +44,7 @@ export async function locateByCoords(lat: number, lng: number): Promise<LocateRe
 
 export type ChainChoice = { id: string; name: string };
 
-export async function saveOnboarding(input: { point: GeoPoint; postalCode: string | null; chains: ChainChoice[] }) {
+export async function saveOnboarding(input: { point: GeoPoint; postalCode: string | null; chains: ChainChoice[]; displayName?: string }) {
   const { supabase, user } = await requireUser();
   if (input.chains.length === 0) throw new Error("Elige al menos un supermercado.");
 
@@ -61,6 +61,7 @@ export async function saveOnboarding(input: { point: GeoPoint; postalCode: strin
       lng: input.point.lng,
       address: input.point.label,
       postal_code: input.postalCode,
+      display_name: input.displayName?.trim() || null,
       onboarded_at: new Date().toISOString(),
     },
     { onConflict: "id" }
