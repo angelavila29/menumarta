@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description: "Menú semanal y lista de la compra con precios reales",
   applicationName: "Sobremesa",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "Sobremesa" },
-  icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#16a34a",
+  themeColor: "#e8552e",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage(props: PageProps<"/login">) {
@@ -6,6 +7,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
   return (
     <main className="flex flex-1 flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm">
+        <Image src="/logo.png" alt="" width={112} height={112} priority className="mx-auto mb-4" />
         <h1 className="mb-2 text-center text-4xl font-bold">Sobremesa</h1>
         <p className="mb-8 text-center text-zinc-600">
           Menú semanal y lista de la compra con precios reales.

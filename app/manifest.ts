@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Menú semanal y lista de la compra con precios reales",
     start_url: "/",
     display: "standalone",
-    background_color: "#fafafa",
-    theme_color: "#16a34a",
+    background_color: "#fff7f0",
+    theme_color: "#e8552e",
     lang: "es",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
