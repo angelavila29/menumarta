@@ -86,31 +86,6 @@ export async function addToList(productId: number, quantity = 1) {
 }
 
 // ---------------------------------------------------------------------------
-// Ajustes
-// ---------------------------------------------------------------------------
-export async function saveSettings(formData: FormData) {
-  const { supabase, user } = await requireUser();
-  const postalCode = String(formData.get("postal_code") ?? "").trim() || null;
-  const supers = formData.getAll("supermarkets").map(String);
-
-  const { error: pErr } = await supabase
-    .from("profiles")
-    .upsert({ id: user.id, postal_code: postalCode }, { onConflict: "id" });
-  if (pErr) throw new Error(pErr.message);
-
-  const { error: dErr } = await supabase.from("user_supermarkets").delete().eq("user_id", user.id);
-  if (dErr) throw new Error(dErr.message);
-  if (supers.length > 0) {
-    const { error: iErr } = await supabase
-      .from("user_supermarkets")
-      .insert(supers.map((s) => ({ user_id: user.id, supermarket_id: s })));
-    if (iErr) throw new Error(iErr.message);
-  }
-  revalidatePath("/", "layout");
-  redirect("/?guardado=1");
-}
-
-// ---------------------------------------------------------------------------
 // Edición de la lista
 // ---------------------------------------------------------------------------
 export async function setItemQuantity(itemId: number, quantity: number) {

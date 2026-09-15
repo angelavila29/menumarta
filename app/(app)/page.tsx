@@ -5,8 +5,12 @@ import { requireUser, userSupermarketIds } from "@/lib/auth";
 export default async function HomePage() {
   const { supabase, user } = await requireUser();
   const supers = await userSupermarketIds(supabase, user.id);
-  const { data: favs } = await supabase.from("favorites").select("product_id").eq("user_id", user.id);
+  const [{ data: favs }, { data: priced }] = await Promise.all([
+    supabase.from("favorites").select("product_id").eq("user_id", user.id),
+    supabase.from("supermarkets").select("id,name").eq("has_prices", true),
+  ]);
   const favoriteIds = (favs ?? []).map((f) => f.product_id as number);
+  const withPrices = (priced ?? []).filter((s) => supers.includes(s.id as string)).map((s) => s.name as string);
 
   return (
     <main>
@@ -19,7 +23,16 @@ export default async function HomePage() {
           </Link>
         </div>
       ) : (
-        <Search favoriteIds={favoriteIds} />
+        <>
+          {withPrices.length < supers.length && (
+            <p className="mb-3 text-sm text-zinc-500">
+              {withPrices.length > 0
+                ? `Por ahora hay precios de ${withPrices.join(" y ")}. El resto de tus supermercados se añadirán cuando tengamos datos.`
+                : "Todavía no hay precios de tus supermercados. Añade Mercadona o Dia en Ajustes para buscar."}
+            </p>
+          )}
+          <Search favoriteIds={favoriteIds} />
+        </>
       )}
     </main>
   );

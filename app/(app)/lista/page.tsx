@@ -6,10 +6,14 @@ import { ListView, type ListItem } from "./list-view";
 
 export default async function ListPage() {
   const { supabase, user } = await requireUser();
-  const [listId, supers] = await Promise.all([
+  const [listId, supers, { data: chainRows }] = await Promise.all([
     getOrCreateActiveList(supabase, user.id),
     userSupermarketIds(supabase, user.id),
+    supabase.from("supermarkets").select("id,name,has_prices"),
   ]);
+  const chains = (chainRows ?? [])
+    .filter((c) => supers.includes(c.id as string))
+    .map((c) => ({ id: c.id as string, name: c.name as string, has_prices: c.has_prices as boolean }));
 
   const { data } = await supabase
     .from("shopping_list_items")
@@ -35,5 +39,5 @@ export default async function ListPage() {
     })
   );
 
-  return <ListView items={items} supermarkets={supers} />;
+  return <ListView items={items} chains={chains} />;
 }

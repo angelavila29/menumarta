@@ -38,7 +38,7 @@ export function Review({ rows, servings }: { rows: ReviewRow[]; servings: number
         Para {servings} personas. Revisa lo dudoso, cambia lo que quieras y confirma. Lo que cambies se recordará.
       </p>
 
-      <ul className="flex flex-col gap-2">
+      <ul className="grid gap-2 md:grid-cols-2">
         {state.map((r, i) => (
           <li key={`${r.need.ingredient}-${r.need.unit}`} className={`rounded-xl border border-zinc-200 bg-white p-3 ${r.skip ? "opacity-50" : ""}`}>
             <div className="flex items-start justify-between gap-2">
@@ -91,7 +91,7 @@ export function Review({ rows, servings }: { rows: ReviewRow[]; servings: number
         ))}
       </ul>
 
-      <div className="mt-5 rounded-xl bg-white p-3 shadow-sm">
+      <div className="mt-5 rounded-xl bg-white p-3 shadow-sm md:flex md:items-center md:justify-between md:p-5">
         <p className="text-sm text-zinc-500">{chosen.length} productos</p>
         <p className="text-lg"><span className="text-zinc-500">Total aprox.: </span><span className="font-bold">{euro(total)}</span></p>
       </div>
@@ -99,7 +99,7 @@ export function Review({ rows, servings }: { rows: ReviewRow[]; servings: number
         type="button"
         disabled={pending || chosen.length === 0}
         onClick={confirm}
-        className="mt-3 w-full rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700 disabled:opacity-60"
+        className="mt-3 w-full rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700 disabled:opacity-60 md:w-auto md:px-8"
       >
         {pending ? "Añadiendo…" : "Añadir a la lista"}
       </button>

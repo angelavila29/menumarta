@@ -40,13 +40,13 @@ export function Search({ favoriteIds }: { favoriteIds: number[] }) {
         onChange={(e) => setQ(e.target.value)}
         placeholder="Busca: leche, arroz, tomate…"
         autoFocus
-        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg outline-none focus:border-green-600"
+        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg outline-none focus:border-green-600 md:max-w-xl"
       />
       {loading && <p className="mt-3 text-sm text-zinc-500">Buscando…</p>}
       {!loading && q.trim().length >= 2 && results.length === 0 && (
         <p className="mt-3 text-sm text-zinc-500">Nada con ese nombre en tus supermercados.</p>
       )}
-      <ul className="mt-3 flex flex-col gap-2">
+      <ul className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
         {results.map((p) => (
           <ProductCard key={p.id} product={p} initialFavorite={favs.has(p.id)} />
         ))}

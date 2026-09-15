@@ -7,7 +7,7 @@ import type { Product } from "@/lib/types";
 export function FavoritesList({ products }: { products: Product[] }) {
   const [items, setItems] = useState(products);
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
       {items.map((p) => (
         <ProductCard
           key={p.id}

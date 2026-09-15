@@ -17,7 +17,9 @@ function lineTotal(i: ListItem) {
   return (i.product.price ?? 0) * i.quantity;
 }
 
-export function ListView({ items, supermarkets }: { items: ListItem[]; supermarkets: string[] }) {
+type Chain = { id: string; name: string; has_prices: boolean };
+
+export function ListView({ items, chains: userChains }: { items: ListItem[]; chains: Chain[] }) {
   const [pending, startTransition] = useTransition();
   const [shared, setShared] = useState<"" | "ok" | "copiado">("");
 
@@ -25,7 +27,11 @@ export function ListView({ items, supermarkets }: { items: ListItem[]; supermark
   const totals: Record<string, number> = {};
   for (const i of items) totals[i.product.supermarket_id] = (totals[i.product.supermarket_id] ?? 0) + lineTotal(i);
   const grand = Object.values(totals).reduce((a, b) => a + b, 0);
-  const chains = Array.from(new Set([...supermarkets, ...Object.keys(totals)]));
+  // Cadenas a mostrar: las del usuario con precios, más cualquiera que tenga productos en la lista
+  const nameOf = (id: string) => userChains.find((c) => c.id === id)?.name ?? superName(id);
+  const chains = Array.from(
+    new Set([...userChains.filter((c) => c.has_prices).map((c) => c.id), ...Object.keys(totals)])
+  );
   const checkedCount = items.filter((i) => i.checked).length;
 
   function share() {
@@ -46,15 +52,12 @@ export function ListView({ items, supermarkets }: { items: ListItem[]; supermark
     });
   }
 
-  return (
-    <main>
-      <h1 className="mb-3 text-2xl font-bold">Lista</h1>
-
-      <div className="mb-4 rounded-xl bg-white p-3 shadow-sm">
+  const summary = (
+    <div className="mb-4 rounded-xl bg-white p-3 shadow-sm md:sticky md:top-8 md:mb-0 md:p-5">
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
           {chains.map((c) => (
             <div key={c}>
-              <span className="text-zinc-500">{superName(c)}: </span>
+              <span className="text-zinc-500">{nameOf(c)}: </span>
               <span className="font-semibold">{euro(totals[c] ?? 0)}</span>
             </div>
           ))}
@@ -63,8 +66,27 @@ export function ListView({ items, supermarkets }: { items: ListItem[]; supermark
           <span className="text-zinc-500">Total: </span>
           <span className="font-bold">{euro(grand)}</span>
         </div>
+        {items.length > 0 && (
+          <div className="mt-4 hidden flex-col gap-2 md:flex">
+            <button type="button" onClick={share} className="rounded-xl bg-green-600 px-4 py-3 text-lg font-semibold text-white active:bg-green-700">
+              {shared === "copiado" ? "Copiado al portapapeles ✓" : "Compartir"}
+            </button>
+            {checkedCount > 0 && (
+              <button type="button" disabled={pending} onClick={() => startTransition(() => clearChecked())} className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg font-medium text-zinc-700">
+                Vaciar comprados ({checkedCount})
+              </button>
+            )}
+          </div>
+        )}
       </div>
+  );
 
+  return (
+    <main>
+      <h1 className="mb-3 text-2xl font-bold">Lista</h1>
+      <div className="md:grid md:grid-cols-[1fr_280px] md:items-start md:gap-6">
+      <div className="md:hidden">{summary}</div>
+      <div>
       {items.length === 0 ? (
         <p className="text-zinc-600">Tu lista está vacía. Añade productos desde el buscador o favoritos.</p>
       ) : (
@@ -74,7 +96,7 @@ export function ListView({ items, supermarkets }: { items: ListItem[]; supermark
             .map((c) => (
               <li key={c}>
                 <h2 className="mb-1 mt-2 text-sm font-semibold uppercase tracking-wide text-zinc-500">
-                  {superName(c)}
+                  {nameOf(c)}
                 </h2>
                 <ul className="flex flex-col gap-2">
                   {items
@@ -89,7 +111,7 @@ export function ListView({ items, supermarkets }: { items: ListItem[]; supermark
       )}
 
       {items.length > 0 && (
-        <div className="mt-6 flex flex-col gap-2">
+        <div className="mt-6 flex flex-col gap-2 md:hidden">
           <button
             type="button"
             onClick={share}
@@ -109,6 +131,9 @@ export function ListView({ items, supermarkets }: { items: ListItem[]; supermark
           )}
         </div>
       )}
+      </div>
+      <div className="hidden md:block">{summary}</div>
+      </div>
     </main>
   );
 }
