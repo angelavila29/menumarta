@@ -174,7 +174,26 @@ def build_products(df: pl.DataFrame, catalog: pl.DataFrame) -> pl.DataFrame:
                 "captured_at": r.get("captured_at"),
             }
         )
-    return pl.DataFrame(rows)
+    # Esquema explícito: si las primeras filas son de Dia (sin imagen), polars inferiría
+    # image_url como nula y fallaría al llegar a Mercadona. El orden de lectura no es estable.
+    return pl.DataFrame(rows, schema=PRODUCT_SCHEMA)
+
+
+PRODUCT_SCHEMA = {
+    "supermarket_id": pl.Utf8,
+    "external_id": pl.Utf8,
+    "zone": pl.Utf8,
+    "name": pl.Utf8,
+    "brand": pl.Utf8,
+    "category": pl.Utf8,
+    "price": pl.Float64,
+    "unit_price": pl.Float64,
+    "unit": pl.Utf8,
+    "pack_size": pl.Utf8,
+    "image_url": pl.Utf8,
+    "product_url": pl.Utf8,
+    "captured_at": pl.Utf8,
+}
 
 
 def _num(v):
