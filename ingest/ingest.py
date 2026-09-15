@@ -32,12 +32,16 @@ DIA_ZONE = "es-default"  # Dia no tiene zonas en opencesta todavía
 BATCH = 500
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env.local")
-SUPABASE_URL = os.environ.get("SUPABASE_URL") or os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
-SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_URL = (os.environ.get("SUPABASE_URL") or os.environ.get("NEXT_PUBLIC_SUPABASE_URL") or "").strip()
+SERVICE_KEY = (os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
 
 if not DRY_RUN and (not SUPABASE_URL or not SERVICE_KEY):
     sys.exit("Faltan SUPABASE_URL y/o SUPABASE_SERVICE_ROLE_KEY en el entorno")
+if not DRY_RUN and not SUPABASE_URL.startswith("https://"):
+    sys.exit(f"SUPABASE_URL no parece una URL: {SUPABASE_URL!r}")
+if not DRY_RUN and not SERVICE_KEY.startswith("eyJ"):
+    sys.exit("SUPABASE_SERVICE_ROLE_KEY no parece la clave service_role (debería empezar por 'eyJ')")
 
 
 # ---------------------------------------------------------------------------
@@ -51,10 +55,16 @@ def fetch_release(client: httpx.Client) -> dict:
         else f"https://api.github.com/repos/{REPO}/releases/latest"
     )
     headers = {"Accept": "application/vnd.github+json"}
-    if os.environ.get("GITHUB_TOKEN"):
-        headers["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
-    r = client.get(url, headers=headers)
-    r.raise_for_status()
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        r = client.get(url, headers={**headers, "Authorization": f"Bearer {token}"})
+        if r.status_code in (401, 403):
+            print(f"GitHub API con token: {r.status_code}; reintento sin token")
+            r = client.get(url, headers=headers)
+    else:
+        r = client.get(url, headers=headers)
+    if r.status_code >= 400:
+        raise SystemExit(f"GitHub API {r.status_code} en {url}: {r.text[:300]}")
     return r.json()
 
 
@@ -203,7 +213,8 @@ class Supa:
                 params={"select": "supermarket_id,external_id,zone"},
                 headers={"Range": f"{offset}-{offset + page - 1}"},
             )
-            r.raise_for_status()
+            if r.status_code >= 400:
+                raise RuntimeError(f"GET products {r.status_code}: {r.text[:300]}")
             data = r.json()
             keys.update((d["supermarket_id"], d["external_id"], d["zone"]) for d in data)
             if len(data) < page:
