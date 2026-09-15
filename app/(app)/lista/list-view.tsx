@@ -1,9 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { clearChecked, removeItem, setItemChecked, setItemQuantity } from "@/lib/actions";
+import Link from "next/link";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
-import { euro, packSize, superName, superStyle, unitPrice } from "@/lib/format";
+import { CartIcon, ChartIcon, PiggyIcon, PlusIcon } from "@/components/icons";
+import { BulbIcon, DotsIcon, ExternalIcon, ReceiptIcon, ShareIcon, WhatsAppIcon } from "@/components/icons-extra";
+import { clearChecked, clearList, removeItem, setItemChecked, setItemQuantity } from "@/lib/actions";
+import { familyOf } from "@/lib/categories";
+import type { Comparison } from "@/lib/compare";
+import { euro, formatWeekRange, packSize, superName, superStyle, unitPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
 export type ListItem = {
@@ -13,234 +18,408 @@ export type ListItem = {
   product: Product;
   cheaper: { name: string; supermarket_id: string; unit_price: number; unit: string; price: number | null } | null;
 };
+type Chain = { id: string; name: string; has_prices: boolean };
+type Filter = "todos" | "pendientes" | "comprados";
+type GroupBy = "super" | "categoria";
+
+const SHOP_URL: Record<string, string> = { mercadona: "https://tienda.mercadona.es", dia: "https://www.dia.es" };
+const TIPS = [
+  "Revisa las ofertas de la semana antes de ir a la compra. Puedes ahorrar todavía más.",
+  "Los productos con precio por kilo o litro más bajo suelen ser los envases grandes: compara antes de coger el pequeño.",
+  "Tacha lo que ya tienes en casa antes de salir. La lista se genera para la semana entera.",
+  "Compartir la lista por WhatsApp te permite repartir la compra con quien viva contigo.",
+];
 
 function lineTotal(i: ListItem) {
   return (i.product.price ?? 0) * i.quantity;
 }
 
-type Chain = { id: string; name: string; has_prices: boolean };
-
-export function ListView({ items, chains: userChains }: { items: ListItem[]; chains: Chain[] }) {
+export function ListView({ items, chains: userChains, comparison, weekStart }: { items: ListItem[]; chains: Chain[]; comparison: Comparison | null; weekStart: string }) {
   const [pending, startTransition] = useTransition();
-  const [shared, setShared] = useState<"" | "ok" | "copiado">("");
+  const [filter, setFilter] = useState<Filter>("todos");
+  const [groupBy, setGroupBy] = useState<GroupBy>("super");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [shared, setShared] = useState("");
 
-  // Totales por supermercado (todos los productos, tachados incluidos)
+  const nameOf = (id: string) => userChains.find((c) => c.id === id)?.name ?? superName(id);
   const totals: Record<string, number> = {};
   for (const i of items) totals[i.product.supermarket_id] = (totals[i.product.supermarket_id] ?? 0) + lineTotal(i);
   const grand = Object.values(totals).reduce((a, b) => a + b, 0);
-  // Cadenas a mostrar: las del usuario con precios, más cualquiera que tenga productos en la lista
-  const nameOf = (id: string) => userChains.find((c) => c.id === id)?.name ?? superName(id);
-  const chains = Array.from(
-    new Set([...userChains.filter((c) => c.has_prices).map((c) => c.id), ...Object.keys(totals)])
-  );
   const checkedCount = items.filter((i) => i.checked).length;
+  const pendingCount = items.length - checkedCount;
+  const progress = items.length ? Math.round((checkedCount / items.length) * 100) : 0;
+  const visible = items.filter((i) => (filter === "todos" ? true : filter === "pendientes" ? !i.checked : i.checked));
+  const chainsWithItems = Array.from(new Set(items.map((i) => i.product.supermarket_id)));
+  const tip = TIPS[new Date().getDate() % TIPS.length];
 
-  const chainsWithItems = chains.filter((c) => items.some((i) => i.product.supermarket_id === c));
+  // Grupos: por supermercado o por familia de producto
+  type Group = { key: string; title: string; icon: React.ReactNode; band?: string; items: ListItem[] };
+  let groups: Group[];
+  if (groupBy === "super") {
+    groups = chainsWithItems
+      .map((c) => ({
+        key: c,
+        title: nameOf(c),
+        band: superStyle(c).band,
+        icon: <ChainLogo id={c} name={nameOf(c)} size={22} />,
+        items: sortByFamily(visible.filter((i) => i.product.supermarket_id === c)),
+      }))
+      .filter((g) => g.items.length > 0);
+  } else {
+    const byFam = new Map<string, Group>();
+    for (const i of sortByFamily(visible)) {
+      const f = familyOf(i.product.category);
+      const g: Group = byFam.get(f.id) ?? { key: f.id, title: f.name, icon: <span className="text-lg">{f.emoji}</span>, items: [] };
+      g.items.push(i);
+      byFam.set(f.id, g);
+    }
+    groups = Array.from(byFam.values());
+  }
 
-  function share(onlyChain?: string) {
-    const text = onlyChain
-      ? buildShareText(items.filter((i) => i.product.supermarket_id === onlyChain), [onlyChain], totals, totals[onlyChain] ?? 0)
-      : buildShareText(items, chains, totals, grand);
+  function shareText(onlyChain?: string) {
+    const mine = onlyChain ? items.filter((i) => i.product.supermarket_id === onlyChain) : items;
+    const lines = ["🛒 Lista de la compra · Sobremesa", ""];
+    for (const c of chainsWithItems) {
+      const rows = mine.filter((i) => i.product.supermarket_id === c);
+      if (rows.length === 0) continue;
+      lines.push(`*${nameOf(c)}* — ${euro(totals[c] ?? 0)}`);
+      for (const i of rows) lines.push(`${i.checked ? "✅" : "▢"} ${i.quantity !== 1 ? `${i.quantity}× ` : ""}${i.product.name} (${euro(lineTotal(i))})`);
+      lines.push("");
+    }
+    lines.push(`Total: ${euro(onlyChain ? totals[onlyChain] ?? 0 : grand)}`);
+    return lines.join("\n");
+  }
+
+  function share() {
+    const text = shareText();
     startTransition(async () => {
       if (typeof navigator !== "undefined" && navigator.share) {
         try {
           await navigator.share({ title: "Lista de la compra", text });
-          setShared("ok");
           return;
         } catch {
-          /* cancelado: probamos con el portapapeles */
+          /* cancelado */
         }
       }
       await navigator.clipboard.writeText(text);
-      setShared("copiado");
+      setShared("Copiada ✓");
       setTimeout(() => setShared(""), 2000);
     });
   }
 
-  const summary = (
-    <div className="mb-4 rounded-xl bg-white p-3 shadow-sm md:flex md:items-center md:justify-between md:gap-6 md:p-4">
-      <div>
-        <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
-          {chains.map((c) => (
-            <div key={c}>
-              <span className="text-zinc-500">{nameOf(c)}: </span>
-              <span className="font-semibold">{euro(totals[c] ?? 0)}</span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-1 text-lg">
-          <span className="text-zinc-500">Total: </span>
-          <span className="font-bold">{euro(grand)}</span>
-        </div>
-      </div>
-        {items.length > 0 && (
-          <div className="hidden gap-2 md:flex">
-            {checkedCount > 0 && (
-              <button type="button" disabled={pending} onClick={() => startTransition(() => clearChecked())} className="rounded-xl border border-zinc-300 bg-white px-4 py-2.5 font-medium text-zinc-700">
-                Vaciar comprados ({checkedCount})
-              </button>
-            )}
-            <button type="button" onClick={() => share()} className="rounded-xl bg-brand px-5 py-2.5 font-semibold text-white active:bg-brand-dark">
-              {shared === "copiado" ? "Copiado ✓" : "Compartir todo"}
-            </button>
-          </div>
-        )}
-      </div>
-  );
+  const cheapest = comparison?.cheapest ?? null;
 
   return (
     <main>
-      <h1 className="mb-3 text-2xl font-bold">Lista</h1>
-      {summary}
-      {items.length === 0 ? (
-        <p className="text-zinc-600">Tu lista está vacía. Añade productos desde el buscador o favoritos.</p>
-      ) : (
-        <div className={`grid gap-4 ${chainsWithItems.length > 1 ? "lg:grid-cols-2" : ""}`}>
-          {chainsWithItems.map((c) => {
-            const mine = items.filter((i) => i.product.supermarket_id === c);
-            return (
-              <section key={c} className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-                <header className={`flex items-center justify-between px-4 py-3 text-white ${superStyle(c).band}`}>
-                  <span className="flex items-center gap-2 text-lg font-bold">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white p-0.5">
-                      <ChainLogo id={c} name={nameOf(c)} size={26} />
-                    </span>
-                    {nameOf(c)}
-                  </span>
-                  <span className="text-sm">
-                    {mine.length} {mine.length === 1 ? "producto" : "productos"} · <b>{euro(totals[c] ?? 0)}</b>
-                  </span>
-                </header>
-                <ul className="flex flex-col gap-2 p-3">
-                  {mine.map((i) => (
-                    <Row key={i.id} item={i} disabled={pending} start={startTransition} />
-                  ))}
-                </ul>
-                <footer className="border-t border-zinc-100 px-3 py-2">
-                  <button
-                    type="button"
-                    onClick={() => share(c)}
-                    className="text-sm font-medium text-brand underline"
-                  >
-                    Compartir solo la lista de {nameOf(c)}
-                  </button>
-                </footer>
-              </section>
-            );
-          })}
+      {/* Cabecera */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold md:text-4xl">Lista de la compra</h1>
+          <p className="mt-1 text-muted">Esta semana · {formatWeekRange(weekStart)}</p>
         </div>
-      )}
-
-      {items.length > 0 && (
-        <div className="mt-6 flex flex-col gap-2 md:hidden">
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => share()}
-            className="rounded-xl bg-brand px-4 py-3 text-lg font-semibold text-white active:bg-brand-dark"
+            onClick={share}
+            disabled={items.length === 0}
+            className="flex items-center gap-2 rounded-xl border border-cream-dark bg-white px-4 py-2.5 font-medium hover:bg-cream disabled:opacity-50"
           >
-            {shared === "copiado" ? "Copiado al portapapeles ✓" : "Compartir"}
+            <ShareIcon className="h-5 w-5" /> {shared || "Compartir"}
           </button>
-          {checkedCount > 0 && (
+          <div className="relative">
             <button
               type="button"
-              disabled={pending}
-              onClick={() => startTransition(() => clearChecked())}
-              className="rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg font-medium text-zinc-700"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Más opciones"
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-cream-dark bg-white hover:bg-cream"
             >
-              Vaciar comprados ({checkedCount})
+              <DotsIcon className="h-5 w-5" />
             </button>
+            {menuOpen && (
+              <div className="absolute right-0 z-10 mt-1 w-56 overflow-hidden rounded-xl border border-cream-dark bg-white shadow-lg" onMouseLeave={() => setMenuOpen(false)}>
+                <MenuBtn onClick={() => setGroupBy(groupBy === "super" ? "categoria" : "super")}>
+                  Agrupar por {groupBy === "super" ? "categoría" : "supermercado"}
+                </MenuBtn>
+                <MenuBtn disabled={checkedCount === 0} onClick={() => startTransition(() => clearChecked())}>
+                  Vaciar comprados ({checkedCount})
+                </MenuBtn>
+                <MenuBtn disabled={items.length === 0} danger onClick={() => { if (confirm("¿Vaciar toda la lista?")) startTransition(() => clearList()); }}>
+                  Vaciar toda la lista
+                </MenuBtn>
+              </div>
+            )}
+          </div>
+          <Link href="/buscar" className="flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 font-semibold text-white hover:bg-brand-dark">
+            <PlusIcon className="h-5 w-5" /> <span className="hidden sm:inline">Añadir producto</span><span className="sm:hidden">Añadir</span>
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_360px] lg:items-start">
+        {/* Columna principal */}
+        <div className="flex flex-col gap-4">
+          {/* Progreso */}
+          <section className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
+              <CartIcon className="h-7 w-7" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-lg font-bold leading-tight">{items.length} productos</p>
+              <p className="text-sm text-muted">{pendingCount} pendientes</p>
+            </div>
+            <div className="ml-auto flex flex-1 items-center gap-3">
+              <div className="h-3 flex-1 overflow-hidden rounded-full bg-cream-dark">
+                <div className="h-full rounded-full bg-olive transition-[width]" style={{ width: `${progress}%` }} />
+              </div>
+              <span className="w-12 text-right text-xl font-bold">{progress}%</span>
+            </div>
+          </section>
+
+          {/* Filtros */}
+          <div className="flex flex-wrap items-center gap-2">
+            {(
+              [
+                ["todos", `Todos (${items.length})`],
+                ["pendientes", `Pendientes (${pendingCount})`],
+                ["comprados", `Comprados (${checkedCount})`],
+              ] as [Filter, string][]
+            ).map(([f, label]) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFilter(f)}
+                className={`rounded-full px-4 py-2 text-sm font-medium ${
+                  filter === f ? "bg-brand text-white" : "border border-cream-dark bg-white text-ink hover:bg-cream"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setGroupBy(groupBy === "super" ? "categoria" : "super")}
+              className="ml-auto text-sm text-muted hover:text-ink"
+            >
+              ⇅ Agrupar por {groupBy === "super" ? "categoría" : "supermercado"}
+            </button>
+          </div>
+
+          {/* Grupos */}
+          {items.length === 0 ? (
+            <section className="rounded-2xl bg-white p-8 text-center shadow-sm">
+              <p className="text-4xl">🛒</p>
+              <p className="mt-2 font-semibold">Tu lista está vacía</p>
+              <p className="text-sm text-muted">Genera el menú de la semana o añade productos desde el buscador.</p>
+              <div className="mt-4 flex justify-center gap-2">
+                <Link href="/menu" className="rounded-xl bg-brand px-4 py-2.5 font-semibold text-white">Ir al menú</Link>
+                <Link href="/buscar" className="rounded-xl border border-cream-dark bg-white px-4 py-2.5 font-medium">Buscar productos</Link>
+              </div>
+            </section>
+          ) : (
+            groups.map((g) => (
+              <section key={g.key} className="overflow-hidden rounded-2xl bg-white shadow-sm">
+                <header className={`flex items-center gap-3 px-4 py-3 ${g.band ? `${g.band} text-white` : "bg-cream"}`}>
+                  <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${g.band ? "bg-white" : "bg-brand-soft"}`}>{g.icon}</span>
+                  <span className="text-base font-bold">{g.title}</span>
+                  <span className={`ml-auto text-sm ${g.band ? "text-white/90" : "text-muted"}`}>
+                    {g.items.length} {g.items.length === 1 ? "producto" : "productos"}
+                    {g.band && <> · <b>{euro(g.items.reduce((a, i) => a + lineTotal(i), 0))}</b></>}
+                  </span>
+                </header>
+                <ul className="divide-y divide-cream-dark">
+                  {g.items.map((i) => (
+                    <Row key={i.id} item={i} showChain={groupBy === "categoria"} chainName={nameOf(i.product.supermarket_id)} disabled={pending} start={startTransition} />
+                  ))}
+                </ul>
+                {g.band && (
+                  <footer className="border-t border-cream-dark px-4 py-2">
+                    <button type="button" onClick={() => { navigator.clipboard.writeText(shareText(g.key)); setShared("Copiada ✓"); setTimeout(() => setShared(""), 2000); }} className="text-sm font-medium text-brand hover:underline">
+                      Copiar solo la lista de {g.title}
+                    </button>
+                  </footer>
+                )}
+              </section>
+            ))
           )}
         </div>
-      )}
+
+        {/* Columna derecha */}
+        <aside className="flex flex-col gap-4">
+          <section className="rounded-2xl bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-olive text-white"><ChartIcon className="h-6 w-6" /></span>
+              <div>
+                <h2 className="text-lg font-bold leading-tight">Comparativa de precios</h2>
+                <p className="text-sm text-muted">
+                  {comparison && comparison.comparable > 0
+                    ? `Sobre ${comparison.comparable} de ${comparison.items} productos que existen en las dos cadenas`
+                    : "Precio total de tu lista en cada supermercado"}
+                </p>
+              </div>
+            </div>
+            {comparison && comparison.comparable > 0 ? (
+              <>
+                <ul className="mt-3 flex flex-col gap-2">
+                  {comparison.chains.slice().sort((a, b) => a.total - b.total).map((c) => {
+                    const best = cheapest?.id === c.id;
+                    return (
+                      <li key={c.id} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${best ? "bg-olive-soft" : "bg-cream"}`}>
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm"><ChainLogo id={c.id} name={nameOf(c.id)} size={26} /></span>
+                        <span className="flex-1 font-medium">{nameOf(c.id)}</span>
+                        <span className={`text-lg font-bold ${best ? "text-olive-dark" : ""}`}>{euro(c.total)}</span>
+                        {best && <span className="rounded-full bg-olive px-2 py-0.5 text-xs font-medium text-white">Más barato</span>}
+                        {c.missing > 0 && <span className="text-xs text-muted">faltan {c.missing}</span>}
+                      </li>
+                    );
+                  })}
+                </ul>
+                {cheapest && comparison.saving > 0.005 && (
+                  <p className="mt-3 flex items-center gap-3 rounded-xl bg-olive-soft px-3 py-3 text-olive-dark">
+                    <PiggyIcon className="h-7 w-7 shrink-0" />
+                    <span><b className="text-lg">Ahorras {euro(comparison.saving)}</b><br /><span className="text-sm">comprando lo comparable en {nameOf(cheapest.id)}</span></span>
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="mt-3 text-sm text-muted">
+                {items.length === 0 ? "Añade productos para comparar." : "No encuentro productos comparables en las dos cadenas."}
+              </p>
+            )}
+          </section>
+
+          <section className="rounded-2xl bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-olive-soft text-olive"><ReceiptIcon className="h-6 w-6" /></span>
+              <h2 className="text-lg font-bold">Resumen de tu compra</h2>
+            </div>
+            <dl className="mt-3 flex flex-col gap-1.5 text-sm">
+              <div className="flex justify-between"><dt className="text-muted">Productos totales</dt><dd className="font-semibold">{items.length}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">Pendientes</dt><dd className="font-semibold">{pendingCount}</dd></div>
+              <div className="flex justify-between"><dt className="text-muted">En el carrito</dt><dd className="font-semibold">{checkedCount}</dd></div>
+              {chainsWithItems.map((c) => (
+                <div key={c} className="flex justify-between"><dt className="text-muted">{nameOf(c)}</dt><dd className="font-semibold">{euro(totals[c] ?? 0)}</dd></div>
+              ))}
+            </dl>
+            <div className="my-3 border-t border-cream-dark" />
+            <div className="flex items-baseline justify-between">
+              <span className="font-semibold">Total estimado</span>
+              <span className="text-3xl font-bold">{euro(grand)}</span>
+            </div>
+            {cheapest && SHOP_URL[cheapest.id] && (
+              <a href={SHOP_URL[cheapest.id]} target="_blank" rel="noopener" className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 font-semibold text-white hover:bg-brand-dark">
+                <CartIcon className="h-5 w-5" /> Ver productos en {nameOf(cheapest.id)} <ExternalIcon className="h-4 w-4" />
+              </a>
+            )}
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(shareText())}`}
+              target="_blank"
+              rel="noopener"
+              aria-disabled={items.length === 0}
+              className={`mt-2 flex items-center justify-center gap-2 rounded-xl bg-olive-soft px-4 py-3 font-semibold text-olive-dark hover:bg-olive/20 ${items.length === 0 ? "pointer-events-none opacity-50" : ""}`}
+            >
+              <WhatsAppIcon className="h-5 w-5" /> Compartir lista por WhatsApp
+            </a>
+          </section>
+
+          <section className="flex gap-3 rounded-2xl bg-brand-soft p-4">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-brand"><BulbIcon className="h-6 w-6" /></span>
+            <div>
+              <p className="font-semibold">Consejo Sobremesa</p>
+              <p className="text-sm text-ink/80">{tip}</p>
+            </div>
+          </section>
+        </aside>
+      </div>
     </main>
   );
 }
 
-function Row({
-  item,
-  disabled,
-  start,
-}: {
-  item: ListItem;
-  disabled: boolean;
-  start: (fn: () => Promise<void>) => void;
-}) {
-  const p = item.product;
+function sortByFamily(items: ListItem[]) {
+  return items.slice().sort((a, b) => familyOf(a.product.category).order - familyOf(b.product.category).order || a.product.name.localeCompare(b.product.name, "es"));
+}
+
+function MenuBtn({ children, onClick, disabled, danger }: { children: React.ReactNode; onClick: () => void; disabled?: boolean; danger?: boolean }) {
   return (
-    <li
-      className={`rounded-xl border border-zinc-200 bg-zinc-50 p-3 ${item.checked ? "opacity-60" : ""}`}
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`block w-full px-4 py-2.5 text-left text-sm hover:bg-cream disabled:opacity-40 ${danger ? "text-red-700" : ""}`}
     >
-      <div className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          checked={item.checked}
-          disabled={disabled}
-          onChange={(e) => start(() => setItemChecked(item.id, e.target.checked))}
-          className="mt-1 h-6 w-6 shrink-0 accent-brand"
-          aria-label="Comprado"
-        />
-        <div className="min-w-0 flex-1">
-          <p className={`text-sm font-medium leading-snug ${item.checked ? "line-through" : ""}`}>{p.name}</p>
-          <p className="text-xs text-zinc-500">
-            {packSize(p.pack_size)} · {euro(p.price)} · {unitPrice(p.unit_price, p.unit)}
-          </p>
-          {item.cheaper && !item.checked && (
-            <p className="mt-1 rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
-              En {superName(item.cheaper.supermarket_id)}: {item.cheaper.name} a{" "}
-              {unitPrice(item.cheaper.unit_price, item.cheaper.unit)}
-            </p>
-          )}
-        </div>
-        <div className="shrink-0 text-right">
-          <p className="font-bold">{euro(lineTotal(item))}</p>
-          <div className="mt-1 flex items-center justify-end gap-1">
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => start(() => setItemQuantity(item.id, item.quantity - 1))}
-              className="h-8 w-8 rounded-lg bg-zinc-100 text-lg font-bold"
-              aria-label="Menos"
-            >
-              −
-            </button>
-            <span className="w-6 text-center font-semibold">{item.quantity}</span>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => start(() => setItemQuantity(item.id, item.quantity + 1))}
-              className="h-8 w-8 rounded-lg bg-zinc-100 text-lg font-bold"
-              aria-label="Más"
-            >
-              +
-            </button>
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => start(() => removeItem(item.id))}
-              className="ml-1 h-8 w-8 rounded-lg text-zinc-400"
-              aria-label="Borrar"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      </div>
-    </li>
+      {children}
+    </button>
   );
 }
 
-function buildShareText(items: ListItem[], chains: string[], totals: Record<string, number>, grand: number) {
-  const lines: string[] = ["🛒 Lista de la compra", ""];
-  for (const c of chains) {
-    const mine = items.filter((i) => i.product.supermarket_id === c);
-    if (mine.length === 0) continue;
-    lines.push(`*${superName(c)}* — ${euro(totals[c] ?? 0)}`);
-    for (const i of mine) {
-      const qty = i.quantity !== 1 ? `${i.quantity}× ` : "";
-      lines.push(`${i.checked ? "✅" : "▢"} ${qty}${i.product.name} (${euro(lineTotal(i))})`);
-    }
-    lines.push("");
-  }
-  lines.push(`Total: ${euro(grand)}`);
-  return lines.join("\n");
+function Row({ item, showChain, chainName, disabled, start }: { item: ListItem; showChain: boolean; chainName: string; disabled: boolean; start: (fn: () => Promise<void>) => void }) {
+  const p = item.product;
+  const fam = familyOf(p.category);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  return (
+    <li className={`flex items-center gap-3 px-4 py-3 ${item.checked ? "bg-cream/50" : ""}`}>
+      <input
+        type="checkbox"
+        checked={item.checked}
+        disabled={disabled}
+        onChange={(e) => start(() => setItemChecked(item.id, e.target.checked))}
+        className="h-6 w-6 shrink-0 accent-olive"
+        aria-label="Comprado"
+      />
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cream">
+        {p.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={p.image_url} alt="" className="h-full w-full object-contain" loading="lazy" />
+        ) : (
+          <span className="text-2xl">{fam.emoji}</span>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className={`font-medium leading-snug ${item.checked ? "text-muted line-through" : ""}`}>{p.name}</p>
+        <p className="text-xs text-muted">
+          {item.quantity !== 1 && <>{item.quantity} × </>}{packSize(p.pack_size) || unitPrice(p.unit_price, p.unit)}
+          {showChain && <> · {chainName}</>}
+          {p.brand && <> · {p.brand}</>}
+        </p>
+        {item.cheaper && !item.checked && (
+          <p className="mt-0.5 text-xs text-olive-dark">
+            En {superName(item.cheaper.supermarket_id)}: {item.cheaper.name} a {unitPrice(item.cheaper.unit_price, item.cheaper.unit)}
+          </p>
+        )}
+      </div>
+      <p className={`shrink-0 text-lg font-bold ${item.checked ? "text-muted line-through" : ""}`}>{euro(lineTotal(item))}</p>
+      <div className="relative shrink-0" ref={ref}>
+        <button type="button" onClick={() => setOpen((v) => !v)} aria-label="Opciones" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-cream">
+          <DotsIcon className="h-5 w-5" />
+        </button>
+        {open && (
+          <div className="absolute right-0 z-10 mt-1 w-48 rounded-xl border border-cream-dark bg-white p-2 shadow-lg">
+            <div className="flex items-center justify-between px-2 py-1 text-sm">
+              <span className="text-muted">Cantidad</span>
+              <span className="flex items-center gap-1">
+                <button type="button" disabled={disabled} onClick={() => start(() => setItemQuantity(item.id, item.quantity - 1))} className="h-7 w-7 rounded-md bg-cream font-bold" aria-label="Menos">−</button>
+                <span className="w-6 text-center font-semibold">{item.quantity}</span>
+                <button type="button" disabled={disabled} onClick={() => start(() => setItemQuantity(item.id, item.quantity + 1))} className="h-7 w-7 rounded-md bg-cream font-bold" aria-label="Más">+</button>
+              </span>
+            </div>
+            {p.product_url && (
+              <a href={p.product_url} target="_blank" rel="noopener" className="block rounded-lg px-2 py-1.5 text-sm hover:bg-cream">Ver en la tienda ↗</a>
+            )}
+            <button type="button" disabled={disabled} onClick={() => start(() => removeItem(item.id))} className="block w-full rounded-lg px-2 py-1.5 text-left text-sm text-red-700 hover:bg-cream">
+              Eliminar
+            </button>
+          </div>
+        )}
+      </div>
+    </li>
+  );
 }

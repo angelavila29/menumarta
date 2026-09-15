@@ -1,6 +1,8 @@
 import { requireUser, userSupermarketIds } from "@/lib/auth";
+import { compareList } from "@/lib/compare";
 import { findCheaperEquivalent } from "@/lib/equivalents";
 import { getOrCreateActiveList } from "@/lib/lists";
+import { currentWeekStart } from "@/lib/menu";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { ListView, type ListItem } from "./list-view";
 
@@ -22,22 +24,33 @@ export default async function ListPage() {
     .order("id", { ascending: true });
 
   const raw = (data ?? []).filter((r) => r.product);
-  const items: ListItem[] = await Promise.all(
-    raw.map(async (r) => {
-      const product = r.product as unknown as Product;
-      const others = supers.filter((s) => s !== product.supermarket_id);
-      const cheaper = await findCheaperEquivalent(supabase, product, others);
-      return {
-        id: r.id as number,
-        quantity: Number(r.quantity),
-        checked: r.checked as boolean,
-        product,
-        cheaper: cheaper
-          ? { name: cheaper.product.name, supermarket_id: cheaper.product.supermarket_id, unit_price: cheaper.product.unit_price!, unit: cheaper.product.unit!, price: cheaper.product.price }
-          : null,
-      };
-    })
-  );
+  const pricedIds = chains.filter((c) => c.has_prices).map((c) => c.id);
 
-  return <ListView items={items} chains={chains} />;
+  const [items, comparison] = await Promise.all([
+    Promise.all(
+      raw.map(async (r): Promise<ListItem> => {
+        const product = r.product as unknown as Product;
+        const others = supers.filter((s) => s !== product.supermarket_id);
+        const cheaper = await findCheaperEquivalent(supabase, product, others);
+        return {
+          id: r.id as number,
+          quantity: Number(r.quantity),
+          checked: r.checked as boolean,
+          product,
+          cheaper: cheaper
+            ? { name: cheaper.product.name, supermarket_id: cheaper.product.supermarket_id, unit_price: cheaper.product.unit_price!, unit: cheaper.product.unit!, price: cheaper.product.price }
+            : null,
+        };
+      })
+    ),
+    raw.length > 0 && pricedIds.length > 1
+      ? compareList(
+          supabase,
+          raw.map((r) => ({ product: r.product as unknown as Product, quantity: Number(r.quantity) })),
+          pricedIds
+        )
+      : Promise.resolve(null),
+  ]);
+
+  return <ListView items={items} chains={chains} comparison={comparison} weekStart={currentWeekStart()} />;
 }

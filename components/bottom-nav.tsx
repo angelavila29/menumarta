@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   CalendarIcon, CartIcon, ChartIcon, ChevronDown, ChevronLeft, ChevronRight, HeartIcon, HelpIcon, HomeIcon, LeafIcon,
   SearchIcon, SettingsIcon, StoreIcon,
@@ -88,27 +88,35 @@ function NavItem({ href, label, Icon, soon, collapsed }: Item & { collapsed: boo
 }
 
 const STORAGE_KEY = "sobremesa.sidebar";
+const EVENT = "sobremesa:sidebar";
 
-/** Barra lateral (escritorio), plegable. */
+function readCollapsed() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === "collapsed";
+  } catch {
+    return false;
+  }
+}
+function subscribe(cb: () => void) {
+  window.addEventListener(EVENT, cb);
+  window.addEventListener("storage", cb);
+  return () => {
+    window.removeEventListener(EVENT, cb);
+    window.removeEventListener("storage", cb);
+  };
+}
+
+/** Barra lateral (escritorio), plegable. El estado se guarda en el navegador. */
 export function SideNav() {
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === "collapsed") setCollapsed(true);
-    } catch {
-      /* sin almacenamiento */
-    }
-  }, []);
+  const collapsed = useSyncExternalStore(subscribe, readCollapsed, () => false);
 
   function toggle() {
-    const next = !collapsed;
-    setCollapsed(next);
     try {
-      localStorage.setItem(STORAGE_KEY, next ? "collapsed" : "open");
+      localStorage.setItem(STORAGE_KEY, collapsed ? "open" : "collapsed");
     } catch {
       /* sin almacenamiento */
     }
+    window.dispatchEvent(new Event(EVENT));
   }
 
   return (

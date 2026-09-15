@@ -34,3 +34,14 @@ const DEFAULT_STYLE = { badge: "bg-zinc-100 text-zinc-700", band: "bg-zinc-600",
 export function superStyle(id: string) {
   return SUPER_STYLE[id] ?? DEFAULT_STYLE;
 }
+
+/** '2026-09-14' → 'del 14 al 20 de septiembre' */
+export function formatWeekRange(weekStart: string): string {
+  const [y, m, d] = weekStart.split("-").map(Number);
+  const start = new Date(y, m - 1, d);
+  const end = new Date(y, m - 1, d + 6);
+  const month = end.toLocaleDateString("es-ES", { month: "long" });
+  if (start.getMonth() === end.getMonth()) return `del ${start.getDate()} al ${end.getDate()} de ${month}`;
+  const m1 = start.toLocaleDateString("es-ES", { month: "long" });
+  return `del ${start.getDate()} de ${m1} al ${end.getDate()} de ${month}`;
+}

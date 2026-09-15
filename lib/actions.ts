@@ -128,3 +128,10 @@ export async function saveDisplayName(formData: FormData) {
   revalidatePath("/", "layout");
   redirect("/ajustes?guardado=1");
 }
+
+export async function clearList() {
+  const { supabase, user } = await requireUser();
+  const listId = await getOrCreateActiveList(supabase, user.id);
+  await supabase.from("shopping_list_items").delete().eq("list_id", listId);
+  revalidatePath("/lista");
+}

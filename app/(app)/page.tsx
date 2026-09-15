@@ -4,7 +4,7 @@ import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, ChevronRight,
 import { ChainLogo } from "@/components/chain-logo";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { compareList } from "@/lib/compare";
-import { euro, superName } from "@/lib/format";
+import { euro, formatWeekRange, superName } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { currentWeekStart, DAYS, getOrCreateMenu, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeEmoji } from "@/lib/recipe-emoji";
@@ -341,14 +341,4 @@ function capitalize(s: string) {
 
 function shortName(name: string) {
   return name.split(" ").slice(0, 3).join(" ");
-}
-
-function formatWeekRange(weekStart: string) {
-  const [y, m, d] = weekStart.split("-").map(Number);
-  const start = new Date(y, m - 1, d);
-  const end = new Date(y, m - 1, d + 6);
-  const month = end.toLocaleDateString("es-ES", { month: "long" });
-  if (start.getMonth() === end.getMonth()) return `del ${start.getDate()} al ${end.getDate()} de ${month}`;
-  const m1 = start.toLocaleDateString("es-ES", { month: "long" });
-  return `del ${start.getDate()} de ${m1} al ${end.getDate()} de ${month}`;
 }
