@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
-  CalendarIcon, CartIcon, ChartIcon, ChevronDown, HeartIcon, HelpIcon, HomeIcon, LeafIcon,
+  CalendarIcon, CartIcon, ChartIcon, ChevronDown, ChevronLeft, ChevronRight, HeartIcon, HelpIcon, HomeIcon, LeafIcon,
   SearchIcon, SettingsIcon, StoreIcon,
 } from "./icons";
 
@@ -53,59 +54,106 @@ export function BottomNav() {
   );
 }
 
-function NavItem({ href, label, Icon, soon }: { href: string; label: string; Icon: (p: { className?: string }) => React.JSX.Element; soon?: boolean }) {
+type Item = { href: string; label: string; Icon: (p: { className?: string }) => React.JSX.Element; soon?: boolean };
+
+function NavItem({ href, label, Icon, soon, collapsed }: Item & { collapsed: boolean }) {
   const pathname = usePathname();
   const active = isActive(pathname, href);
+  const layout = collapsed ? "justify-center px-0" : "px-3";
   if (soon) {
     return (
-      <span className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-base text-muted/60" title="Próximamente">
-        <Icon className="h-5 w-5" />
-        {label}
-        <span className="ml-auto rounded-full bg-cream-dark px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted">pronto</span>
+      <span className={`flex items-center gap-3 rounded-xl py-2.5 text-base text-muted/60 ${layout}`} title={`${label} (próximamente)`}>
+        <Icon className="h-5 w-5 shrink-0" />
+        {!collapsed && (
+          <>
+            {label}
+            <span className="ml-auto rounded-full bg-cream-dark px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted">pronto</span>
+          </>
+        )}
       </span>
     );
   }
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-base ${
+      title={collapsed ? label : undefined}
+      className={`flex items-center gap-3 rounded-xl py-2.5 text-base ${layout} ${
         active ? "bg-brand-soft font-semibold text-brand-dark" : "text-ink hover:bg-cream"
       }`}
     >
-      <Icon className="h-5 w-5" />
-      {label}
+      <Icon className="h-5 w-5 shrink-0" />
+      {!collapsed && label}
     </Link>
   );
 }
 
-/** Barra lateral (escritorio). */
+const STORAGE_KEY = "sobremesa.sidebar";
+
+/** Barra lateral (escritorio), plegable. */
 export function SideNav() {
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === "collapsed") setCollapsed(true);
+    } catch {
+      /* sin almacenamiento */
+    }
+  }, []);
+
+  function toggle() {
+    const next = !collapsed;
+    setCollapsed(next);
+    try {
+      localStorage.setItem(STORAGE_KEY, next ? "collapsed" : "open");
+    } catch {
+      /* sin almacenamiento */
+    }
+  }
+
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-cream-dark bg-white px-4 py-6 md:flex">
-      <Link href="/" className="mb-8 block px-2" aria-label="Sobremesa, inicio">
-        <Image src="/logo.png" alt="Sobremesa" width={80} height={80} priority />
+    <aside
+      className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-cream-dark bg-white py-5 transition-[width] duration-200 md:flex ${
+        collapsed ? "w-20 px-3" : "w-64 px-4"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={collapsed ? "Desplegar menú" : "Plegar menú"}
+        className="absolute -right-3 top-7 flex h-6 w-6 items-center justify-center rounded-full border border-cream-dark bg-white text-muted shadow-sm hover:text-brand"
+      >
+        {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+      </button>
+
+      <Link href="/" className="mb-6 flex items-center justify-center gap-2" aria-label="Sobremesa, inicio">
+        <Image src="/logo.png" alt="" width={collapsed ? 44 : 48} height={collapsed ? 44 : 48} priority />
+        {!collapsed && <span className="text-2xl font-bold tracking-tight">Sobremesa</span>}
       </Link>
+
       <ul className="flex flex-col gap-1">
         {MAIN.map((t) => (
-          <li key={t.href}><NavItem {...t} /></li>
+          <li key={t.href}><NavItem {...t} collapsed={collapsed} /></li>
         ))}
       </ul>
       <div className="my-4 border-t border-cream-dark" />
       <ul className="flex flex-col gap-1">
         {SECONDARY.map((t) => (
-          <li key={t.href}><NavItem {...t} /></li>
+          <li key={t.href}><NavItem {...t} collapsed={collapsed} /></li>
         ))}
       </ul>
       <div className="mt-auto">
         <ul className="flex flex-col gap-1">
           {FOOTER.map((t) => (
-            <li key={t.href}><NavItem {...t} /></li>
+            <li key={t.href}><NavItem {...t} collapsed={collapsed} /></li>
           ))}
         </ul>
-        <div className="mt-4 flex items-center gap-3 rounded-2xl bg-cream px-4 py-4 text-sm text-ink">
-          <LeafIcon className="h-6 w-6 shrink-0 text-olive" />
-          <span>Comer bien,<br />vivir mejor.</span>
-        </div>
+        {!collapsed && (
+          <div className="mt-4 flex items-center gap-3 rounded-2xl bg-cream px-4 py-4 text-sm text-ink">
+            <LeafIcon className="h-6 w-6 shrink-0 text-olive" />
+            <span>Comer bien,<br />vivir mejor.</span>
+          </div>
+        )}
       </div>
     </aside>
   );

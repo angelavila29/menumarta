@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChainLogo } from "@/components/chain-logo";
 import { requireUser } from "@/lib/auth";
 import { signOut } from "@/lib/actions";
 
@@ -26,9 +27,10 @@ export default async function SettingsPage() {
           {chains.map((c) => (
             <li
               key={c.id}
-              className={`rounded-full px-3 py-1 text-sm ${c.has_prices ? "bg-brand-soft text-brand-dark" : "bg-zinc-100 text-zinc-600"}`}
+              className={`flex items-center gap-1.5 rounded-full py-1 pl-1.5 pr-3 text-sm ${c.has_prices ? "bg-brand-soft text-brand-dark" : "bg-zinc-100 text-zinc-600"}`}
               title={c.has_prices ? "Con precios" : "Sin precios todavía"}
             >
+              <ChainLogo id={c.id} name={c.name} size={20} />
               {c.name}
               {!c.has_prices && " · sin precios"}
             </li>

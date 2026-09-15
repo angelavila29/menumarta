@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { ChainLogo } from "@/components/chain-logo";
 import { formatDistance, type NearbyChain } from "@/lib/geo";
 import { locateByAddress, locateByCoords, saveOnboarding, type LocateResult } from "@/lib/onboarding-actions";
 
@@ -139,6 +140,7 @@ export function Onboarding({ initialAddress, initialName, initialChains, isFirst
                     >
                       {on ? "✓" : ""}
                     </span>
+                    <ChainLogo id={c.id} name={c.name} size={28} />
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium">{c.name}</span>
                       <span className="block text-xs text-zinc-500">

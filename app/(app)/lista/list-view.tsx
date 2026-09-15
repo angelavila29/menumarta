@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { clearChecked, removeItem, setItemChecked, setItemQuantity } from "@/lib/actions";
+import { ChainLogo } from "@/components/chain-logo";
 import { euro, packSize, superName, superStyle, unitPrice } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
@@ -100,7 +101,12 @@ export function ListView({ items, chains: userChains }: { items: ListItem[]; cha
             return (
               <section key={c} className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
                 <header className={`flex items-center justify-between px-4 py-3 text-white ${superStyle(c).band}`}>
-                  <span className="text-lg font-bold">{nameOf(c)}</span>
+                  <span className="flex items-center gap-2 text-lg font-bold">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white p-0.5">
+                      <ChainLogo id={c} name={nameOf(c)} size={26} />
+                    </span>
+                    {nameOf(c)}
+                  </span>
                   <span className="text-sm">
                     {mine.length} {mine.length === 1 ? "producto" : "productos"} · <b>{euro(totals[c] ?? 0)}</b>
                   </span>

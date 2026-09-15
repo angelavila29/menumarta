@@ -32,6 +32,9 @@ export const HelpIcon = ({ className }: P) => (
 export const ChevronRight = ({ className }: P) => (
   <svg {...base} className={className}><path d="m9 6 6 6-6 6" /></svg>
 );
+export const ChevronLeft = ({ className }: P) => (
+  <svg {...base} className={className}><path d="m15 6-6 6 6 6" /></svg>
+);
 export const ChevronDown = ({ className }: P) => (
   <svg {...base} className={className}><path d="m6 9 6 6 6-6" /></svg>
 );

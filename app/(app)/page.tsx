@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, ChevronRight, HeartIcon, PiggyIcon, PlusIcon, SearchIcon } from "@/components/icons";
+import { ChainLogo } from "@/components/chain-logo";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { compareList } from "@/lib/compare";
-import { euro, superName, superStyle } from "@/lib/format";
+import { euro, superName } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { currentWeekStart, DAYS, getOrCreateMenu, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeEmoji } from "@/lib/recipe-emoji";
@@ -169,8 +170,8 @@ export default async function HomePage() {
                         key={c.id}
                         className={`flex items-center gap-2 rounded-xl px-3 py-2 ${best ? "bg-olive-soft" : "bg-cream"}`}
                       >
-                        <span className={`rounded-md px-1.5 py-0.5 text-xs font-semibold ${superStyle(c.id).badge}`}>
-                          {superName(c.id).slice(0, 3).toUpperCase()}
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-sm">
+                          <ChainLogo id={c.id} name={superName(c.id)} size={24} />
                         </span>
                         <span className="flex-1 text-sm font-medium">{superName(c.id)}</span>
                         <span className={`font-bold ${best ? "text-olive-dark" : ""}`}>{euro(c.total)}</span>
@@ -271,7 +272,9 @@ export default async function HomePage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{shortName(p.name)}</p>
                   <p className="text-base font-bold text-olive-dark">{euro(p.price)}</p>
-                  <p className="truncate text-[11px] text-muted">{superName(p.supermarket_id)}</p>
+                  <p className="flex items-center gap-1 truncate text-[11px] text-muted">
+                    <ChainLogo id={p.supermarket_id} size={12} /> {superName(p.supermarket_id)}
+                  </p>
                 </div>
               </li>
             ))}
