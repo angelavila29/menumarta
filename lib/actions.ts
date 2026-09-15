@@ -108,3 +108,35 @@ export async function saveSettings(formData: FormData) {
   revalidatePath("/", "layout");
   redirect("/?guardado=1");
 }
+
+// ---------------------------------------------------------------------------
+// Edición de la lista
+// ---------------------------------------------------------------------------
+export async function setItemQuantity(itemId: number, quantity: number) {
+  const { supabase } = await requireUser();
+  if (quantity <= 0) {
+    await supabase.from("shopping_list_items").delete().eq("id", itemId);
+  } else {
+    await supabase.from("shopping_list_items").update({ quantity }).eq("id", itemId);
+  }
+  revalidatePath("/lista");
+}
+
+export async function setItemChecked(itemId: number, checked: boolean) {
+  const { supabase } = await requireUser();
+  await supabase.from("shopping_list_items").update({ checked }).eq("id", itemId);
+  revalidatePath("/lista");
+}
+
+export async function removeItem(itemId: number) {
+  const { supabase } = await requireUser();
+  await supabase.from("shopping_list_items").delete().eq("id", itemId);
+  revalidatePath("/lista");
+}
+
+export async function clearChecked() {
+  const { supabase, user } = await requireUser();
+  const listId = await getOrCreateActiveList(supabase, user.id);
+  await supabase.from("shopping_list_items").delete().eq("list_id", listId).eq("checked", true);
+  revalidatePath("/lista");
+}
