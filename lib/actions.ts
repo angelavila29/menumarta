@@ -116,3 +116,15 @@ export async function clearChecked() {
   await supabase.from("shopping_list_items").delete().eq("list_id", listId).eq("checked", true);
   revalidatePath("/lista");
 }
+
+// ---------------------------------------------------------------------------
+// Perfil
+// ---------------------------------------------------------------------------
+export async function saveDisplayName(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const name = String(formData.get("display_name") ?? "").trim().slice(0, 40) || null;
+  const { error } = await supabase.from("profiles").upsert({ id: user.id, display_name: name }, { onConflict: "id" });
+  if (error) throw new Error(error.message);
+  revalidatePath("/", "layout");
+  redirect("/ajustes?guardado=1");
+}

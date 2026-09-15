@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { ChainLogo } from "@/components/chain-logo";
 import { requireUser } from "@/lib/auth";
-import { signOut } from "@/lib/actions";
+import { saveDisplayName, signOut } from "@/lib/actions";
 
-export default async function SettingsPage() {
+export default async function SettingsPage(props: PageProps<"/ajustes">) {
+  const sp = await props.searchParams;
+  const saved = sp.guardado === "1";
   const { supabase, user } = await requireUser();
   const [{ data: profile }, { data: mine }] = await Promise.all([
-    supabase.from("profiles").select("postal_code,address").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("postal_code,address,display_name").eq("id", user.id).maybeSingle(),
     supabase.from("user_supermarkets").select("supermarket:supermarkets(id,name,has_prices)").eq("user_id", user.id),
   ]);
   const chains = (mine ?? [])
@@ -17,6 +19,27 @@ export default async function SettingsPage() {
   return (
     <main className="md:max-w-2xl">
       <h1 className="mb-4 text-2xl font-bold">Ajustes</h1>
+
+      <section className="mb-4 rounded-2xl border border-zinc-200 bg-white p-5">
+        <form action={saveDisplayName} className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <label className="flex-1">
+            <span className="mb-1 block text-sm font-medium text-zinc-500">Tu nombre</span>
+            <input
+              name="display_name"
+              type="text"
+              defaultValue={profile?.display_name ?? ""}
+              placeholder="Como quieres que te saludemos"
+              maxLength={40}
+              autoComplete="given-name"
+              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-lg outline-none focus:border-brand"
+            />
+          </label>
+          <button type="submit" className="rounded-xl bg-brand px-5 py-3 font-semibold text-white active:bg-brand-dark">
+            Guardar
+          </button>
+        </form>
+        {saved && <p className="mt-2 text-sm text-olive-dark">Guardado ✓</p>}
+      </section>
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-5">
         <h2 className="text-sm font-medium text-zinc-500">Dónde vivo</h2>
