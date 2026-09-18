@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState, useSyncExternalStore, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
-import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, PlusIcon } from "@/components/icons";
+import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, LeafIcon, PlusIcon } from "@/components/icons";
 import { formatDistance, type NearbyChain } from "@/lib/geo";
 import { locateByAddress, locateByCoords, saveOnboarding, type LocateResult } from "@/lib/onboarding-actions";
 import { CartBigIcon, HouseIcon, LeafBigIcon, PinIcon, StoreBigIcon, TargetIcon } from "./step-icons";
@@ -27,6 +27,18 @@ export type Initial = {
 
 type Located = Extract<LocateResult, { ok: true }>;
 const TOTAL = 7;
+const STEP_NAMES = ["Bienvenida", "Tu hogar", "Tu zona", "Supermercados", "Tu habitual", "Alimentación", "Objetivos"];
+
+// ¿Pantalla de escritorio? (para mostrar el mapa siempre junto a la lista)
+const DESKTOP_QUERY = "(min-width: 1024px)";
+function subscribeDesktop(cb: () => void) {
+  const mq = window.matchMedia(DESKTOP_QUERY);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+function useIsDesktop() {
+  return useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP_QUERY).matches, () => false);
+}
 
 export function Onboarding({ initial }: { initial: Initial }) {
   const [step, setStep] = useState(1);
@@ -48,6 +60,8 @@ export function Onboarding({ initial }: { initial: Initial }) {
   const [pending, start] = useTransition();
 
   const next = () => setStep((s) => Math.min(TOTAL, s + 1));
+  const back = () => setStep((s) => Math.max(1, s - 1));
+  const isDesktop = useIsDesktop();
 
   // ---- paso 3: localizar ----
   function applyLocation(r: LocateResult) {
@@ -100,7 +114,44 @@ export function Onboarding({ initial }: { initial: Initial }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="lg:grid lg:min-h-screen lg:grid-cols-[380px_1fr]">
+      {/* Panel de marca (escritorio) */}
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-cream-dark bg-white px-8 py-10 lg:flex">
+        <div className="flex items-center gap-3">
+          <Image src="/logo.png" alt="" width={52} height={52} priority />
+          <span className="text-2xl font-bold tracking-tight">Sobremesa</span>
+        </div>
+        <p className="font-hand mt-8 -rotate-2 text-3xl leading-tight text-brand">Buenas comidas,<br />mejores días.</p>
+        <ol className="mt-10 flex flex-col gap-1">
+          {STEP_NAMES.map((label, i) => {
+            const n = i + 1;
+            const done = n < step;
+            const current = n === step;
+            return (
+              <li key={label}>
+                <button
+                  type="button"
+                  disabled={!done}
+                  onClick={() => setStep(n)}
+                  aria-current={current ? "step" : undefined}
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left ${current ? "bg-brand-soft font-semibold text-brand-dark" : done ? "text-ink hover:bg-cream" : "text-muted"}`}
+                >
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${done ? "bg-olive text-white" : current ? "bg-brand text-white" : "bg-cream-dark text-muted"}`}>
+                    {done ? <CheckIcon className="h-4 w-4" /> : n}
+                  </span>
+                  {label}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+        <div className="mt-auto flex items-center gap-3 rounded-2xl bg-cream px-4 py-4 text-sm">
+          <LeafIcon className="h-6 w-6 shrink-0 text-olive" />
+          <span>Te llevará menos de un minuto y podrás cambiarlo todo después.</span>
+        </div>
+      </aside>
+
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pb-8 pt-4 lg:max-w-4xl lg:px-14 lg:py-12">
       {/* Progreso */}
       <div className="flex items-center gap-3">
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-cream-dark">
@@ -111,23 +162,27 @@ export function Onboarding({ initial }: { initial: Initial }) {
 
       {step === 1 && (
         <Screen icon={<Image src="/logo.png" alt="" width={88} height={88} priority />} title={<>Bienvenido a <span className="text-brand">Sobremesa</span></>} subtitle="Organiza tus comidas, prepara la compra y compara cuánto te cuesta en tus supermercados habituales.">
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-2 lg:grid lg:grid-cols-3 lg:gap-4">
             <Feature icon={<CalendarIcon className="h-6 w-6" />} title="Menú semanal" text="Planifica comidas ricas, variadas y equilibradas." />
             <Feature icon={<CartIcon className="h-6 w-6" />} title="Lista de la compra" text="Genera tu lista de forma automática y sencilla." />
             <Feature icon={<ChartIcon className="h-6 w-6" />} title="Precios reales" text="Compara en tus supermercados habituales y ahorra." />
           </ul>
-          <p className="mt-3 flex items-center justify-center gap-1 text-xs text-muted">⏱ Te llevará menos de 1 minuto.</p>
+          <p className="mt-3 flex items-center justify-center gap-1 text-xs text-muted lg:justify-start lg:text-sm">⏱ Te llevará menos de 1 minuto.</p>
           <Primary onClick={next}>Configurar Sobremesa</Primary>
           {!initial.isFirstTime && (
-            <Link href="/" className="mt-3 block text-center text-sm font-medium text-brand">Ya tengo cuenta</Link>
+            <Link href="/" className="mt-3 block text-center text-sm font-medium text-brand lg:text-right">Ya tengo cuenta</Link>
           )}
         </Screen>
       )}
 
       {step === 2 && (
         <Screen icon={<HouseIcon className="h-20 w-20" />} title="Cuéntanos sobre tu hogar" subtitle="Así ajustamos mejor tus cantidades y tu menú.">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-8">
+          <div>
           <label className="mb-1 block text-sm font-semibold">¿Cómo te llamas?</label>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" autoComplete="given-name" className="mb-4 w-full rounded-xl border border-cream-dark bg-white px-4 py-3 outline-none focus:border-brand" />
+          </div>
+          <div>
           <p className="mb-2 text-sm font-semibold">¿Para cuántas personas compras?</p>
           <div className="mb-5 grid grid-cols-5 gap-2">
             {[1, 2, 3, 4, 5].map((n) => (
@@ -136,18 +191,21 @@ export function Onboarding({ initial }: { initial: Initial }) {
               </button>
             ))}
           </div>
+          </div>
+          </div>
           <p className="mb-2 text-sm font-semibold">¿Qué quieres planificar?</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
             {[["comida", "🍽️ Comidas"], ["cena", "🌙 Cenas"], ["desayuno", "☕ Desayunos"], ["merienda", "🍎 Meriendas"]].map(([id, label]) => (
               <Chip key={id} on={meals.has(id)} onClick={() => setMeals(toggleSet(meals, id))} big>{label}</Chip>
             ))}
           </div>
-          <Primary onClick={next} disabled={meals.size === 0}>Continuar</Primary>
+          <Primary onClick={next} onBack={back} disabled={meals.size === 0}>Continuar</Primary>
         </Screen>
       )}
 
       {step === 3 && (
         <Screen icon={<PinIcon className="h-20 w-20" />} title="¿Dónde haces la compra?" subtitle="Usamos tu zona para mostrarte supermercados cercanos.">
+          <div className="lg:max-w-xl">
           <button type="button" onClick={byGps} disabled={pending} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3.5 font-semibold text-white disabled:opacity-60">
             📍 {pending ? "Buscando…" : "Usar mi ubicación"}
           </button>
@@ -166,23 +224,30 @@ export function Onboarding({ initial }: { initial: Initial }) {
           </div>
           <p className="mt-3 rounded-xl bg-cream px-3 py-2.5 text-xs text-muted">ⓘ Puedes cambiarlo después en cualquier momento.</p>
           {error && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-          <Primary onClick={byAddress} disabled={pending || address.trim().length < 3}>{pending ? "Buscando…" : "Continuar"}</Primary>
+          </div>
+          <Primary onClick={byAddress} onBack={back} disabled={pending || address.trim().length < 3}>{pending ? "Buscando…" : "Continuar"}</Primary>
         </Screen>
       )}
 
       {step === 4 && located && (
         <Screen icon={<CartBigIcon className="h-20 w-20" />} title="Tus supermercados cercanos" subtitle="Selecciona los que usas habitualmente.">
-          <div className="mb-3 grid grid-cols-2 rounded-full bg-cream-dark p-1 text-sm font-medium">
+          <div className="mb-3 grid grid-cols-2 rounded-full bg-cream-dark p-1 text-sm font-medium lg:hidden">
             {(["lista", "mapa"] as const).map((t) => (
               <button key={t} type="button" onClick={() => setTab(t)} className={`rounded-full py-1.5 ${tab === t ? "bg-white shadow-sm" : "text-muted"}`}>
                 {t === "lista" ? "Lista" : "Mapa"}
               </button>
             ))}
           </div>
-          {tab === "mapa" && <div className="mb-3"><StoreMap center={located.point} stores={located.stores} selected={selected} /></div>}
-          <p className="mb-2 text-xs text-muted">📍 {located.point.label}</p>
+          <div className="lg:grid lg:grid-cols-2 lg:gap-5">
+          {(isDesktop || tab === "mapa") && (
+            <div className="mb-3 lg:order-2 lg:mb-0">
+              <StoreMap center={located.point} stores={located.stores} selected={selected} className={isDesktop ? "h-[440px]" : "h-56"} />
+            </div>
+          )}
+          <div className="lg:order-1">
+          <p className="mb-2 text-xs text-muted lg:text-sm">📍 {located.point.label}</p>
           {chainList.length === 0 && <p className="mb-2 text-sm text-muted">No he podido consultar el mapa. Elige entre las cadenas con precios.</p>}
-          <ul className="max-h-72 divide-y divide-cream-dark overflow-y-auto rounded-xl border border-cream-dark bg-white">
+          <ul className="max-h-72 divide-y divide-cream-dark overflow-y-auto rounded-xl border border-cream-dark bg-white lg:max-h-[412px]">
             {chainList.map((c) => {
               const on = selected.has(c.id);
               const near = "nearestM" in c ? c : null;
@@ -205,12 +270,17 @@ export function Onboarding({ initial }: { initial: Initial }) {
               );
             })}
           </ul>
-          <Primary onClick={next} disabled={selected.size === 0}>Continuar</Primary>
+          </div>
+          </div>
+          <Primary onClick={next} onBack={back} disabled={selected.size === 0}>Continuar</Primary>
         </Screen>
       )}
 
       {step === 5 && (
         <Screen icon={<StoreBigIcon className="h-20 w-20" />} title="Tu supermercado habitual" subtitle="También puedes decirnos cómo quieres comparar.">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-8">
+          <div>
+          <p className="mb-2 hidden text-sm font-semibold lg:block">Tu supermercado de siempre</p>
           <ul className="divide-y divide-cream-dark rounded-xl border border-cream-dark bg-white">
             {chosen.map((c) => {
               const on = (main ?? chosen[0]?.id) === c.id;
@@ -226,7 +296,9 @@ export function Onboarding({ initial }: { initial: Initial }) {
               );
             })}
           </ul>
-          <p className="mb-2 mt-4 text-sm font-semibold">¿Qué prefieres?</p>
+          </div>
+          <div>
+          <p className="mb-2 mt-4 text-sm font-semibold lg:mt-0">¿Qué prefieres?</p>
           <ul className="flex flex-col gap-2">
             {[
               ["habitual", "Mi supermercado habitual primero", "Te mostraremos precios de otros también."],
@@ -241,12 +313,16 @@ export function Onboarding({ initial }: { initial: Initial }) {
               </li>
             ))}
           </ul>
-          <Primary onClick={next}>Continuar</Primary>
+          </div>
+          </div>
+          <Primary onClick={next} onBack={back}>Continuar</Primary>
         </Screen>
       )}
 
       {step === 6 && (
         <Screen icon={<LeafBigIcon className="h-20 w-20" />} title="Tu alimentación" subtitle="Adaptaremos tus menús y tu lista.">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-10">
+          <div>
           <p className="mb-2 text-sm font-semibold">¿Cómo coméis en casa?</p>
           <div className="mb-4 flex flex-wrap gap-2">
             {[["todo", "De todo"], ["vegetariano", "Vegetariano"], ["vegano", "Vegano"], ["pescetariano", "Pescetariano"], ["otro", "Otro"]].map(([id, l]) => (
@@ -260,6 +336,8 @@ export function Onboarding({ initial }: { initial: Initial }) {
               <Chip key={a} on={allergies.has(a)} onClick={() => setAllergies(toggleSet(allergies, a))}>{cap(a)}</Chip>
             ))}
           </div>
+          </div>
+          <div>
           <p className="mb-2 text-sm font-semibold">Evitar alimentos <span className="font-normal text-muted">(opcional)</span></p>
           <div className="mb-2 flex flex-wrap gap-2">
             {Array.from(new Set(["brócoli", "champiñones", "cerdo", ...avoid])).map((a) => (
@@ -282,13 +360,15 @@ export function Onboarding({ initial }: { initial: Initial }) {
               className="w-full bg-transparent py-2.5 text-sm outline-none"
             />
           </div>
-          <Primary onClick={next}>Continuar</Primary>
+          </div>
+          </div>
+          <Primary onClick={next} onBack={back}>Continuar</Primary>
         </Screen>
       )}
 
       {step === 7 && (
         <Screen icon={<TargetIcon className="h-20 w-20" />} title={<>¿Qué buscas con <span className="text-brand">Sobremesa</span>?</>} subtitle="Elige hasta dos opciones.">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-3 lg:gap-3">
             {[["ahorrar", "🐷", "Ahorrar dinero"], ["organizar", "🗓️", "Organizarme mejor"], ["saludable", "🥗", "Comer más saludable"], ["variado", "🥦", "Comer más variado"], ["tiempo", "⏱️", "Ahorrar tiempo"], ["todo", "❤️", "Todo un poco"]].map(([id, e, l]) => {
               const on = goals.has(id);
               return (
@@ -305,10 +385,11 @@ export function Onboarding({ initial }: { initial: Initial }) {
             </p>
           </div>
           {error && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-          <Primary onClick={finish} disabled={pending || !located || chosen.length === 0}>{pending ? "Preparando tu menú…" : "Crear mi primer menú"}</Primary>
-          <button type="button" onClick={() => setStep(2)} className="mt-3 block w-full text-center text-sm font-medium text-brand">Revisar preferencias</button>
+          <Primary onClick={finish} onBack={back} disabled={pending || !located || chosen.length === 0}>{pending ? "Preparando tu menú…" : "Crear mi primer menú"}</Primary>
+          <button type="button" onClick={() => setStep(2)} className="mt-3 block w-full text-center text-sm font-medium text-brand lg:text-right">Revisar preferencias</button>
         </Screen>
       )}
+      </div>
     </div>
   );
 }
@@ -316,27 +397,40 @@ export function Onboarding({ initial }: { initial: Initial }) {
 // ---------------------------------------------------------------------------
 function Screen({ icon, title, subtitle, children }: { icon: React.ReactNode; title: React.ReactNode; subtitle: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-1 flex-col pt-6">
-      <div className="mx-auto mb-3">{icon}</div>
-      <h1 className="text-center text-2xl font-bold leading-tight">{title}</h1>
-      <p className="mx-auto mb-5 mt-1 max-w-xs text-center text-sm text-muted">{subtitle}</p>
+    <div className="flex flex-1 flex-col pt-6 lg:pt-10">
+      <div className="lg:mb-8 lg:flex lg:items-center lg:gap-5">
+        <div className="mx-auto mb-3 w-fit lg:mx-0 lg:mb-0 lg:shrink-0">{icon}</div>
+        <div>
+          <h1 className="text-center text-2xl font-bold leading-tight lg:text-left lg:text-4xl">{title}</h1>
+          <p className="mx-auto mb-5 mt-1 max-w-xs text-center text-sm text-muted lg:mx-0 lg:mb-0 lg:max-w-none lg:text-left lg:text-lg">{subtitle}</p>
+        </div>
+      </div>
       <div className="flex-1">{children}</div>
     </div>
   );
 }
 function Feature({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
-    <li className="flex items-center gap-3 rounded-xl border border-cream-dark bg-white p-3">
+    <li className="flex items-center gap-3 rounded-xl border border-cream-dark bg-white p-3 lg:flex-col lg:items-start lg:rounded-2xl lg:p-5">
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">{icon}</span>
-      <span><span className="block text-sm font-semibold">{title}</span><span className="block text-xs text-muted">{text}</span></span>
+      <span><span className="block text-sm font-semibold lg:text-base">{title}</span><span className="block text-xs text-muted lg:text-sm">{text}</span></span>
     </li>
   );
 }
-function Primary({ children, onClick, disabled }: { children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
+function Primary({ children, onClick, onBack, disabled }: { children: React.ReactNode; onClick: () => void; onBack?: () => void; disabled?: boolean }) {
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3.5 text-base font-semibold text-white active:bg-brand-dark disabled:opacity-50">
-      {children} <ArrowRight className="h-5 w-5" />
-    </button>
+    <div className="mt-6 lg:mt-10 lg:flex lg:items-center lg:justify-between">
+      {onBack ? (
+        <button type="button" onClick={onBack} className="hidden rounded-xl px-4 py-3 font-medium text-muted hover:bg-white hover:text-ink lg:block">
+          ← Atrás
+        </button>
+      ) : (
+        <span className="hidden lg:block" />
+      )}
+      <button type="button" onClick={onClick} disabled={disabled} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3.5 text-base font-semibold text-white hover:bg-brand-dark active:bg-brand-dark disabled:opacity-50 lg:w-auto lg:min-w-64 lg:px-8">
+        {children} <ArrowRight className="h-5 w-5" />
+      </button>
+    </div>
   );
 }
 function Chip({ children, on, onClick, big }: { children: React.ReactNode; on: boolean; onClick: () => void; big?: boolean }) {

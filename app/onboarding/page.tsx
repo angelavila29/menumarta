@@ -26,7 +26,7 @@ export default async function OnboardingPage() {
     isFirstTime: (mine ?? []).length === 0,
   };
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 pb-8 pt-4">
+    <main className="min-h-screen">
       <Onboarding initial={initial} />
     </main>
   );

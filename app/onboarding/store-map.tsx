@@ -37,7 +37,7 @@ function loadLeaflet(): Promise<LeafletLike> {
 const COLOR: Record<string, string> = { mercadona: "#0b7a3b", dia: "#d5201c" };
 
 /** Mapa con tu posición y las tiendas detectadas (OpenStreetMap). */
-export function StoreMap({ center, stores, selected }: { center: { lat: number; lng: number }; stores: Store[]; selected: Set<string> }) {
+export function StoreMap({ center, stores, selected, className = "h-56" }: { center: { lat: number; lng: number }; stores: Store[]; selected: Set<string>; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,5 +76,5 @@ export function StoreMap({ center, stores, selected }: { center: { lat: number; 
     };
   }, [center.lat, center.lng, stores, selected]);
 
-  return <div ref={ref} className="h-56 w-full rounded-xl bg-cream-dark" aria-label="Mapa de supermercados cercanos" />;
+  return <div ref={ref} className={`w-full rounded-xl bg-cream-dark ${className}`} aria-label="Mapa de supermercados cercanos" />;
 }
