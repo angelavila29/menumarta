@@ -73,3 +73,13 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
 - 15–18 sep: rediseño completo (portada, lista, menú, buscador, producto, receta, configuración,
   onboarding de 7 pasos en móvil y escritorio), ofertas, histórico de precios en la ficha.
 - 19 sep: banco de recetas, amigos, y recetas de amigos en el generador (todas o solo guardadas).
+- 19 sep: menú realista (sesiones de cocina, sobras, "como fuera"), despensa y básicos, presupuesto,
+  plan de compra con opciones, lista usable en tienda (sin cobertura), 26 recetas de estudiante y
+  "pegar receta", equivalencias de opencesta, aviso de zona, histórico, hábitos, fotos, piso
+  compartido, registro por invitación, carga y error, tests y comprobaciones automáticas.
+
+## Lo único que queda en tus manos
+1. Revocar en Supabase el token de acceso que compartiste en el chat (Account → Access Tokens).
+2. Punto 4: crear una cuenta gratuita en Resend o Brevo y ejecutar `scripts/setup_email.ts`;
+   después añadir `NEXT_PUBLIC_LOGIN_CODE=1` en Vercel. Eso activa el acceso con código de 6
+   dígitos, quita el límite de 2 correos por hora y permite el recordatorio del domingo.
