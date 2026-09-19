@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
 import { CartIcon, ChartIcon, PiggyIcon, PlusIcon } from "@/components/icons";
 import { BulbIcon, DotsIcon, ExternalIcon, ReceiptIcon, ShareIcon, WhatsAppIcon } from "@/components/icons-extra";
@@ -30,12 +30,90 @@ const TIPS = [
   "Compartir la lista por WhatsApp te permite repartir la compra con quien viva contigo.",
 ];
 
+// Tachados pendientes de enviar cuando no hay cobertura
+const QUEUE_KEY = "sobremesa.tachados";
+type Pending = Record<string, boolean>;
+function readQueue(): Pending {
+  try {
+    return JSON.parse(localStorage.getItem(QUEUE_KEY) ?? "{}") as Pending;
+  } catch {
+    return {};
+  }
+}
+function writeQueue(q: Pending) {
+  try {
+    localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
+  } catch {
+    /* sin almacenamiento */
+  }
+}
+// Último estado visto de cada casilla: sirve para pintar bien la copia guardada cuando no hay red
+const SEEN_KEY = "sobremesa.tachados.vistos";
+function readSeen(): Pending {
+  try {
+    return JSON.parse(localStorage.getItem(SEEN_KEY) ?? "{}") as Pending;
+  } catch {
+    return {};
+  }
+}
+function subscribeOnline(cb: () => void) {
+  window.addEventListener("online", cb);
+  window.addEventListener("offline", cb);
+  return () => {
+    window.removeEventListener("online", cb);
+    window.removeEventListener("offline", cb);
+  };
+}
+
 function lineTotal(i: ListItem) {
   return (i.product.price ?? 0) * i.quantity;
 }
 
-export function ListView({ items, chains: userChains, comparison, weekStart }: { items: ListItem[]; chains: Chain[]; comparison: Comparison | null; weekStart: string }) {
+export function ListView({ items: serverItems, chains: userChains, comparison, weekStart }: { items: ListItem[]; chains: Chain[]; comparison: Comparison | null; weekStart: string }) {
   const [pending, startTransition] = useTransition();
+  // Tachar es instantáneo: se pinta al momento y se envía por detrás. Sin cobertura se guarda
+  // en el móvil y se envía al volver la conexión.
+  const [ticks, setTicks] = useState<Pending>({});
+  const online = useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true);
+  const items = serverItems.map((i) => (String(i.id) in ticks ? { ...i, checked: ticks[String(i.id)] } : i));
+
+  const flush = useCallback(async () => {
+    const queue = readQueue();
+    for (const [id, checked] of Object.entries(queue)) {
+      try {
+        await setItemChecked(Number(id), checked);
+        const rest = readQueue();
+        delete rest[id];
+        writeQueue(rest);
+      } catch {
+        return; // seguimos sin conexión
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const queued = readQueue();
+    // Sin red la página viene de la copia guardada: se repinta con lo último que se tachó aquí.
+    // Con red manda el servidor y el estado visto se olvida.
+    const seen = navigator.onLine ? {} : readSeen();
+    if (navigator.onLine) localStorage.removeItem(SEEN_KEY);
+    if (Object.keys(queued).length > 0 || Object.keys(seen).length > 0) {
+      queueMicrotask(() => setTicks((t) => ({ ...seen, ...queued, ...t })));
+      void flush();
+    }
+    window.addEventListener("online", flush);
+    return () => window.removeEventListener("online", flush);
+  }, [flush]);
+
+  function toggle(id: number, checked: boolean) {
+    setTicks((t) => ({ ...t, [String(id)]: checked }));
+    try {
+      localStorage.setItem(SEEN_KEY, JSON.stringify({ ...readSeen(), [String(id)]: checked }));
+    } catch {
+      /* sin almacenamiento */
+    }
+    setItemChecked(id, checked).catch(() => writeQueue({ ...readQueue(), [String(id)]: checked }));
+  }
   const [filter, setFilter] = useState<Filter>("todos");
   const [groupBy, setGroupBy] = useState<GroupBy>("super");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -156,6 +234,12 @@ export function ListView({ items, chains: userChains, comparison, weekStart }: {
         </div>
       </div>
 
+      {!online && (
+        <p role="status" className="mt-4 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+          Sin conexión. Puedes seguir tachando: se guardará en cuanto vuelva la cobertura.
+        </p>
+      )}
+
       <div className="mt-5 flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_360px] lg:items-start">
         {/* Columna principal */}
         <div className="flex flex-col gap-4">
@@ -229,7 +313,7 @@ export function ListView({ items, chains: userChains, comparison, weekStart }: {
                 </header>
                 <ul className="divide-y divide-cream-dark">
                   {g.items.map((i) => (
-                    <Row key={i.id} item={i} showChain={groupBy === "categoria"} chainName={nameOf(i.product.supermarket_id)} disabled={pending} start={startTransition} />
+                    <Row key={i.id} item={i} showChain={groupBy === "categoria"} chainName={nameOf(i.product.supermarket_id)} disabled={pending} start={startTransition} onToggle={toggle} />
                   ))}
                 </ul>
                 {g.band && (
@@ -336,7 +420,7 @@ export function ListView({ items, chains: userChains, comparison, weekStart }: {
 }
 
 function sortByFamily(items: ListItem[]) {
-  return items.slice().sort((a, b) => familyOf(a.product.category).order - familyOf(b.product.category).order || a.product.name.localeCompare(b.product.name, "es"));
+  return items.slice().sort((a, b) => Number(a.checked) - Number(b.checked) || familyOf(a.product.category).order - familyOf(b.product.category).order || a.product.name.localeCompare(b.product.name, "es"));
 }
 
 function MenuBtn({ children, onClick, disabled, danger }: { children: React.ReactNode; onClick: () => void; disabled?: boolean; danger?: boolean }) {
@@ -352,7 +436,7 @@ function MenuBtn({ children, onClick, disabled, danger }: { children: React.Reac
   );
 }
 
-function Row({ item, showChain, chainName, disabled, start }: { item: ListItem; showChain: boolean; chainName: string; disabled: boolean; start: (fn: () => Promise<void>) => void }) {
+function Row({ item, showChain, chainName, disabled, start, onToggle }: { item: ListItem; showChain: boolean; chainName: string; disabled: boolean; start: (fn: () => Promise<void>) => void; onToggle: (id: number, checked: boolean) => void }) {
   const p = item.product;
   const fam = familyOf(p.category);
   const [open, setOpen] = useState(false);
@@ -371,9 +455,8 @@ function Row({ item, showChain, chainName, disabled, start }: { item: ListItem; 
       <input
         type="checkbox"
         checked={item.checked}
-        disabled={disabled}
-        onChange={(e) => start(() => setItemChecked(item.id, e.target.checked))}
-        className="h-6 w-6 shrink-0 accent-olive"
+        onChange={(e) => onToggle(item.id, e.target.checked)}
+        className="h-7 w-7 shrink-0 accent-olive"
         aria-label="Comprado"
       />
       <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cream">

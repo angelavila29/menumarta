@@ -22,10 +22,13 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
       objetivos, recetas económicas, rápidas o sanas (22,2 ingredientes de media frente a 24,6).
 
 ## B. Uso real en el móvil
-- [ ] 4. Acceso sin fricción: entrar con código de 6 dígitos en vez de enlace (el enlace abre
-      Safari y no la app instalada en iPhone) y correo propio gratuito (Supabase limita a 2 por hora).
-- [ ] 5. Lista dentro del supermercado: tachar al instante, que funcione con mala cobertura y
-      orden por pasillos.
+- [ ] 4. Acceso sin fricción: PREPARADO (19 sep), falta un paso del dueño. Supabase no deja cambiar la
+      plantilla del correo sin servidor de correo propio. Ya están: pantalla de acceso con código
+      (se activa con `NEXT_PUBLIC_LOGIN_CODE=1`), plantilla `supabase/email_code.html` y el script
+      `scripts/setup_email.ts`. Falta: crear cuenta gratuita en Resend o Brevo y ejecutar el script.
+- [x] 5. Lista dentro del supermercado (19 sep): tachar es instantáneo (38 ms), sin cobertura se guarda
+      en el móvil y se envía al volver; service worker para abrir la lista sin red; lo pendiente
+      arriba y ordenado por familias.
 
 ## C. Contenido y datos
 - [ ] 6. Recetas de estudiante: rápidas, baratas, de táper, de pocas ollas, con filtros; y

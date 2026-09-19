@@ -9,7 +9,7 @@ export default async function LoginPage(props: PageProps<"/login">) {
       <div className="w-full max-w-sm">
         <Image src="/logo.png" alt="" width={112} height={112} priority className="mx-auto mb-4" />
         <h1 className="mb-2 text-center text-4xl font-bold">Sobremesa</h1>
-        <p className="mb-8 text-center text-zinc-600">
+        <p className="mb-8 text-center text-muted">
           Menú semanal y lista de la compra con precios reales.
         </p>
         {error && (

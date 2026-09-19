@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Caveat } from "next/font/google";
+import { ServiceWorkerRegister } from "@/components/sw-register";
 import "./globals.css";
 
 const hand = Caveat({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-hand" });
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="es" className={`h-full antialiased ${hand.variable}`}>
       <body className="min-h-full flex flex-col bg-cream text-ink">
         {children}
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
