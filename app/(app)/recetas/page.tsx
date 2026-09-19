@@ -4,10 +4,11 @@ import { RecipeBank, type BankRecipe } from "./recipe-bank";
 export default async function RecipesPage(props: PageProps<"/recetas">) {
   const sp = await props.searchParams;
   const { supabase, user } = await requireUser();
-  const [{ data: rows }, { data: favs }, { data: friends }] = await Promise.all([
+  const [{ data: rows }, { data: favs }, { data: friends }, { data: me }] = await Promise.all([
     supabase.from("recipes").select("id,name,meal,tags,time_minutes,difficulty,description,owner_id,author_name,visibility,created_at").order("created_at", { ascending: false }),
     supabase.from("favorite_recipes").select("recipe_id").eq("user_id", user.id),
     supabase.rpc("my_friendships"),
+    supabase.from("profiles").select("friend_recipes_mode").eq("id", user.id).maybeSingle(),
   ]);
   const saved = new Set((favs ?? []).map((f) => f.recipe_id as number));
   const friendNames = new Map(
@@ -37,5 +38,5 @@ export default async function RecipesPage(props: PageProps<"/recetas">) {
 
   const view = typeof sp.ver === "string" ? sp.ver : "todas";
   const author = typeof sp.autor === "string" ? sp.autor : null;
-  return <RecipeBank recipes={recipes} initialView={view} initialAuthor={author} friendCount={friendNames.size} />;
+  return <RecipeBank recipes={recipes} initialView={view} initialAuthor={author} friendCount={friendNames.size} friendsMode={me?.friend_recipes_mode === "saved" ? "saved" : "all"} />;
 }

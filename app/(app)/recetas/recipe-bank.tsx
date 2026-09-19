@@ -27,7 +27,7 @@ function norm(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
 
-export function RecipeBank({ recipes, initialView, initialAuthor, friendCount }: { recipes: BankRecipe[]; initialView: string; initialAuthor: string | null; friendCount: number }) {
+export function RecipeBank({ recipes, initialView, initialAuthor, friendCount, friendsMode }: { recipes: BankRecipe[]; initialView: string; initialAuthor: string | null; friendCount: number; friendsMode: "all" | "saved" }) {
   const [view, setView] = useState(VIEWS.some(([v]) => v === initialView) ? initialView : "todas");
   const [author, setAuthor] = useState<string | null>(initialAuthor);
   const [q, setQ] = useState("");
@@ -103,6 +103,15 @@ export function RecipeBank({ recipes, initialView, initialAuthor, friendCount }:
           <option value="cena">Solo cenas</option>
         </select>
       </div>
+
+      {!author && view === "amigos" && counts.amigos > 0 && (
+        <p className="mt-3 rounded-xl bg-olive-soft px-3 py-2 text-sm text-olive-dark">
+          {friendsMode === "all"
+            ? "«Generar semana» puede usar todas estas recetas."
+            : "«Generar semana» solo usa las que guardes con el corazón."}{" "}
+          <Link href="/amigos" className="font-semibold underline">Cambiar</Link>
+        </p>
+      )}
 
       {author && (
         <p className="mt-3 flex items-center gap-2 text-sm">

@@ -58,3 +58,13 @@ export async function removeFriend(otherId: string) {
   revalidatePath("/amigos");
   revalidatePath("/recetas");
 }
+
+/** Qué recetas de amigos usa "Generar semana": todas o solo las guardadas. */
+export async function setFriendRecipesMode(mode: "all" | "saved") {
+  const { supabase, user } = await requireUser();
+  const value = mode === "saved" ? "saved" : "all";
+  const { error } = await supabase.from("profiles").update({ friend_recipes_mode: value }).eq("id", user.id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/amigos");
+  revalidatePath("/recetas");
+}

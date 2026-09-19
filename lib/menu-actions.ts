@@ -17,7 +17,7 @@ export async function generateWeekAction(weekStart: string) {
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
@@ -28,7 +28,16 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
   ]);
   const { data: favs } = await supabase.from("favorite_recipes").select("recipe_id").eq("user_id", userId);
   const saved = new Set((favs ?? []).map((f) => f.recipe_id as number));
-  const pool = recipes.filter((r) => r.owner_id === null || r.owner_id === userId || saved.has(r.id));
+  // Recetas de amigos: todas o solo las guardadas, según la preferencia. Las públicas de
+  // gente que no es amiga solo entran si las has guardado.
+  const useAllFromFriends = (profile?.friend_recipes_mode ?? "all") === "all";
+  const { data: friendRows } = useAllFromFriends ? await supabase.rpc("my_friendships") : { data: [] };
+  const friendIds = new Set(
+    ((friendRows ?? []) as { other_id: string; status: string }[]).filter((f) => f.status === "accepted").map((f) => f.other_id)
+  );
+  const pool = recipes.filter(
+    (r) => r.owner_id === null || r.owner_id === userId || saved.has(r.id) || (r.owner_id !== null && friendIds.has(r.owner_id))
+  );
   const minutes = new Map((times ?? []).map((t) => [t.id as number, t.time_minutes as number | null]));
   const maxMinutes = profile?.max_recipe_minutes ?? null;
   const prefs = { diet: profile?.diet ?? null, allergies: profile?.allergies ?? [], avoid: profile?.avoid_foods ?? [] };

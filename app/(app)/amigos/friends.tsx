@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { WhatsAppIcon } from "@/components/icons-extra";
-import { acceptFriend, removeFriend, requestFriend } from "@/lib/friends-actions";
+import { acceptFriend, removeFriend, requestFriend, setFriendRecipesMode } from "@/lib/friends-actions";
 
 export type Friendship = { other_id: string; display_name: string; status: string; incoming: boolean; recipes: number };
 
-export function Friends({ code, inviteUrl, myName, friendships, incomingCode }: { code: string; inviteUrl: string; myName: string; friendships: Friendship[]; incomingCode: string }) {
+export function Friends({ code, inviteUrl, myName, friendships, incomingCode, recipesMode }: { code: string; inviteUrl: string; myName: string; friendships: Friendship[]; incomingCode: string; recipesMode: "all" | "saved" }) {
+  const [mode, setMode] = useState(recipesMode);
   const [input, setInput] = useState(incomingCode && incomingCode.toUpperCase() !== code ? incomingCode.toUpperCase() : "");
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -87,6 +88,39 @@ export function Friends({ code, inviteUrl, myName, friendships, incomingCode }: 
           </ul>
         </section>
       )}
+
+      <section className="mt-4 rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-bold">Sus recetas en tu menú</h2>
+        <p className="text-sm text-muted">Elige qué recetas de tus amigos puede usar «Generar semana». Siempre puedes poner cualquiera a mano.</p>
+        <ul className="mt-3 flex flex-col gap-1">
+          {([
+            ["all", "Todas las recetas de mis amigos", "Entran en el sorteo junto a las tuyas y las de Sobremesa, respetando tu dieta y alergias."],
+            ["saved", "Solo las que yo guarde", "Marca con el corazón las que te gusten y solo se usarán esas."],
+          ] as const).map(([id, title, desc]) => (
+            <li key={id}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={mode === id}
+                disabled={pending}
+                onClick={() => {
+                  setMode(id);
+                  start(() => setFriendRecipesMode(id));
+                }}
+                className={`flex w-full items-start gap-3 rounded-xl border px-3 py-2.5 text-left ${mode === id ? "border-brand bg-brand-soft" : "border-transparent hover:bg-cream"}`}
+              >
+                <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${mode === id ? "border-brand" : "border-cream-dark"}`}>
+                  {mode === id && <span className="h-2.5 w-2.5 rounded-full bg-brand" />}
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold">{title}</span>
+                  <span className="block text-xs text-muted">{desc}</span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="mt-4 rounded-2xl bg-white p-5 shadow-sm">
         <h2 className="text-lg font-bold">Tus amigos ({friends.length})</h2>

@@ -114,3 +114,7 @@ drop policy if exists "recipe_ingredients propios" on recipe_ingredients;
 create policy "recipe_ingredients propios" on recipe_ingredients for all to authenticated
   using (exists (select 1 from recipes r where r.id = recipe_ingredients.recipe_id and r.owner_id = (select auth.uid())))
   with check (exists (select 1 from recipes r where r.id = recipe_ingredients.recipe_id and r.owner_id = (select auth.uid())));
+
+-- Qué recetas de amigos entran al generar el menú: 'all' = todas, 'saved' = solo las guardadas
+alter table profiles add column if not exists friend_recipes_mode text not null default 'all'
+  check (friend_recipes_mode in ('all', 'saved'));

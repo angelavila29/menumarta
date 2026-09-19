@@ -6,7 +6,7 @@ export default async function FriendsPage(props: PageProps<"/amigos">) {
   const sp = await props.searchParams;
   const { supabase, user } = await requireUser();
   const [{ data: profile }, { data: rows }] = await Promise.all([
-    supabase.from("profiles").select("friend_code,display_name").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("friend_code,display_name,friend_recipes_mode").eq("id", user.id).maybeSingle(),
     supabase.rpc("my_friendships"),
   ]);
   const h = await headers();
@@ -21,6 +21,7 @@ export default async function FriendsPage(props: PageProps<"/amigos">) {
       myName={profile?.display_name?.trim() || "Alguien"}
       friendships={(rows ?? []) as Friendship[]}
       incomingCode={typeof sp.codigo === "string" ? sp.codigo : ""}
+      recipesMode={profile?.friend_recipes_mode === "saved" ? "saved" : "all"}
     />
   );
 }
