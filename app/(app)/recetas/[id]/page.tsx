@@ -37,14 +37,14 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
 
   const [{ data: recipe }, { data: ingRows }, { data: profile }, supers, { data: chainRows }, listId, { data: fav }, { data: allRecipes }, { data: weekMenu }] =
     await Promise.all([
-      supabase.from("recipes").select("id,name,meal,servings,tags,description,time_minutes,difficulty,steps,owner_id,author_name,visibility").eq("id", recipeId).maybeSingle(),
+      supabase.from("recipes").select("id,name,meal,servings,tags,description,time_minutes,difficulty,steps,owner_id,author_name,visibility,photo_url").eq("id", recipeId).maybeSingle(),
       supabase.from("recipe_ingredients").select("ingredient_name,qty,unit").eq("recipe_id", recipeId).order("id"),
       supabase.from("profiles").select("household_size").eq("id", user.id).maybeSingle(),
       userSupermarketIds(supabase, user.id),
       supabase.from("supermarkets").select("id,name,has_prices"),
       getOrCreateActiveList(supabase, user.id),
       supabase.from("favorite_recipes").select("recipe_id").eq("user_id", user.id).eq("recipe_id", recipeId).maybeSingle(),
-      supabase.from("recipes").select("id,name,tags,time_minutes,difficulty"),
+      supabase.from("recipes").select("id,name,tags,time_minutes,difficulty,photo_url"),
       supabase.from("weekly_menus").select("id,week_start").eq("user_id", user.id).eq("week_start", currentWeekStart()).maybeSingle(),
     ]);
   if (!recipe) notFound();
@@ -115,7 +115,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
 
   const similar = (allRecipes ?? [])
     .filter((r) => r.id !== recipeId)
-    .map((r) => ({ id: r.id as number, name: r.name as string, tags: (r.tags ?? []) as string[], time: r.time_minutes as number | null, difficulty: r.difficulty as string | null }))
+    .map((r) => ({ id: r.id as number, name: r.name as string, tags: (r.tags ?? []) as string[], time: r.time_minutes as number | null, difficulty: r.difficulty as string | null, photo: r.photo_url as string | null }))
     .map((r) => ({ ...r, score: r.tags.filter((t) => tags.includes(t)).length }))
     .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, "es"))
@@ -162,7 +162,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
 
         <div className="grid gap-4 md:grid-cols-[1fr_1.1fr]">
           <div className="flex flex-col gap-3">
-            <RecipeArt tags={tags} name={recipe.name} className="aspect-[4/3] rounded-2xl text-8xl shadow-sm" />
+            <RecipeArt tags={tags} name={recipe.name} photoUrl={recipe.photo_url as string | null} className="aspect-[4/3] rounded-2xl text-8xl shadow-sm" />
             <div className="grid grid-cols-2 gap-2">
               <Stat emoji="⏱️" value={recipe.time_minutes ? `${recipe.time_minutes} min` : "—"} label="Tiempo total" />
               <Stat emoji="🧑‍🍳" value={recipe.difficulty ?? "—"} label="Dificultad" />
@@ -234,7 +234,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
               {similar.map((r) => (
                 <li key={r.id}>
                   <Link href={`/recetas/${r.id}`} className="group block">
-                    <RecipeArt tags={r.tags} name={r.name} className="aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95" />
+                    <RecipeArt tags={r.tags} name={r.name} photoUrl={r.photo} className="aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95" />
                     <p className="mt-1.5 line-clamp-2 text-sm font-medium leading-tight group-hover:text-brand">{r.name}</p>
                     <p className="mt-0.5 text-xs text-muted">
                       {r.time ? `⏱️ ${r.time} min` : ""}{r.time && r.difficulty ? " · " : ""}{r.difficulty ?? ""}

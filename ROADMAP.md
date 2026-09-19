@@ -45,10 +45,14 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
       La ingesta deduce el precio por unidad del tamaño cuando falta (de 449 productos sin él a 1).
 
 ## D. Social y hábito
-- [ ] 10. Piso compartido: lista común con compañeros y reparto del gasto.
-- [ ] 11. Hábito: recordatorio el domingo, repetir la semana pasada, marcar platos como cocinados.
-- [ ] 12. Fotos en las recetas de usuarios (almacenamiento gratuito de Supabase).
-- [ ] 13. Pantalla de Histórico: qué ha subido y bajado, seguimiento de favoritos.
+- [x] 10. Piso compartido (19 sep): comparte tu lista con un amigo desde /lista; todos añaden y
+      tachan, y se muestra el gasto a partes iguales. Cada miembro puede salirse.
+- [x] 11. Hábito (19 sep): "Repetir semana anterior" y marcar cada plato como cocinado o comido.
+      El recordatorio del domingo depende del correo propio (punto 4).
+- [x] 12. Fotos en las recetas (19 sep): se reducen a 1200 px en el móvil antes de subirlas al
+      almacenamiento de Supabase; cada persona solo escribe en su carpeta.
+- [x] 13. Histórico (19 sep): /historico con lo que más ha bajado y subido, tus favoritos y tu lista,
+      y variación media. Excluye cambios de más del 60 % (suelen ser cambio de formato).
 
 ## E. Mantenimiento
 - [ ] Revocar el token de acceso de Supabase compartido en el chat y generar otro.

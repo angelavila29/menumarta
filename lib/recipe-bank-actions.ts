@@ -19,6 +19,7 @@ export type RecipeInput = {
   visibility: string;
   ingredients: { name: string; qty: number; unit: string }[];
   steps: string[];
+  photoUrl?: string | null;
 };
 
 const MEALS = ["comida", "cena", "ambas"];
@@ -58,6 +59,7 @@ export async function saveRecipe(input: RecipeInput): Promise<SaveResult> {
     tags,
     steps,
     visibility: VISIBILITIES.includes(input.visibility) ? input.visibility : "friends",
+    photo_url: safePhoto(input.photoUrl, user.id),
   };
 
   let recipeId = input.id;
@@ -79,6 +81,12 @@ export async function saveRecipe(input: RecipeInput): Promise<SaveResult> {
 
   revalidatePath("/recetas");
   redirect(`/recetas/${recipeId}`);
+}
+
+/** Solo se aceptan fotos subidas a la carpeta del propio usuario en nuestro almacenamiento. */
+function safePhoto(url: string | null | undefined, userId: string): string | null {
+  const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/recipe-photos/${userId}/`;
+  return url && url.startsWith(base) && url.length < 400 ? url : null;
 }
 
 function dupMessage(msg: string) {

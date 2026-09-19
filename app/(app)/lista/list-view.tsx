@@ -6,6 +6,7 @@ import { ChainLogo } from "@/components/chain-logo";
 import { CartIcon, ChartIcon, PiggyIcon, PlusIcon } from "@/components/icons";
 import { BulbIcon, DotsIcon, ExternalIcon, ReceiptIcon, ShareIcon, WhatsAppIcon } from "@/components/icons-extra";
 import { clearChecked, clearList, removeItem, setItemChecked, setItemQuantity } from "@/lib/actions";
+import { removeFromList, shareListWith } from "@/lib/share-actions";
 import { familyOf } from "@/lib/categories";
 import type { Comparison } from "@/lib/compare";
 import { euro, formatWeekRange, packSize, superName, superStyle, unitPrice } from "@/lib/format";
@@ -19,6 +20,7 @@ export type ListItem = {
   cheaper: { name: string; supermarket_id: string; unit_price: number; unit: string; price: number | null } | null;
 };
 type Chain = { id: string; name: string; has_prices: boolean };
+export type Sharing = { listId: string; me: string; iAmOwner: boolean; members: { id: string; name: string; isOwner: boolean }[]; friends: { id: string; name: string }[] };
 type Filter = "todos" | "pendientes" | "comprados";
 type GroupBy = "super" | "categoria";
 
@@ -69,7 +71,10 @@ function lineTotal(i: ListItem) {
   return (i.product.price ?? 0) * i.quantity;
 }
 
-export function ListView({ items: serverItems, chains: userChains, comparison, weekStart }: { items: ListItem[]; chains: Chain[]; comparison: Comparison | null; weekStart: string }) {
+export function ListView({ items: serverItems, chains: userChains, comparison, weekStart, sharing }: { items: ListItem[]; chains: Chain[]; comparison: Comparison | null; weekStart: string; sharing: Sharing }) {
+  const [shareMsg, setShareMsg] = useState("");
+  const [friendToAdd, setFriendToAdd] = useState("");
+  const people = Math.max(1, sharing.members.length);
   const [pending, startTransition] = useTransition();
   // Tachar es instantáneo: se pinta al momento y se envía por detrás. Sin cobertura se guarda
   // en el móvil y se envía al volver la conexión.
@@ -404,6 +409,52 @@ export function ListView({ items: serverItems, chains: userChains, comparison, w
             >
               <WhatsAppIcon className="h-5 w-5" /> Compartir lista por WhatsApp
             </a>
+          </section>
+
+          <section className="rounded-2xl bg-white p-4 shadow-sm">
+            <h2 className="text-lg font-bold">{people > 1 ? "Lista compartida" : "¿Piso compartido?"}</h2>
+            {people > 1 ? (
+              <>
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {sharing.members.map((m) => (
+                    <li key={m.id} className="inline-flex items-center gap-2 rounded-xl bg-cream px-3 py-1.5 text-sm">
+                      {m.id === sharing.me ? "Tú" : m.name}
+                      {m.isOwner && <span className="text-xs text-muted">· dueño</span>}
+                      {sharing.iAmOwner && !m.isOwner && (
+                        <button type="button" aria-label={`Quitar a ${m.name}`} onClick={() => startTransition(() => removeFromList(sharing.listId, m.id))} className="text-muted hover:text-red-700">✕</button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 flex items-baseline justify-between rounded-xl bg-olive-soft px-3 py-2 text-olive-dark">
+                  <span className="text-sm">A partes iguales entre {people}</span>
+                  <b className="text-lg">{euro(grand / people)}</b>
+                </p>
+                {!sharing.iAmOwner && (
+                  <button type="button" onClick={() => { if (confirm("¿Salir de esta lista compartida? Volverás a tu lista propia.")) startTransition(() => removeFromList(sharing.listId, sharing.me)); }} className="mt-3 text-sm font-medium text-red-700 hover:underline">
+                    Salir de la lista compartida
+                  </button>
+                )}
+              </>
+            ) : (
+              <p className="mt-1 text-sm text-muted">Comparte esta lista con tus compañeros: todos podréis añadir y tachar, y veréis el gasto repartido.</p>
+            )}
+            {sharing.iAmOwner && (
+              sharing.friends.length > 0 ? (
+                <div className="mt-3 flex gap-2">
+                  <select value={friendToAdd} onChange={(e) => setFriendToAdd(e.target.value)} aria-label="Amigo con quien compartir" className="min-w-0 flex-1 rounded-xl border border-cream-dark bg-white px-3 py-2 text-sm">
+                    <option value="">Elige un amigo…</option>
+                    {sharing.friends.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                  </select>
+                  <button type="button" disabled={!friendToAdd || pending} onClick={() => startTransition(async () => { setShareMsg((await shareListWith(friendToAdd)) ?? ""); setFriendToAdd(""); })} className="rounded-xl bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                    Invitar
+                  </button>
+                </div>
+              ) : people === 1 ? (
+                <Link href="/amigos" className="mt-3 inline-block text-sm font-semibold text-brand hover:underline">Añade primero a tus compañeros como amigos</Link>
+              ) : null
+            )}
+            {shareMsg && <p role="alert" className="mt-2 text-sm text-red-700">{shareMsg}</p>}
           </section>
 
           <section className="flex gap-3 rounded-2xl bg-brand-soft p-4">

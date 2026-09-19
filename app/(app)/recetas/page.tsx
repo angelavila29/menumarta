@@ -5,7 +5,7 @@ export default async function RecipesPage(props: PageProps<"/recetas">) {
   const sp = await props.searchParams;
   const { supabase, user } = await requireUser();
   const [{ data: rows }, { data: favs }, { data: friends }, { data: me }] = await Promise.all([
-    supabase.from("recipes").select("id,name,meal,tags,time_minutes,difficulty,description,owner_id,author_name,visibility,created_at").order("created_at", { ascending: false }),
+    supabase.from("recipes").select("id,name,meal,tags,time_minutes,difficulty,description,owner_id,author_name,visibility,created_at,photo_url").order("created_at", { ascending: false }),
     supabase.from("favorite_recipes").select("recipe_id").eq("user_id", user.id),
     supabase.rpc("my_friendships"),
     supabase.from("profiles").select("friend_recipes_mode").eq("id", user.id).maybeSingle(),
@@ -33,6 +33,7 @@ export default async function RecipesPage(props: PageProps<"/recetas">) {
       source,
       visibility: r.visibility as string,
       saved: saved.has(r.id as number),
+      photoUrl: r.photo_url as string | null,
     };
   });
 

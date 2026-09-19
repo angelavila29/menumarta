@@ -59,7 +59,7 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     thrifty: profile?.weekly_budget != null || goals.includes("ahorrar"),
     quick: goals.includes("tiempo"),
     healthy: goals.includes("saludable"),
-  }).map((s) => ({ ...s, menu_id: menu.id }));
+  }).map((s) => ({ ...s, menu_id: menu.id, cooked: false }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
 }
@@ -67,7 +67,7 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
 /** Cambia un hueco: una receta, vacío, o "out" para marcarlo como "como fuera". */
 export async function setSlotAction(menuId: string, day: number, meal: "comida" | "cena", value: number | "out" | null) {
   const { supabase } = await requireUser();
-  const row = value === "out" ? { recipe_id: null, kind: "out" } : { recipe_id: value, kind: "meal" };
+  const row = value === "out" ? { recipe_id: null, kind: "out", cooked: false } : { recipe_id: value, kind: "meal", cooked: false };
   const { error } = await supabase
     .from("weekly_menu_slots")
     .upsert({ menu_id: menuId, day, meal, ...row }, { onConflict: "menu_id,day,meal" });
@@ -135,5 +135,28 @@ export async function setCookSessionsAction(sessions: number) {
   const n = Math.min(14, Math.max(1, Math.round(sessions)));
   const { error } = await supabase.from("profiles").update({ cook_sessions: n }).eq("id", user.id);
   if (error) throw new Error(error.message);
+  revalidatePath("/menu");
+}
+
+/** Copia el menú de la semana anterior a esta (platos y huecos "como fuera"). */
+export async function repeatPreviousWeekAction(weekStart: string): Promise<boolean> {
+  const { supabase, user } = await requireUser();
+  const [y, m, d] = weekStart.split("-").map(Number);
+  const prev = new Date(Date.UTC(y, m - 1, d - 7)).toISOString().slice(0, 10);
+  const { data: prevMenu } = await supabase.from("weekly_menus").select("id,servings").eq("user_id", user.id).eq("week_start", prev).maybeSingle();
+  if (!prevMenu) return false;
+  const prevSlots = await loadSlots(supabase, prevMenu.id as string);
+  if (!prevSlots.some((s) => s.recipe_id !== null)) return false;
+  const menu = await getOrCreateMenu(supabase, user.id, weekStart, Number(prevMenu.servings) || 2);
+  const rows = prevSlots.map((s) => ({ menu_id: menu.id, day: s.day, meal: s.meal, recipe_id: s.recipe_id, kind: s.kind, cooked: false }));
+  const { error } = await supabase.from("weekly_menu_slots").upsert(rows, { onConflict: "menu_id,day,meal" });
+  if (error) throw new Error(error.message);
+  revalidatePath("/menu");
+  return true;
+}
+
+export async function setCookedAction(menuId: string, day: number, meal: "comida" | "cena", cooked: boolean) {
+  const { supabase } = await requireUser();
+  await supabase.from("weekly_menu_slots").update({ cooked }).eq("menu_id", menuId).eq("day", day).eq("meal", meal);
   revalidatePath("/menu");
 }

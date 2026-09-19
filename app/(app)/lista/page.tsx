@@ -4,7 +4,7 @@ import { findCheaperEquivalent } from "@/lib/equivalents";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { currentWeekStart } from "@/lib/menu";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
-import { ListView, type ListItem } from "./list-view";
+import { ListView, type ListItem, type Sharing } from "./list-view";
 
 export default async function ListPage() {
   const { supabase, user } = await requireUser();
@@ -22,6 +22,23 @@ export default async function ListPage() {
     .select(`id,quantity,checked,product:products(${PRODUCT_COLUMNS})`)
     .eq("list_id", listId)
     .order("id", { ascending: true });
+
+  // Piso compartido: quién ve esta lista y con qué amigos puedo compartirla
+  const [{ data: people }, { data: friendRows }] = await Promise.all([
+    supabase.rpc("list_people", { p_list: listId }),
+    supabase.rpc("my_friendships"),
+  ]);
+  const members = ((people ?? []) as { user_id: string; display_name: string; is_owner: boolean }[]).map((p) => ({ id: p.user_id, name: p.display_name, isOwner: p.is_owner }));
+  const iAmOwner = members.some((m) => m.id === user.id && m.isOwner) || members.length === 0;
+  const sharing: Sharing = {
+    listId,
+    me: user.id,
+    iAmOwner,
+    members,
+    friends: ((friendRows ?? []) as { other_id: string; display_name: string; status: string }[])
+      .filter((f) => f.status === "accepted" && !members.some((m) => m.id === f.other_id))
+      .map((f) => ({ id: f.other_id, name: f.display_name })),
+  };
 
   const raw = (data ?? []).filter((r) => r.product);
   const pricedIds = chains.filter((c) => c.has_prices).map((c) => c.id);
@@ -52,5 +69,5 @@ export default async function ListPage() {
       : Promise.resolve(null),
   ]);
 
-  return <ListView items={items} chains={chains} comparison={comparison} weekStart={currentWeekStart()} />;
+  return <ListView items={items} chains={chains} comparison={comparison} weekStart={currentWeekStart()} sharing={sharing} />;
 }

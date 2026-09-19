@@ -13,8 +13,16 @@ const TILE_BG: Record<string, string> = {
   guiso: "from-orange-100 to-rose-50",
 };
 
-/** Ilustración de una receta (emoji sobre degradado según su tipo); no tenemos fotos. */
-export function RecipeArt({ tags, name, className = "" }: { tags: string[]; name: string; className?: string }) {
+/** Foto de la receta si la tiene; si no, un emoji sobre un degradado según el tipo de plato. */
+export function RecipeArt({ tags, name, photoUrl, className = "" }: { tags: string[]; name: string; photoUrl?: string | null; className?: string }) {
+  if (photoUrl) {
+    return (
+      <div className={`overflow-hidden bg-cream ${className}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={photoUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+      </div>
+    );
+  }
   return (
     <div aria-hidden className={`flex items-center justify-center bg-gradient-to-br ${TILE_BG[tags[0] ?? ""] ?? "from-cream-dark to-cream"} ${className}`}>
       {recipeEmoji(tags, name)}

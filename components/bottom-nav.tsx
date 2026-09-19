@@ -22,7 +22,7 @@ const SECONDARY = [
   { href: "/despensa", label: "Despensa", Icon: BoxIcon },
   { href: "/favoritos", label: "Favoritos", Icon: HeartIcon },
   { href: "/ajustes#supermercados", label: "Supermercados", Icon: StoreIcon },
-  { href: "/historico", label: "Histórico", Icon: ChartIcon, soon: true },
+  { href: "/historico", label: "Histórico", Icon: ChartIcon },
 ];
 const FOOTER = [
   { href: "/ajustes", label: "Configuración", Icon: SettingsIcon },

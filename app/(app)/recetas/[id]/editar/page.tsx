@@ -11,7 +11,7 @@ export default async function EditRecipePage(props: PageProps<"/recetas/[id]/edi
   if (!Number.isInteger(recipeId)) notFound();
   const { supabase, user } = await requireUser();
   const [{ data: r }, { data: ings }, { data: all }] = await Promise.all([
-    supabase.from("recipes").select("id,name,description,meal,servings,time_minutes,difficulty,tags,steps,visibility,owner_id").eq("id", recipeId).maybeSingle(),
+    supabase.from("recipes").select("id,name,description,meal,servings,time_minutes,difficulty,tags,steps,visibility,owner_id,photo_url").eq("id", recipeId).maybeSingle(),
     supabase.from("recipe_ingredients").select("ingredient_name,qty,unit").eq("recipe_id", recipeId).order("id"),
     supabase.from("recipe_ingredients").select("ingredient_name"),
   ]);
@@ -33,6 +33,7 @@ export default async function EditRecipePage(props: PageProps<"/recetas/[id]/edi
     visibility: r.visibility as string,
     ingredients: (ings ?? []).map((i) => ({ name: i.ingredient_name as string, qty: Number(i.qty), unit: i.unit as string })),
     steps: (r.steps ?? []) as string[],
+    photoUrl: (r.photo_url as string | null) ?? null,
   };
   const known = Array.from(new Set((all ?? []).map((x) => x.ingredient_name as string))).sort((a, b) => a.localeCompare(b, "es"));
 

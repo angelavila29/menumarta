@@ -12,9 +12,10 @@ export type Recipe = {
   tags: string[];
   owner_id: string | null; // null = receta de Sobremesa
   author_name: string | null;
+  photo_url?: string | null;
 };
 // kind "out" = como fuera o no cocino: el generador no toca ese hueco
-export type Slot = { day: number; meal: "comida" | "cena"; recipe_id: number | null; kind: "meal" | "out" };
+export type Slot = { day: number; meal: "comida" | "cena"; recipe_id: number | null; kind: "meal" | "out"; cooked?: boolean };
 export type Menu = { id: string; week_start: string; servings: number };
 
 export const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -46,7 +47,7 @@ export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart:
 }
 
 export async function loadRecipes(supabase: Supa): Promise<Recipe[]> {
-  const { data } = await supabase.from("recipes").select("id,name,meal,servings,tags,owner_id,author_name").order("name");
+  const { data } = await supabase.from("recipes").select("id,name,meal,servings,tags,owner_id,author_name,photo_url").order("name");
   return (data ?? []) as Recipe[];
 }
 
@@ -63,7 +64,7 @@ export async function loadIngredientNames(supabase: Supa): Promise<Map<number, s
 }
 
 export async function loadSlots(supabase: Supa, menuId: string): Promise<Slot[]> {
-  const { data } = await supabase.from("weekly_menu_slots").select("day,meal,recipe_id,kind").eq("menu_id", menuId);
+  const { data } = await supabase.from("weekly_menu_slots").select("day,meal,recipe_id,kind,cooked").eq("menu_id", menuId);
   return (data ?? []) as Slot[];
 }
 

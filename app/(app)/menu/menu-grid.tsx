@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
 import { euro } from "@/lib/format";
 import { DAYS, MEALS, type Menu, type Recipe, type Slot } from "@/lib/menu";
-import { generateWeekAction, setCookSessionsAction, setServingsAction, setSlotAction } from "@/lib/menu-actions";
+import { generateWeekAction, repeatPreviousWeekAction, setCookedAction, setCookSessionsAction, setServingsAction, setSlotAction } from "@/lib/menu-actions";
 import { RecipeArt } from "@/components/recipe-art";
 
 export type MenuSettings = { meals: string; diet: string; chains: string; prefs: string };
@@ -42,6 +42,7 @@ const hrefFor = (o: number) => (o === 0 ? "/menu" : `/menu?semana=${o}`);
 export function MenuGrid(p: Props) {
   const { menu, recipes, slots, offset } = p;
   const [pending, start] = useTransition();
+  const [notice, setNotice] = useState("");
   const recipeById = new Map(recipes.map((r) => [r.id, r]));
   const slotAt = (day: number, meal: string) => slots.find((s) => s.day === day && s.meal === meal);
   const recipeAt = (day: number, meal: string) => {
@@ -92,6 +93,17 @@ export function MenuGrid(p: Props) {
           </nav>
           <button
             type="button"
+            disabled={pending}
+            onClick={() => {
+              if (filled > 0 && !confirm("¿Sustituir el menú de esta semana por el de la semana anterior?")) return;
+              start(async () => setNotice((await repeatPreviousWeekAction(menu.week_start)) ? "" : "La semana anterior no tiene menú que copiar."));
+            }}
+            className="rounded-xl border border-cream-dark bg-white px-4 py-3 text-sm font-medium shadow-sm hover:bg-cream disabled:opacity-60"
+          >
+            ↻ Repetir semana anterior
+          </button>
+          <button
+            type="button"
             onClick={createMenu}
             disabled={pending}
             className="flex items-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-sm hover:bg-brand-dark disabled:opacity-60"
@@ -101,6 +113,8 @@ export function MenuGrid(p: Props) {
           </button>
         </div>
       </div>
+
+      {notice && <p role="status" className="rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900">{notice}</p>}
 
       {/* Resumen */}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -161,6 +175,8 @@ export function MenuGrid(p: Props) {
                     recipe={recipeAt(day, meal)}
                     isOut={slotAt(day, meal)?.kind === "out"}
                     isLeftover={leftovers.has(`${day}-${meal}`)}
+                    cooked={slotAt(day, meal)?.cooked === true}
+                    onCooked={(v) => start(() => setCookedAction(menu.id, day, meal, v))}
                     recipes={recipes}
                     disabled={pending}
                     ariaLabel={`Cambiar ${meal} del ${name.toLowerCase()}`}
@@ -265,13 +281,15 @@ function Stat({ icon, iconBg, big, small, label, bigClass = "text-3xl" }: { icon
   );
 }
 
-function MealSlot({ label, meal, day, recipe, isOut, isLeftover, recipes, disabled, ariaLabel, onChange }: {
+function MealSlot({ label, meal, day, recipe, isOut, isLeftover, cooked, onCooked, recipes, disabled, ariaLabel, onChange }: {
   label: string;
   meal: string;
   day: number;
   recipe: Recipe | null;
   isOut: boolean;
   isLeftover: boolean;
+  cooked: boolean;
+  onCooked: (v: boolean) => void;
   recipes: Recipe[];
   disabled: boolean;
   ariaLabel: string;
@@ -284,7 +302,7 @@ function MealSlot({ label, meal, day, recipe, isOut, isLeftover, recipes, disabl
       <div className="group relative" title="Cambiar plato">
         {recipe ? (
           <div className="relative">
-            <RecipeArt tags={recipe.tags} name={recipe.name} className={`aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95 ${isLeftover ? "opacity-60" : ""}`} />
+            <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className={`aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95 ${isLeftover ? "opacity-60" : ""}`} />
             <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${isLeftover ? "bg-white/90 text-muted" : "bg-brand text-white"}`}>
               {isLeftover ? "Sobras · táper" : "Cocinas"}
             </span>
@@ -314,6 +332,12 @@ function MealSlot({ label, meal, day, recipe, isOut, isLeftover, recipes, disabl
             ))}
         </select>
       </div>
+      {recipe && (
+        <label className={`mt-1 flex items-center gap-1.5 text-[11px] ${cooked ? "font-medium text-olive-dark" : "text-muted"}`}>
+          <input type="checkbox" checked={cooked} disabled={disabled} onChange={(e) => onCooked(e.target.checked)} className="h-3.5 w-3.5 accent-olive" />
+          {cooked ? "Hecho" : isLeftover ? "Marcar como comido" : "Marcar como cocinado"}
+        </label>
+      )}
       {recipe ? (
         <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`mt-1.5 line-clamp-2 block min-h-[2.5em] text-sm leading-tight hover:text-brand hover:underline ${isLeftover ? "text-muted" : ""}`}>
           {recipe.name}

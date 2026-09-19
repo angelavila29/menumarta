@@ -6,6 +6,7 @@ import { CheckIcon, PlusIcon } from "@/components/icons";
 import { saveRecipe, type RecipeInput } from "@/lib/recipe-bank-actions";
 import { parseRecipeText } from "@/lib/recipe-parse";
 import { EXTRA_TAGS, MAIN_TAGS, VISIBILITY } from "@/lib/recipe-tags";
+import { createClient } from "@/lib/supabase/client";
 
 type IngRow = { name: string; qty: string; unit: string };
 
@@ -32,9 +33,39 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
   const [steps, setSteps] = useState<string[]>(initial?.steps.length ? initial.steps : ["", ""]);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
+  const [photoUrl, setPhotoUrl] = useState<string | null>(initial?.photoUrl ?? null);
+  const [uploading, setUploading] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasted, setPasted] = useState("");
   const [pasteMsg, setPasteMsg] = useState("");
+
+  // La foto se reduce a 1200 px en el dispositivo antes de subirla: pesa poco y sube rápido
+  async function onPhoto(file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    setError("");
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.82));
+      if (!blob) throw new Error("No se ha podido leer la imagen.");
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) throw new Error("Sesión caducada.");
+      const path = `${auth.user.id}/${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage.from("recipe-photos").upload(path, blob, { contentType: "image/jpeg" });
+      if (upErr) throw new Error(upErr.message);
+      setPhotoUrl(supabase.storage.from("recipe-photos").getPublicUrl(path).data.publicUrl);
+    } catch (e) {
+      setError(e instanceof Error ? `No se ha podido subir la foto: ${e.message}` : "No se ha podido subir la foto.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function fillFromText() {
     const r = parseRecipeText(pasted, knownIngredients);
@@ -71,6 +102,7 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
         visibility,
         ingredients: ings.map((i) => ({ name: i.name, qty: Number(i.qty.replace(",", ".")), unit: i.unit })),
         steps,
+        photoUrl,
       });
       if (res && !res.ok) setError(res.error);
     });
@@ -210,6 +242,22 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
       </div>
 
       <aside className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-6">
+        <section className="rounded-2xl bg-white p-5 shadow-sm">
+          <h2 className="mb-3 text-lg font-bold">Foto <span className="text-sm font-normal text-muted">(opcional)</span></h2>
+          {photoUrl ? (
+            <div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photoUrl} alt="Foto de la receta" className="aspect-[4/3] w-full rounded-xl object-cover" />
+              <button type="button" onClick={() => setPhotoUrl(null)} className="mt-2 text-sm font-medium text-red-700 hover:underline">Quitar foto</button>
+            </div>
+          ) : (
+            <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-cream-dark text-sm text-muted hover:border-brand hover:text-brand">
+              <span aria-hidden className="text-3xl">📷</span>
+              {uploading ? "Subiendo…" : "Añadir una foto del plato"}
+              <input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={(e) => onPhoto(e.target.files?.[0])} />
+            </label>
+          )}
+        </section>
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-lg font-bold">¿Quién puede verla?</h2>
           <ul className="flex flex-col gap-1">
