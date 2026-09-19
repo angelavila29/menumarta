@@ -13,7 +13,8 @@ export type Recipe = {
   owner_id: string | null; // null = receta de Sobremesa
   author_name: string | null;
 };
-export type Slot = { day: number; meal: "comida" | "cena"; recipe_id: number | null };
+// kind "out" = como fuera o no cocino: el generador no toca ese hueco
+export type Slot = { day: number; meal: "comida" | "cena"; recipe_id: number | null; kind: "meal" | "out" };
 export type Menu = { id: string; week_start: string; servings: number };
 
 export const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -62,33 +63,79 @@ export async function loadIngredientNames(supabase: Supa): Promise<Map<number, s
 }
 
 export async function loadSlots(supabase: Supa, menuId: string): Promise<Slot[]> {
-  const { data } = await supabase.from("weekly_menu_slots").select("day,meal,recipe_id").eq("menu_id", menuId);
+  const { data } = await supabase.from("weekly_menu_slots").select("day,meal,recipe_id,kind").eq("menu_id", menuId);
   return (data ?? []) as Slot[];
 }
 
+export const MAX_PORTIONS = 3; // una receta cocinada da como mucho 3 comidas (por conservación)
+
+/** Veces que se cocina por defecto: quien vive solo o en pareja no cocina 14 veces. */
+export function defaultCookSessions(householdSize: number, activeSlots: number): number {
+  return Math.min(activeSlots, householdSize <= 2 ? 6 : activeSlots);
+}
+
 /**
- * Elige recetas al azar sin repetir, máximo 2 por etiqueta principal (tags[0]) en la semana.
- * Si no queda ninguna que cumpla la regla, la relaja antes que dejar el hueco vacío.
+ * Genera la semana cocinando `sessions` veces. Cada receta cocinada se reparte como sobras o
+ * táper en los días siguientes (misma comida, hasta 3 días después). Los huecos de `blocked`
+ * ("como fuera") no se tocan. Máximo 2 recetas por etiqueta principal; si no hay otra, se relaja.
  */
-export function generateWeek(recipes: Recipe[]): Slot[] {
+export function generateWeek(recipes: Recipe[], opts: { sessions?: number; blocked?: Set<string> } = {}): Slot[] {
+  const blocked = opts.blocked ?? new Set<string>();
+  const keyOf = (day: number, meal: string) => `${day}-${meal}`;
+  const order: { day: number; meal: "comida" | "cena" }[] = [];
+  for (const day of [0, 1, 2, 3, 4, 5, 6]) for (const meal of MEALS) order.push({ day, meal });
+  const active = order.filter((s) => !blocked.has(keyOf(s.day, s.meal)));
+  const sessions = Math.max(1, Math.min(opts.sessions ?? active.length, active.length));
+
+  // raciones por sesión: se reparten los huecos entre las sesiones, con tope
+  const base = Math.floor(active.length / sessions);
+  const extra = active.length % sessions;
+  const portions = Array.from({ length: sessions }, (_, i) => Math.min(MAX_PORTIONS, base + (i < extra ? 1 : 0)));
+
   const used = new Set<number>();
   const tagCount = new Map<string, number>();
   const shuffled = [...recipes].sort(() => Math.random() - 0.5);
-  const slots: Slot[] = [];
+  const assigned = new Map<string, number>();
+  const cookedAt = new Map<number, { day: number; count: number; meal: Recipe["meal"] }>();
+  const isFree = (day: number, meal: string) => day <= 6 && !blocked.has(keyOf(day, meal)) && !assigned.has(keyOf(day, meal));
+  let done = 0;
 
-  for (const day of [0, 1, 2, 3, 4, 5, 6]) {
-    for (const meal of MEALS) {
-      const candidates = shuffled.filter((r) => !used.has(r.id) && (r.meal === meal || r.meal === "ambas"));
-      const ok = candidates.find((r) => (tagCount.get(r.tags[0] ?? "") ?? 0) < 2) ?? candidates[0];
-      if (ok) {
-        used.add(ok.id);
-        const t = ok.tags[0] ?? "";
-        tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+  for (const slot of active) {
+    if (assigned.has(keyOf(slot.day, slot.meal)) || done >= sessions) continue;
+    const candidates = shuffled.filter((r) => !used.has(r.id) && (r.meal === slot.meal || r.meal === "ambas"));
+    const recipe = candidates.find((r) => (tagCount.get(r.tags[0] ?? "") ?? 0) < 2) ?? candidates[0];
+    if (!recipe) continue;
+    used.add(recipe.id);
+    tagCount.set(recipe.tags[0] ?? "", (tagCount.get(recipe.tags[0] ?? "") ?? 0) + 1);
+    assigned.set(keyOf(slot.day, slot.meal), recipe.id);
+    let count = 1;
+    // sobras: misma comida en los días siguientes
+    for (let d = slot.day + 1; d <= slot.day + 3 && count < portions[done]; d++) {
+      if (isFree(d, slot.meal)) {
+        assigned.set(keyOf(d, slot.meal), recipe.id);
+        count++;
       }
-      slots.push({ day, meal, recipe_id: ok?.id ?? null });
+    }
+    cookedAt.set(recipe.id, { day: slot.day, count, meal: recipe.meal });
+    done++;
+  }
+
+  // huecos que quedan: sobras de algo cocinado en los 3 días anteriores que aún dé para otra ración
+  for (const slot of active) {
+    if (assigned.has(keyOf(slot.day, slot.meal))) continue;
+    const donor = [...cookedAt.entries()].find(
+      ([, c]) => c.count < MAX_PORTIONS && slot.day > c.day && slot.day - c.day <= 3 && (c.meal === slot.meal || c.meal === "ambas")
+    );
+    if (donor) {
+      assigned.set(keyOf(slot.day, slot.meal), donor[0]);
+      donor[1].count++;
     }
   }
-  return slots;
+
+  return order.map((s) => {
+    const out = blocked.has(keyOf(s.day, s.meal));
+    return { day: s.day, meal: s.meal, recipe_id: out ? null : assigned.get(keyOf(s.day, s.meal)) ?? null, kind: out ? "out" : "meal" };
+  });
 }
 
 // ---------------------------------------------------------------------------

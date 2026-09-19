@@ -35,6 +35,8 @@ export default async function HomePage() {
     label: DAYS[d],
     comida: recipeById.get(slots.find((s) => s.day === d && s.meal === "comida")?.recipe_id ?? -1) ?? null,
     cena: recipeById.get(slots.find((s) => s.day === d && s.meal === "cena")?.recipe_id ?? -1) ?? null,
+    comidaOut: slots.find((s) => s.day === d && s.meal === "comida")?.kind === "out",
+    cenaOut: slots.find((s) => s.day === d && s.meal === "cena")?.kind === "out",
   }));
   const orderedDays = [...days.slice(todayIdx), ...days.slice(0, todayIdx)];
   const hasMenu = slots.some((s) => s.recipe_id !== null);
@@ -104,9 +106,9 @@ export default async function HomePage() {
                 <p className={`mb-2 text-sm font-semibold ${i === 0 ? "text-brand" : ""}`}>
                   {i === 0 ? `HOY · ${d.label}` : d.label}
                 </p>
-                <Meal label="Comida" recipe={d.comida} />
+                <Meal label="Comida" recipe={d.comida} out={d.comidaOut} />
                 <div className="my-2 border-t border-cream-dark" />
-                <Meal label="Cena" recipe={d.cena} />
+                <Meal label="Cena" recipe={d.cena} out={d.cenaOut} />
               </div>
             ))}
           </div>
@@ -321,15 +323,15 @@ export default async function HomePage() {
   );
 }
 
-function Meal({ label, recipe }: { label: string; recipe: { name: string; tags: string[] } | null }) {
+function Meal({ label, recipe, out }: { label: string; recipe: { name: string; tags: string[] } | null; out?: boolean }) {
   return (
     <div className="flex items-center gap-2 md:flex-col md:items-start md:gap-1">
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-2xl shadow-sm md:h-14 md:w-14 md:text-3xl">
-        {recipe ? recipeEmoji(recipe.tags, recipe.name) : "·"}
+        {recipe ? recipeEmoji(recipe.tags, recipe.name) : out ? "🍴" : "·"}
       </span>
       <div className="min-w-0">
         <p className="text-[11px] text-muted">{label}</p>
-        <p className="line-clamp-2 text-sm font-medium leading-tight">{recipe?.name ?? "Sin plato"}</p>
+        <p className="line-clamp-2 text-sm font-medium leading-tight">{recipe?.name ?? (out ? "Como fuera" : "Sin plato")}</p>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { getOrCreateActiveList } from "@/lib/lists";
 import {
   aggregateIngredients,
   currentWeekStart,
+  defaultCookSessions,
   getOrCreateMenu,
   loadRecipes,
   loadSlots,
@@ -30,7 +31,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
   const weekStart = currentWeekStart(offset);
 
   const [{ data: profile }, supers, { data: chainRows }, listId] = await Promise.all([
-    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions").eq("id", user.id).maybeSingle(),
     userSupermarketIds(supabase, user.id),
     supabase.from("supermarkets").select("id,name,has_prices"),
     getOrCreateActiveList(supabase, user.id),
@@ -88,6 +89,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
       listTotal={listTotal}
       cheapestName={cheapestName}
       ingredientsCount={needs.length}
+      cookSessions={profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, 14 - slots.filter((s) => s.kind === "out").length)}
       balance={balance}
       settings={settings}
     />

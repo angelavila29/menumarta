@@ -100,7 +100,7 @@ export async function addRecipeToMenu(recipeId: number, day: number, meal: "comi
   const menu = await getOrCreateMenu(supabase, user.id, currentWeekStart(weekOffset === 1 ? 1 : 0), profile?.household_size ?? 2);
   const { error } = await supabase
     .from("weekly_menu_slots")
-    .upsert({ menu_id: menu.id, day, meal, recipe_id: recipeId }, { onConflict: "menu_id,day,meal" });
+    .upsert({ menu_id: menu.id, day, meal, recipe_id: recipeId, kind: "meal" }, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
   revalidatePath("/menu");
   revalidatePath(`/recetas/${recipeId}`);

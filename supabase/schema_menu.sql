@@ -86,3 +86,8 @@ alter table favorite_recipes enable row level security;
 drop policy if exists "favorite_recipes propio" on favorite_recipes;
 create policy "favorite_recipes propio" on favorite_recipes
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Menú realista: huecos "como fuera" y cuántas veces se cocina a la semana
+alter table weekly_menu_slots add column if not exists kind text not null default 'meal'
+  check (kind in ('meal', 'out'));
+alter table profiles add column if not exists cook_sessions int check (cook_sessions between 1 and 14);

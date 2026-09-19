@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
 import { euro } from "@/lib/format";
 import { DAYS, MEALS, type Menu, type Recipe, type Slot } from "@/lib/menu";
-import { generateWeekAction, setServingsAction, setSlotAction } from "@/lib/menu-actions";
+import { generateWeekAction, setCookSessionsAction, setServingsAction, setSlotAction } from "@/lib/menu-actions";
 import { RecipeArt } from "@/components/recipe-art";
 
 export type MenuSettings = { meals: string; diet: string; chains: string; prefs: string };
@@ -21,6 +21,7 @@ type Props = {
   listTotal: number;
   cheapestName: string | null;
   ingredientsCount: number;
+  cookSessions: number;
   balance: BalanceItem[];
   settings: MenuSettings;
 };
@@ -39,11 +40,25 @@ export function MenuGrid(p: Props) {
   const { menu, recipes, slots, offset } = p;
   const [pending, start] = useTransition();
   const recipeById = new Map(recipes.map((r) => [r.id, r]));
+  const slotAt = (day: number, meal: string) => slots.find((s) => s.day === day && s.meal === meal);
   const recipeAt = (day: number, meal: string) => {
-    const id = slots.find((s) => s.day === day && s.meal === meal)?.recipe_id;
+    const id = slotAt(day, meal)?.recipe_id;
     return id != null ? recipeById.get(id) ?? null : null;
   };
+  // Un plato es "sobras" si la misma receta ya aparece antes en la semana
+  const seen = new Set<number>();
+  const leftovers = new Set<string>();
+  for (const day of [0, 1, 2, 3, 4, 5, 6]) {
+    for (const meal of MEALS) {
+      const id = slotAt(day, meal)?.recipe_id;
+      if (id == null) continue;
+      if (seen.has(id)) leftovers.add(`${day}-${meal}`);
+      seen.add(id);
+    }
+  }
   const filled = slots.filter((s) => s.recipe_id !== null).length;
+  const cooked = seen.size;
+  const outCount = slots.filter((s) => s.kind === "out").length;
   const listHref = `/menu/lista${offset !== 0 ? `?semana=${offset}` : ""}`;
 
   function createMenu() {
@@ -86,7 +101,13 @@ export function MenuGrid(p: Props) {
 
       {/* Resumen */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat icon={<ForkIcon className="h-7 w-7" />} iconBg="bg-olive-soft text-olive-dark" big={String(filled)} small="comidas planificadas" />
+        <Stat
+          icon={<ForkIcon className="h-7 w-7" />}
+          iconBg="bg-olive-soft text-olive-dark"
+          big={filled === 0 ? "0" : `Cocinas ${cooked} ${cooked === 1 ? "vez" : "veces"}`}
+          bigClass={filled === 0 ? "text-3xl" : "text-xl"}
+          small={filled === 0 ? "comidas planificadas" : `para ${filled} comidas${outCount > 0 ? ` · ${outCount} fuera` : ""}`}
+        />
         <Stat icon={<CartIcon className="h-7 w-7" />} iconBg="bg-brand-soft text-brand" label="Lista estimada" big={euro(p.listTotal)} />
         <Stat
           icon={<StoreIcon className="h-7 w-7" />}
@@ -121,6 +142,8 @@ export function MenuGrid(p: Props) {
                     label={meal === "comida" ? "Comida" : "Cena"}
                     meal={meal}
                     recipe={recipeAt(day, meal)}
+                    isOut={slotAt(day, meal)?.kind === "out"}
+                    isLeftover={leftovers.has(`${day}-${meal}`)}
                     recipes={recipes}
                     disabled={pending}
                     ariaLabel={`Cambiar ${meal} del ${name.toLowerCase()}`}
@@ -193,6 +216,14 @@ export function MenuGrid(p: Props) {
                 <button type="button" disabled={pending || menu.servings >= 12} onClick={() => start(() => setServingsAction(menu.id, menu.servings + 1))} aria-label="Más personas" className="h-7 w-7 rounded-md bg-cream font-bold disabled:opacity-40">+</button>
               </span>
             </li>
+            <li className="flex items-center gap-3">
+              <span aria-hidden className="w-5 shrink-0 text-center">🍳</span>
+              <span className="flex-1">Cocino {p.cookSessions} {p.cookSessions === 1 ? "vez" : "veces"} por semana</span>
+              <span className="flex items-center gap-1">
+                <button type="button" disabled={pending || p.cookSessions <= 1} onClick={() => start(() => setCookSessionsAction(p.cookSessions - 1))} aria-label="Cocinar menos veces" className="h-7 w-7 rounded-md bg-cream font-bold disabled:opacity-40">−</button>
+                <button type="button" disabled={pending || p.cookSessions >= 14} onClick={() => start(() => setCookSessionsAction(p.cookSessions + 1))} aria-label="Cocinar más veces" className="h-7 w-7 rounded-md bg-cream font-bold disabled:opacity-40">+</button>
+              </span>
+            </li>
             <li className="flex items-center gap-3"><ForkIcon className="h-5 w-5 shrink-0" /> {p.settings.meals}</li>
             <li className="flex items-center gap-3"><LeafIcon className="h-5 w-5 shrink-0 text-olive" /> {p.settings.diet}</li>
             <li className="flex items-center gap-3"><StoreIcon className="h-5 w-5 shrink-0" /> {p.settings.chains}</li>
@@ -217,15 +248,17 @@ function Stat({ icon, iconBg, big, small, label, bigClass = "text-3xl" }: { icon
   );
 }
 
-function MealSlot({ label, meal, day, recipe, recipes, disabled, ariaLabel, onChange }: {
+function MealSlot({ label, meal, day, recipe, isOut, isLeftover, recipes, disabled, ariaLabel, onChange }: {
   label: string;
   meal: string;
   day: number;
   recipe: Recipe | null;
+  isOut: boolean;
+  isLeftover: boolean;
   recipes: Recipe[];
   disabled: boolean;
   ariaLabel: string;
-  onChange: (id: number | null) => void;
+  onChange: (value: number | "out" | null) => void;
 }) {
   return (
     <div>
@@ -233,20 +266,30 @@ function MealSlot({ label, meal, day, recipe, recipes, disabled, ariaLabel, onCh
       {/* La imagen abre el selector para cambiar el plato; el nombre abre la receta */}
       <div className="group relative" title="Cambiar plato">
         {recipe ? (
-          <RecipeArt tags={recipe.tags} name={recipe.name} className="aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95" />
+          <div className="relative">
+            <RecipeArt tags={recipe.tags} name={recipe.name} className={`aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95 ${isLeftover ? "opacity-60" : ""}`} />
+            <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${isLeftover ? "bg-white/90 text-muted" : "bg-brand text-white"}`}>
+              {isLeftover ? "Sobras · táper" : "Cocinas"}
+            </span>
+          </div>
+        ) : isOut ? (
+          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-xl bg-cream text-xs text-muted">
+            <span aria-hidden className="text-3xl">🍴</span> Como fuera
+          </div>
         ) : (
           <div className="flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-cream-dark text-xs text-muted group-hover:border-brand group-hover:text-brand">
             <PlusIcon className="h-5 w-5" /> Añadir
           </div>
         )}
         <select
-          value={recipe?.id ?? ""}
+          value={isOut ? "out" : recipe?.id ?? ""}
           disabled={disabled}
           aria-label={ariaLabel}
-          onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
+          onChange={(e) => onChange(e.target.value === "out" ? "out" : e.target.value ? Number(e.target.value) : null)}
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         >
           <option value="">— vacío —</option>
+          <option value="out">🍴 Como fuera / no cocino</option>
           {recipes
             .filter((r) => r.meal === meal || r.meal === "ambas")
             .map((r) => (
@@ -255,11 +298,11 @@ function MealSlot({ label, meal, day, recipe, recipes, disabled, ariaLabel, onCh
         </select>
       </div>
       {recipe ? (
-        <Link href={`/recetas/${recipe.id}?dia=${day}`} className="mt-1.5 line-clamp-2 block min-h-[2.5em] text-sm leading-tight hover:text-brand hover:underline">
+        <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`mt-1.5 line-clamp-2 block min-h-[2.5em] text-sm leading-tight hover:text-brand hover:underline ${isLeftover ? "text-muted" : ""}`}>
           {recipe.name}
         </Link>
       ) : (
-        <p className="mt-1.5 min-h-[2.5em] text-sm leading-tight text-muted">Sin plato</p>
+        <p className="mt-1.5 min-h-[2.5em] text-sm leading-tight text-muted">{isOut ? "No hace falta cocinar" : "Sin plato"}</p>
       )}
     </div>
   );

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getOrCreateActiveList } from "@/lib/lists";
-import { currentWeekStart, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes } from "@/lib/menu";
+import { currentWeekStart, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
 
 export async function generateWeekAction(weekStart: string) {
@@ -17,7 +17,7 @@ export async function generateWeekAction(weekStart: string) {
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
@@ -47,16 +47,22 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
       (maxMinutes === null || (minutes.get(r.id) ?? 0) <= maxMinutes)
   );
   if (allowed.length < 6) allowed = pool; // demasiado restrictivo: mejor un menú que ninguno
-  const slots = generateWeek(allowed).map((s) => ({ ...s, menu_id: menu.id }));
+  // Los huecos "como fuera" se respetan; se cocina las veces que diga el perfil
+  const existing = await loadSlots(supabase, menu.id);
+  const blocked = new Set(existing.filter((s) => s.kind === "out").map((s) => `${s.day}-${s.meal}`));
+  const sessions = profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, 14 - blocked.size);
+  const slots = generateWeek(allowed, { sessions, blocked }).map((s) => ({ ...s, menu_id: menu.id }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
 }
 
-export async function setSlotAction(menuId: string, day: number, meal: "comida" | "cena", recipeId: number | null) {
+/** Cambia un hueco: una receta, vacío, o "out" para marcarlo como "como fuera". */
+export async function setSlotAction(menuId: string, day: number, meal: "comida" | "cena", value: number | "out" | null) {
   const { supabase } = await requireUser();
+  const row = value === "out" ? { recipe_id: null, kind: "out" } : { recipe_id: value, kind: "meal" };
   const { error } = await supabase
     .from("weekly_menu_slots")
-    .upsert({ menu_id: menuId, day, meal, recipe_id: recipeId }, { onConflict: "menu_id,day,meal" });
+    .upsert({ menu_id: menuId, day, meal, ...row }, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
   revalidatePath("/menu");
 }
@@ -110,4 +116,13 @@ export async function confirmMenuListAction(rawItems: ConfirmItem[]) {
   }
   revalidatePath("/lista");
   redirect("/lista");
+}
+
+/** Cuántas veces cocinas a la semana (el resto se cubre con sobras). Se guarda en el perfil. */
+export async function setCookSessionsAction(sessions: number) {
+  const { supabase, user } = await requireUser();
+  const n = Math.min(14, Math.max(1, Math.round(sessions)));
+  const { error } = await supabase.from("profiles").update({ cook_sessions: n }).eq("id", user.id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/menu");
 }

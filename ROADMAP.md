@@ -12,8 +12,9 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
 - Precios solo de Mercadona (zona Madrid) y Dia. Una usuaria vive en Cáceres.
 
 ## A. Plan semanal realista (el corazón)
-- [ ] 1. Menú para una persona: cocinar N veces por semana, sobras y táper repartidos en los días
-      siguientes, y huecos "como fuera / no cocino" que el generador respeta.
+- [x] 1. Menú para una persona (19 sep): cocinar N veces por semana, sobras y táper repartidos en
+      los días siguientes (misma comida, máximo 3 raciones y 3 días), y huecos "como fuera" que el
+      generador respeta. Por defecto 6 veces si vives solo o en pareja. Se ajusta en "Ajustes del menú".
 - [ ] 2. Despensa y básicos: marcar lo que ya tengo para que no se compre; lista de básicos
       recurrentes (leche, pan, café, papel) que entra sola cada semana.
 - [ ] 3. Presupuesto de verdad: coste estimado de la semana antes de crear la lista, aviso si se
