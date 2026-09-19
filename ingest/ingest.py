@@ -14,6 +14,7 @@ Variables opcionales:
 from __future__ import annotations
 
 import io
+import json
 import os
 import re
 import sys
@@ -268,6 +269,20 @@ class Supa:
             raise RuntimeError(f"upsert products {r.status_code}: {r.text[:500]}")
         return r.json()
 
+    def replace_equivalences(self, rows: list[dict]) -> None:
+        """La tabla es pequeña: se vacía y se vuelve a cargar con la release del día."""
+        r = self.client.delete(f"{self.base}/product_equivalences", params={"product_a": "gt.0"})
+        if r.status_code >= 400:
+            raise RuntimeError(f"delete product_equivalences {r.status_code}: {r.text[:300]}")
+        for i in range(0, len(rows), BATCH):
+            r = self.client.post(
+                f"{self.base}/product_equivalences",
+                headers={"Prefer": "resolution=ignore-duplicates,return=minimal"},
+                json=rows[i : i + BATCH],
+            )
+            if r.status_code >= 400:
+                raise RuntimeError(f"insert product_equivalences {r.status_code}: {r.text[:300]}")
+
     def insert_history(self, rows: list[dict]) -> None:
         r = self.client.post(
             f"{self.base}/price_history",
@@ -285,6 +300,10 @@ def main() -> None:
         print(f"Release: {release['tag_name']} ({release.get('published_at')})")
         prices = read_prices(download_asset(client, release, "prices.tar.gz"))
         catalog = pl.read_parquet(io.BytesIO(download_asset(client, release, "catalog-mercadona.parquet")))
+        try:
+            equivalences_raw = download_asset(client, release, "equivalences.jsonl").decode("utf-8")
+        except SystemExit:
+            equivalences_raw = ""  # la release no trae equivalencias: no es un fallo
 
     print(f"Filas en el dataset: {prices.height} (zonas: {sorted(prices['zone'].unique().to_list())})")
     products = build_products(prices, catalog)
@@ -307,6 +326,7 @@ def main() -> None:
     now = datetime.now(timezone.utc).isoformat()
 
     inserted = updated = failed = history_rows = 0
+    ids_by_sku: dict[tuple[str, str], int] = {}  # (cadena, sku) -> id de producto
     records = products.to_dicts()
     for i in range(0, len(records), BATCH):
         batch = records[i : i + BATCH]
@@ -323,6 +343,8 @@ def main() -> None:
             continue
 
         id_by_key = {(d["supermarket_id"], d["external_id"], d["zone"]): d["id"] for d in returned}
+        for d in returned:
+            ids_by_sku[(d["supermarket_id"], d["external_id"])] = d["id"]
         hist = []
         for rec in batch:
             key = (rec["supermarket_id"], rec["external_id"], rec["zone"])
@@ -347,12 +369,33 @@ def main() -> None:
             print(f"  lote {i // BATCH + 1}: ERROR price_history {e}")
         print(f"  lote {i // BATCH + 1}: {len(batch)} productos ok")
 
+    # Equivalencias Mercadona (a) - Dia (b) de opencesta
+    eq_rows = []
+    for line in equivalences_raw.splitlines():
+        if not line.strip():
+            continue
+        try:
+            e = json.loads(line)
+            a = ids_by_sku.get(("mercadona", str(e["a"]["sku"])))
+            b = ids_by_sku.get(("dia", str(e["b"]["sku"])))
+        except (ValueError, KeyError, TypeError):
+            continue
+        if a and b:
+            eq_rows.append({"product_a": a, "product_b": b, "score": e.get("score"), "method": e.get("method")})
+    if eq_rows:
+        try:
+            supa.replace_equivalences(eq_rows)
+        except Exception as e:  # noqa: BLE001
+            print(f"  ERROR equivalencias: {e}")
+            eq_rows = []
+
     print("\nResumen")
     for chain, n in counts.iter_rows():
         print(f"  {chain}: {n} productos")
     print(f"  insertados: {inserted}")
     print(f"  actualizados: {updated}")
     print(f"  fallos: {failed}")
+    print(f"  equivalencias entre cadenas: {len(eq_rows)}")
     print(f"  filas enviadas a price_history (se ignoran las ya existentes): {history_rows}")
     if failed:
         sys.exit(1)

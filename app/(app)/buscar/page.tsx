@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { Search } from "@/components/search";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
+import { zoneNotice } from "@/lib/format";
 
 export default async function SearchPage(props: PageProps<"/buscar">) {
   const sp = await props.searchParams;
   const initialQuery = typeof sp.q === "string" ? sp.q : "";
   const { supabase, user } = await requireUser();
   const supers = await userSupermarketIds(supabase, user.id);
-  const [{ data: favs }, { data: priced }, { data: offerRows }] = await Promise.all([
+  const [{ data: favs }, { data: priced }, { data: offerRows }, { data: me }] = await Promise.all([
     supabase.from("favorites").select("product_id").eq("user_id", user.id),
     supabase.from("supermarkets").select("id,name").eq("has_prices", true),
     supabase.from("products").select("supermarket_id").eq("is_discounted", true).in("supermarket_id", supers.length > 0 ? supers : ["-"]),
+    supabase.from("profiles").select("postal_code").eq("id", user.id).maybeSingle(),
   ]);
   const favoriteIds = (favs ?? []).map((f) => f.product_id as number);
   const chains = (priced ?? [])
@@ -25,6 +27,7 @@ export default async function SearchPage(props: PageProps<"/buscar">) {
       {supers.length > chains.length && chains.length > 0 && (
         <p className="mt-1 text-sm text-muted">Por ahora solo hay precios de {chains.map((c) => c.name).join(" y ")}.</p>
       )}
+      {chains.some((c) => c.id === "mercadona") && <p className="mt-1 text-sm text-muted">{zoneNotice(me?.postal_code)}</p>}
       {chains.length === 0 ? (
         <div className="mt-5 rounded-2xl bg-amber-50 p-5 text-amber-900">
           <p className="font-semibold">Todavía no hay precios de tus supermercados.</p>

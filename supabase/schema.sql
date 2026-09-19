@@ -192,3 +192,18 @@ create index if not exists products_name_norm_trgm_idx
 -- ---------------------------------------------------------------------
 alter table products add column if not exists is_discounted boolean not null default false;
 create index if not exists products_discounted_idx on products (supermarket_id) where is_discounted;
+
+-- ---------------------------------------------------------------------
+-- Equivalencias entre cadenas publicadas por opencesta (equivalences.jsonl)
+-- ---------------------------------------------------------------------
+create table if not exists product_equivalences (
+  product_a bigint not null references products(id) on delete cascade, -- Mercadona
+  product_b bigint not null references products(id) on delete cascade, -- Dia
+  score     numeric,
+  method    text,
+  primary key (product_a, product_b)
+);
+create index if not exists product_equivalences_b_idx on product_equivalences (product_b);
+alter table product_equivalences enable row level security;
+drop policy if exists "product_equivalences lectura publica" on product_equivalences;
+create policy "product_equivalences lectura publica" on product_equivalences for select using (true);

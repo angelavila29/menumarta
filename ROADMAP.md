@@ -34,10 +34,12 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
 - [x] 6. Recetas de estudiante (19 sep): 26 recetas nuevas (56 en total; de 8 a 25 de 20 minutos o
       menos, de 6 a 21 económicas, 31 de táper), filtros en el banco y "Pegar receta" que rellena
       el formulario a partir de texto (`lib/recipe-parse.ts`).
-- [ ] 7. Más supermercados y zona honesta: avisar de qué zona son los precios; añadir cadenas
-      cuando la fuente (opencesta) las publique.
-- [ ] 8. Emparejamiento fiable entre cadenas: cargar `equivalences.jsonl` de opencesta y usarlo
-      antes que la heurística por nombre.
+- [x] 7. Zona honesta (19 sep): el buscador y la ficha avisan de que los precios de Mercadona son de
+      la zona de Madrid. Queda pendiente, fuera de nuestro control: más cadenas y más zonas cuando
+      opencesta las publique (hoy solo vlc1, mad1, bcn1, alc1 y Dia).
+- [x] 8. Emparejamiento fiable (19 sep): la ingesta carga a diario `equivalences.jsonl` (505 pares) en
+      `product_equivalences`; las comparaciones lo usan primero (puntuación de 0,5 o más) y solo
+      después la aproximación por nombre.
 - [x] 9. Plan de compra con opciones (19 sep): todo en cada cadena o repartido, con total, recomendado
       según `compare_mode` y `main_supermarket`. Pantalla "Organizar la compra" rediseñada.
       La ingesta deduce el precio por unidad del tamaño cuando falta (de 449 productos sin él a 1).

@@ -45,3 +45,11 @@ export function formatWeekRange(weekStart: string): string {
   const m1 = start.toLocaleDateString("es-ES", { month: "long" });
   return `del ${start.getDate()} de ${m1} al ${end.getDate()} de ${month}`;
 }
+
+/** Aviso honesto sobre la zona de los precios de Mercadona (la fuente solo publica algunas zonas). */
+export function zoneNotice(postalCode: string | null | undefined): string {
+  const inMadrid = !!postalCode && postalCode.startsWith("28");
+  return inMadrid
+    ? "Los precios de Mercadona son los de la zona de Madrid."
+    : "Los precios de Mercadona son los de la zona de Madrid: en tu zona pueden variar un poco, sobre todo en frescos.";
+}

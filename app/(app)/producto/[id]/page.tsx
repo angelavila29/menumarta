@@ -6,7 +6,7 @@ import { BulbIcon, ExternalIcon } from "@/components/icons-extra";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { FAMILY_FILTERS, familyOf } from "@/lib/categories";
 import { equivalentIn } from "@/lib/compare";
-import { euro, packSize, superName, unitPrice } from "@/lib/format";
+import { euro, packSize, superName, unitPrice, zoneNotice } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { parsePackSize } from "@/lib/menu";
 import { keywords, PACK_WORDS, unaccent, wordRegex } from "@/lib/search";
@@ -229,11 +229,13 @@ export default async function ProductPage(props: PageProps<"/producto/[id]">) {
 
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="text-lg font-bold">Información del producto</h2>
-          <dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {product.supermarket_id === "mercadona" && <p className="text-sm text-muted">{zoneNotice(null).replace("en tu zona", "fuera de Madrid")}</p>}
+          <dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             <Info label="Marca" value={product.brand ?? "—"} />
             <Info label="Formato" value={packSize(product.pack_size) || "—"} />
             <Info label="Categoría" value={fam.name} />
             <Info label="Precio por unidad" value={unitPrice(product.unit_price, product.unit) || "—"} />
+            {product.supermarket_id === "mercadona" && <Info label="Zona del precio" value="Madrid" />}
             <Info label="Última actualización" value={new Date(product.updated_at).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })} />
           </dl>
         </section>

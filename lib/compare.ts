@@ -59,7 +59,25 @@ export async function compareList(
   return { chains, comparable, items: items.length, cheapest, saving };
 }
 
+/** Equivalente publicado por opencesta (emparejado por marca, tamaño y nombre), si lo hay. */
+export async function knownEquivalent(supabase: Supa, productId: number, chainId: string): Promise<Product | null> {
+  const { data } = await supabase
+    .from("product_equivalences")
+    .select("product_a,product_b,score")
+    .or(`product_a.eq.${productId},product_b.eq.${productId}`)
+    .gte("score", 0.5)
+    .order("score", { ascending: false })
+    .limit(5);
+  const otherIds = (data ?? []).map((e) => ((e.product_a as number) === productId ? (e.product_b as number) : (e.product_a as number)));
+  if (otherIds.length === 0) return null;
+  const { data: products } = await supabase.from("products").select(PRODUCT_COLUMNS).in("id", otherIds).eq("supermarket_id", chainId).not("price", "is", null);
+  const list = (products ?? []) as Product[];
+  return otherIds.map((id) => list.find((p) => p.id === id)).find((p): p is Product => !!p) ?? null;
+}
+
 export async function equivalentIn(supabase: Supa, product: Product, chainId: string): Promise<Product | null> {
+  const known = await knownEquivalent(supabase, product.id, chainId);
+  if (known) return known;
   // Palabras útiles: sin marca, sin cantidades ni formatos ("pack 6 x 1 L")
   const words = keywords(product.name.replace(product.brand ?? "", ""))
     .filter((w) => !/\d/.test(w) && !PACK_WORDS.has(unaccent(w)))

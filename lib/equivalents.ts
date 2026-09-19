@@ -1,4 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
+import { knownEquivalent } from "@/lib/compare";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
@@ -36,6 +37,13 @@ export async function findCheaperEquivalent(
   otherSupers: string[]
 ): Promise<Cheaper | null> {
   if (otherSupers.length === 0 || product.unit_price == null || !product.unit) return null;
+  // Primero las equivalencias publicadas por opencesta; si no hay, la aproximación por nombre
+  for (const chain of otherSupers) {
+    const eq = await knownEquivalent(supabase, product.id, chain);
+    if (eq && eq.unit === product.unit && eq.unit_price != null && eq.unit_price < product.unit_price) {
+      return { product: eq, saving: product.unit_price - eq.unit_price };
+    }
+  }
   const words = normalizeName(product.name, product.brand).slice(0, 3);
   if (words.length === 0) return null;
 
