@@ -194,6 +194,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
           </div>
           </div>
           <p className="mb-2 text-sm font-semibold">¿Qué quieres planificar?</p>
+          <p className="mb-2 text-xs text-muted">Por ahora el menú organiza comidas y cenas; lo demás llegará más adelante.</p>
           <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
             {[["comida", "🍽️ Comidas"], ["cena", "🌙 Cenas"], ["desayuno", "☕ Desayunos"], ["merienda", "🍎 Meriendas"]].map(([id, label]) => (
               <Chip key={id} on={meals.has(id)} onClick={() => setMeals(toggleSet(meals, id))} big>{label}</Chip>

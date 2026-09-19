@@ -37,3 +37,8 @@ export const NOT_FOOD_CATEGORY =
 
 /** Palabras de formato o tamaño que no sirven para emparejar productos entre cadenas. */
 export const PACK_WORDS = new Set(["pack", "x", "botella", "bolsa", "brik", "lata", "bote", "tarro", "paquete", "caja", "bandeja", "kg", "g", "gr", "l", "ml", "cl", "ud", "uds", "unidades"]);
+
+/** Un producto se considera vigente si la ingesta lo ha visto en los últimos tres días. */
+export function freshSince(days = 3): string {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+}

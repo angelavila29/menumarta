@@ -1,5 +1,6 @@
 import type { createClient } from "@/lib/supabase/server";
 import { knownEquivalent } from "@/lib/compare";
+import { freshSince } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
@@ -52,7 +53,8 @@ export async function findCheaperEquivalent(
     .select(PRODUCT_COLUMNS)
     .in("supermarket_id", otherSupers)
     .eq("unit", product.unit)
-    .lt("unit_price", product.unit_price);
+    .lt("unit_price", product.unit_price)
+    .gte("updated_at", freshSince());
   for (const w of words) req = req.ilike("name", `%${w}%`);
   const { data } = await req.order("unit_price", { ascending: true }).limit(1);
   const found = data?.[0] as Product | undefined;

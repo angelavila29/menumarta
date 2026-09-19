@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import { keywords, NON_FOOD_CATEGORY, stem, unaccent, wordRegex } from "@/lib/search";
+import { freshSince, keywords, NON_FOOD_CATEGORY, stem, unaccent, wordRegex } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
@@ -21,11 +21,16 @@ export type Menu = { id: string; week_start: string; servings: number };
 export const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 export const MEALS = ["comida", "cena"] as const;
 
-/** Lunes de la semana actual, como 'YYYY-MM-DD' (hora local del servidor). */
+/**
+ * Lunes de la semana actual en horario español, como 'YYYY-MM-DD'. El servidor va en UTC, así
+ * que de 00:00 a 02:00 la fecha UTC es la del día anterior: hay que calcularla en Madrid.
+ */
 export function currentWeekStart(offsetWeeks = 0): string {
-  const d = new Date();
-  const dow = (d.getDay() + 6) % 7; // lunes = 0
-  d.setDate(d.getDate() - dow + offsetWeeks * 7);
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short" }).formatToParts(new Date());
+  const get = (t: string) => parts.find((p) => p.type === t)!.value;
+  const dow = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(get("weekday"));
+  const d = new Date(Date.UTC(Number(get("year")), Number(get("month")) - 1, Number(get("day"))));
+  d.setUTCDate(d.getUTCDate() - (dow < 0 ? 0 : dow) + offsetWeeks * 7);
   return d.toISOString().slice(0, 10);
 }
 
@@ -243,7 +248,8 @@ export async function cheapestProductFor(supabase: Supa, need: Need, supers: str
       .select(PRODUCT_COLUMNS)
       .in("supermarket_id", supers)
       .not("category", "imatch", NON_FOOD_CATEGORY)
-      .not("unit_price", "is", null);
+      .not("unit_price", "is", null)
+      .gte("updated_at", freshSince());
     for (const w of words.slice(0, n)) req = req.filter("name_norm", "match", wordRegex(w));
     const { data } = await req.order("unit_price", { ascending: true }).limit(40);
     const candidates = (data ?? []) as Product[];

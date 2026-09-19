@@ -152,6 +152,7 @@ export function SettingsForm({ initial, email, chains, location }: Props) {
               </div>
               <div className="sm:border-l sm:border-cream-dark sm:pl-8">
                 <p className="mb-2 text-sm font-semibold">Planificas</p>
+                <p className="mb-2 text-xs text-muted">De momento el menú semanal solo organiza comidas y cenas.</p>
                 <div className="flex flex-wrap gap-2">
                   {MEALS.map(([id, label]) => (
                     <Chip key={id} on={v.planningMeals.includes(id)} onClick={() => toggleIn("planningMeals", id)}>{label}</Chip>

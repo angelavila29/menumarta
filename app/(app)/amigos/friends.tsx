@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { WhatsAppIcon } from "@/components/icons-extra";
-import { acceptFriend, removeFriend, requestFriend, setFriendRecipesMode } from "@/lib/friends-actions";
+import { acceptFriend, inviteByEmail, removeFriend, requestFriend, setFriendRecipesMode } from "@/lib/friends-actions";
 
 export type Friendship = { other_id: string; display_name: string; status: string; incoming: boolean; recipes: number };
 
-export function Friends({ code, inviteUrl, myName, friendships, incomingCode, recipesMode }: { code: string; inviteUrl: string; myName: string; friendships: Friendship[]; incomingCode: string; recipesMode: "all" | "saved" }) {
+export function Friends({ code, inviteUrl, myName, friendships, incomingCode, recipesMode, invitedEmails }: { code: string; inviteUrl: string; myName: string; friendships: Friendship[]; incomingCode: string; recipesMode: "all" | "saved"; invitedEmails: string[] }) {
   const [mode, setMode] = useState(recipesMode);
   const [input, setInput] = useState(incomingCode && incomingCode.toUpperCase() !== code ? incomingCode.toUpperCase() : "");
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteMsg, setInviteMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
   const [pending, start] = useTransition();
 
@@ -53,6 +55,36 @@ export function Friends({ code, inviteUrl, myName, friendships, incomingCode, re
             <WhatsAppIcon className="h-5 w-5" /> Enviar por WhatsApp
           </a>
         </div>
+      </section>
+
+      <section className="mt-4 rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-bold">¿Todavía no tiene cuenta?</h2>
+        <p className="text-sm text-muted">Sobremesa es solo por invitación. Apunta su correo y ya podrá entrar con tu enlace.</p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            start(async () => {
+              const res = await inviteByEmail(inviteEmail);
+              setInviteMsg(res.ok ? { text: res.message, ok: true } : { text: res.error, ok: false });
+              if (res.ok) setInviteEmail("");
+            });
+          }}
+          className="mt-3 flex gap-2"
+        >
+          <input
+            type="email"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            placeholder="correo@desuamigo.com"
+            aria-label="Correo de quien quieres invitar"
+            className="min-w-0 flex-1 rounded-xl border border-cream-dark bg-white px-4 py-2.5 outline-none focus:border-brand sm:max-w-xs"
+          />
+          <button type="submit" disabled={pending || inviteEmail.trim().length < 5} className="rounded-xl border border-brand px-5 py-2.5 font-semibold text-brand hover:bg-brand-soft disabled:opacity-50">
+            Invitar
+          </button>
+        </form>
+        {inviteMsg && <p role="status" className={`mt-3 rounded-xl p-3 text-sm ${inviteMsg.ok ? "bg-olive-soft text-olive-dark" : "bg-red-50 text-red-700"}`}>{inviteMsg.text}</p>}
+        {invitedEmails.length > 0 && <p className="mt-2 text-xs text-muted">Ya has invitado a: {invitedEmails.join(", ")}</p>}
       </section>
 
       <section className="mt-4 rounded-2xl bg-white p-5 shadow-sm">

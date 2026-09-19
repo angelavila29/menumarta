@@ -1,5 +1,5 @@
 import type { createClient } from "@/lib/supabase/server";
-import { keywords, NOT_FOOD_CATEGORY, PACK_WORDS, unaccent, wordRegex } from "@/lib/search";
+import { freshSince, keywords, NOT_FOOD_CATEGORY, PACK_WORDS, unaccent, wordRegex } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
@@ -89,7 +89,8 @@ export async function equivalentIn(supabase: Supa, product: Product, chainId: st
     .select(PRODUCT_COLUMNS)
     .eq("supermarket_id", chainId)
     .not("category", "imatch", NOT_FOOD_CATEGORY)
-    .not("price", "is", null);
+    .not("price", "is", null)
+    .gte("updated_at", freshSince());
   if (product.unit) req = req.eq("unit", product.unit);
   for (const w of words) req = req.filter("name_norm", "match", wordRegex(w));
   // A igual precio por unidad, el envase más barato (el brik suelto antes que el pack de 6)

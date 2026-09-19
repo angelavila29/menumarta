@@ -7,7 +7,7 @@ import { getOrCreateActiveList } from "@/lib/lists";
 import { FAMILY_FILTERS } from "@/lib/categories";
 import { equivalentIn } from "@/lib/compare";
 import { parsePackSize } from "@/lib/menu";
-import { keywords, NOT_FOOD_CATEGORY, unaccent, wordRegex } from "@/lib/search";
+import { freshSince, keywords, NOT_FOOD_CATEGORY, unaccent, wordRegex } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product, type SearchResult } from "@/lib/types";
 
 export async function signOut() {
@@ -26,7 +26,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
   const supers = await userSupermarketIds(supabase, user.id);
   if (supers.length === 0) return [];
 
-  let req = supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", supers);
+  let req = supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", supers).gte("updated_at", freshSince());
   // Cada palabra debe aparecer en el nombre, sin distinguir tildes (índice pg_trgm sobre name_norm)
   for (const word of q.split(/\s+/).filter(Boolean)) {
     req = req.ilike("name_norm", `%${unaccent(word)}%`);
@@ -181,7 +181,8 @@ export async function browseProducts(input: BrowseInput): Promise<SearchResult[]
           .select(PRODUCT_COLUMNS)
           .in("supermarket_id", chains)
           .not("category", "imatch", NOT_FOOD_CATEGORY)
-          .not("unit_price", "is", null);
+          .not("unit_price", "is", null)
+          .gte("updated_at", freshSince());
         for (const w of keywords(term)) req = req.filter("name_norm", "match", wordRegex(w));
         // A igual precio por unidad, el envase más barato (1 L antes que el pack de 6)
         const { data } = await req.order("unit_price", { ascending: true }).order("price", { ascending: true }).limit(1);
@@ -191,7 +192,7 @@ export async function browseProducts(input: BrowseInput): Promise<SearchResult[]
     products = found.filter((p): p is Product => p !== null);
     if (input.sort !== "relevancia") products = sortProducts(products, input.sort, "");
   } else {
-    let req = supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", chains).not("price", "is", null);
+    let req = supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", chains).not("price", "is", null).gte("updated_at", freshSince());
     for (const word of q.split(/\s+/).filter(Boolean)) req = req.ilike("name_norm", `%${unaccent(word)}%`);
     if (family) req = req.filter("category", "imatch", family.pattern);
     if (input.onlyOffers) req = req.eq("is_discounted", true);

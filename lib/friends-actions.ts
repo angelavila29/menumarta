@@ -68,3 +68,14 @@ export async function setFriendRecipesMode(mode: "all" | "saved") {
   revalidatePath("/amigos");
   revalidatePath("/recetas");
 }
+
+/** Deja entrar a alguien que todavía no tiene cuenta (el registro es por invitación). */
+export async function inviteByEmail(email: string): Promise<FriendResult> {
+  const { supabase, user } = await requireUser();
+  const clean = email.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(clean) || clean.length > 120) return { ok: false, error: "Ese correo no parece válido." };
+  const { error } = await supabase.from("signup_allowlist").upsert({ email: clean, invited_by: user.id }, { onConflict: "email" });
+  if (error) return { ok: false, error: "No se ha podido invitar. Puede que ya tenga cuenta." };
+  revalidatePath("/amigos");
+  return { ok: true, message: `Listo: ${clean} ya puede crearse una cuenta con tu enlace.` };
+}

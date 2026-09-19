@@ -9,7 +9,7 @@ import { ChainLogo } from "./chain-logo";
 import { CheckIcon, HeartIcon, PlusIcon } from "./icons";
 
 /** Tarjeta de producto del buscador, en cuadrícula o en lista. */
-export function ProductTile({ result, initialFavorite, view }: { result: SearchResult; initialFavorite: boolean; view: "grid" | "list" }) {
+export function ProductTile({ result, initialFavorite, view, onUnfavorite }: { result: SearchResult; initialFavorite: boolean; view: "grid" | "list"; onUnfavorite?: () => void }) {
   const p = result.product;
   const [fav, setFav] = useState(initialFavorite);
   const [added, setAdded] = useState(false);
@@ -21,6 +21,7 @@ export function ProductTile({ result, initialFavorite, view }: { result: SearchR
     start(async () => {
       try {
         await toggleFavorite(p.id, next);
+        if (!next) onUnfavorite?.();
       } catch {
         setFav(!next);
       }

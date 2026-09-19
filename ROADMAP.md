@@ -55,13 +55,18 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
       y variación media. Excluye cambios de más del 60 % (suelen ser cambio de formato).
 
 ## E. Mantenimiento
-- [ ] Revocar el token de acceso de Supabase compartido en el chat y generar otro.
-- [ ] Cerrar el registro abierto o limitarlo a una lista de correos.
-- [ ] Ocultar productos que llevan días sin actualizarse.
-- [ ] Rediseñar Favoritos, login y la revisión menú → lista (siguen con el estilo antiguo).
-- [ ] Pantallas de carga y de error; tests de lo esencial.
-- [ ] La semana actual se calcula mal entre las 00:00 y las 02:00 por la zona horaria del servidor.
-- [ ] Preferencias que se guardan y no hacen nada: objetivos, desayunos y meriendas, notificaciones.
+- [ ] Revocar el token de acceso de Supabase compartido en el chat y generar otro (solo tú puedes).
+- [x] Registro por invitación (19 sep): `signup_allowlist` + disparador en auth.users; desde /amigos se
+      invita por correo. Un correo no invitado recibe un mensaje claro.
+- [x] Productos caducados ocultos (19 sep): las búsquedas y los cálculos solo usan lo visto por la
+      ingesta en los últimos tres días.
+- [x] Rediseño pendiente (19 sep): Favoritos (ahora también con recetas guardadas), login y la
+      pantalla de menú a lista ya usan el estilo actual.
+- [x] Carga, error y tests (19 sep): esqueleto de carga, pantalla de error y 404 propios; 12 tests de
+      la lógica delicada (menú, lector de recetas, planes, nutrición, búsqueda) en cada push.
+- [x] Zona horaria (19 sep): la semana se calcula en horario español, no en UTC.
+- [x] Preferencias (19 sep): los objetivos ya influyen en el menú generado; desayunos, meriendas y
+      notificaciones avisan en pantalla de que todavía no están.
 
 ## Hecho
 - 15 sep: esqueleto, ingesta diaria, login, buscador, lista, PWA, menú semanal, despliegue.
