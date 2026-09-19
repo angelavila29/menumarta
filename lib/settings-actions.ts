@@ -61,5 +61,6 @@ export async function saveSettings(input: SettingsInput) {
     { onConflict: "id" }
   );
   if (error) throw new Error(error.message);
+  await supabase.from("recipes").update({ author_name: input.displayName.trim().slice(0, 40) || null }).eq("owner_id", user.id);
   revalidatePath("/", "layout");
 }

@@ -44,6 +44,8 @@ async function main() {
       .from("recipes")
       .upsert(
         {
+          owner_id: null,
+          visibility: "public",
           name: r.name,
           meal: r.meal,
           servings: r.servings,
@@ -53,7 +55,7 @@ async function main() {
           difficulty: r.difficulty ?? null,
           steps: r.steps ?? [],
         },
-        { onConflict: "name" }
+        { onConflict: "owner_id,name" }
       )
       .select("id")
       .single();

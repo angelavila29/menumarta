@@ -26,15 +26,18 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     loadIngredientNames(supabase),
     supabase.from("recipes").select("id,time_minutes"),
   ]);
+  const { data: favs } = await supabase.from("favorite_recipes").select("recipe_id").eq("user_id", userId);
+  const saved = new Set((favs ?? []).map((f) => f.recipe_id as number));
+  const pool = recipes.filter((r) => r.owner_id === null || r.owner_id === userId || saved.has(r.id));
   const minutes = new Map((times ?? []).map((t) => [t.id as number, t.time_minutes as number | null]));
   const maxMinutes = profile?.max_recipe_minutes ?? null;
   const prefs = { diet: profile?.diet ?? null, allergies: profile?.allergies ?? [], avoid: profile?.avoid_foods ?? [] };
-  let allowed = recipes.filter(
+  let allowed = pool.filter(
     (r) =>
       recipeAllowed(r, ingredients.get(r.id) ?? [], prefs) &&
       (maxMinutes === null || (minutes.get(r.id) ?? 0) <= maxMinutes)
   );
-  if (allowed.length < 6) allowed = recipes; // demasiado restrictivo: mejor un menú que ninguno
+  if (allowed.length < 6) allowed = pool; // demasiado restrictivo: mejor un menú que ninguno
   const slots = generateWeek(allowed).map((s) => ({ ...s, menu_id: menu.id }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);

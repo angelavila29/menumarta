@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { geocode, nearbyChains, reverseGeocode, type GeoPoint, type NearbyChain, type Store } from "@/lib/geo";
@@ -109,5 +110,6 @@ export async function saveOnboarding(input: OnboardingInput) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/menu");
+  const inviteCode = (await cookies()).get("invite_code")?.value;
+  redirect(inviteCode ? `/amigos?codigo=${inviteCode}` : "/menu");
 }

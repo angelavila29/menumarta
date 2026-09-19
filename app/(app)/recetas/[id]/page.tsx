@@ -11,7 +11,7 @@ import { cheapestProductFor, currentWeekStart, DAYS, toProductUnit, type Need } 
 import { nutritionPerServing, unitGramsOf } from "@/lib/nutrition";
 import { keywords, stem, unaccent } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
-import { AddAllButton, FavoriteRecipeButton, IngredientAddButton } from "./recipe-client";
+import { AddAllButton, AddToMenuControl, DeleteRecipeButton, FavoriteRecipeButton, IngredientAddButton } from "./recipe-client";
 
 type Ing = { ingredient_name: string; qty: number; unit: string };
 
@@ -37,7 +37,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
 
   const [{ data: recipe }, { data: ingRows }, { data: profile }, supers, { data: chainRows }, listId, { data: fav }, { data: allRecipes }, { data: weekMenu }] =
     await Promise.all([
-      supabase.from("recipes").select("id,name,meal,servings,tags,description,time_minutes,difficulty,steps").eq("id", recipeId).maybeSingle(),
+      supabase.from("recipes").select("id,name,meal,servings,tags,description,time_minutes,difficulty,steps,owner_id,author_name,visibility").eq("id", recipeId).maybeSingle(),
       supabase.from("recipe_ingredients").select("ingredient_name,qty,unit").eq("recipe_id", recipeId).order("id"),
       supabase.from("profiles").select("household_size").eq("id", user.id).maybeSingle(),
       userSupermarketIds(supabase, user.id),
@@ -50,6 +50,9 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
   if (!recipe) notFound();
 
   const tags: string[] = recipe.tags ?? [];
+  const isMine = recipe.owner_id === user.id;
+  const authorLabel = recipe.owner_id === null ? "Receta de Sobremesa" : isMine ? "Receta tuya" : `Receta de ${recipe.author_name ?? "otra persona"}`;
+  const VIS: Record<string, string> = { private: "solo la ves tú", friends: "la ven tus amigos", public: "la ve todo el mundo" };
   const ings = (ingRows ?? []) as Ing[];
   const people = profile?.household_size ?? 2;
   const base = Number(recipe.servings) || 4;
@@ -130,7 +133,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
       <div className="flex min-w-0 flex-col gap-5">
         <div>
           <nav aria-label="Ruta" className="mb-2 flex flex-wrap items-center gap-1.5 text-sm text-muted">
-            <Link href="/menu" className="hover:text-brand">Menú semanal</Link>
+            <Link href={dayName ? "/menu" : "/recetas"} className="hover:text-brand">{dayName ? "Menú semanal" : "Banco de recetas"}</Link>
             {dayName && (
               <>
                 <span aria-hidden>/</span>
@@ -145,6 +148,16 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
             <FavoriteRecipeButton key={`h-${isFav}`} recipeId={recipeId} initial={isFav} variant="icon" />
           </div>
           <p className="mt-1 text-muted md:text-lg">{recipe.description ?? "Receta casera sencilla para tu menú semanal."}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <span className={`rounded-lg px-2.5 py-1 font-medium ${isMine ? "bg-brand-soft text-brand-dark" : recipe.owner_id ? "bg-olive-soft text-olive-dark" : "bg-cream"}`}>{authorLabel}</span>
+            {isMine && <span className="text-muted">{VIS[recipe.visibility as string]}</span>}
+            {isMine && (
+              <>
+                <Link href={`/recetas/${recipeId}/editar`} className="rounded-xl border border-cream-dark bg-white px-4 py-2 font-medium hover:bg-cream">Editar</Link>
+                <DeleteRecipeButton recipeId={recipeId} />
+              </>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1fr_1.1fr]">
@@ -275,9 +288,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
             </p>
           )}
           <AddAllButton recipeId={recipeId} needs={missingNeeds} />
-          <Link href="/menu" className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-brand bg-white px-4 py-3 font-medium text-brand hover:bg-brand-soft">
-            ⇄ Cambiar esta receta
-          </Link>
+          <AddToMenuControl recipeId={recipeId} meal={recipe.meal as string} todayIndex={(new Date().getDay() + 6) % 7} />
           <FavoriteRecipeButton key={`b-${isFav}`} recipeId={recipeId} initial={isFav} variant="button" />
         </section>
 

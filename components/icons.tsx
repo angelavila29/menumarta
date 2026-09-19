@@ -56,3 +56,9 @@ export const PlusIcon = ({ className }: P) => (
 export const LeafIcon = ({ className }: P) => (
   <svg {...base} className={className}><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14" /><path d="M5 19c3-4 6-7 10-9" /></svg>
 );
+export const BookIcon = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 21a2 2 0 0 1 2-2h13v2H6a2 2 0 0 1-2 0z" /><path d="M9 8h6M9 12h4" /></svg>
+);
+export const UsersIcon = ({ className }: P) => (
+  <svg {...base} className={className}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6" /></svg>
+);

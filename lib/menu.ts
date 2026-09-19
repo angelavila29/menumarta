@@ -4,7 +4,15 @@ import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
 
-export type Recipe = { id: number; name: string; meal: "comida" | "cena" | "ambas"; servings: number; tags: string[] };
+export type Recipe = {
+  id: number;
+  name: string;
+  meal: "comida" | "cena" | "ambas";
+  servings: number;
+  tags: string[];
+  owner_id: string | null; // null = receta de Sobremesa
+  author_name: string | null;
+};
 export type Slot = { day: number; meal: "comida" | "cena"; recipe_id: number | null };
 export type Menu = { id: string; week_start: string; servings: number };
 
@@ -37,7 +45,7 @@ export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart:
 }
 
 export async function loadRecipes(supabase: Supa): Promise<Recipe[]> {
-  const { data } = await supabase.from("recipes").select("id,name,meal,servings,tags").order("name");
+  const { data } = await supabase.from("recipes").select("id,name,meal,servings,tags,owner_id,author_name").order("name");
   return (data ?? []) as Recipe[];
 }
 

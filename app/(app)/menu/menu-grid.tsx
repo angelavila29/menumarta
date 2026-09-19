@@ -250,7 +250,7 @@ function MealSlot({ label, meal, day, recipe, recipes, disabled, ariaLabel, onCh
           {recipes
             .filter((r) => r.meal === meal || r.meal === "ambas")
             .map((r) => (
-              <option key={r.id} value={r.id}>{r.name}</option>
+              <option key={r.id} value={r.id}>{r.name}{r.owner_id ? ` · de ${r.author_name ?? "un amigo"}` : ""}</option>
             ))}
         </select>
       </div>

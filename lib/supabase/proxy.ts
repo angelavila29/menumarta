@@ -31,13 +31,20 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  const invite = pathname === "/amigos" ? request.nextUrl.searchParams.get("codigo") : null;
+  const remember = (res: NextResponse) => {
+    if (invite && /^[A-Za-z0-9]{6,12}$/.test(invite)) {
+      res.cookies.set("invite_code", invite.toUpperCase(), { maxAge: 60 * 60 * 24 * 7, httpOnly: true, sameSite: "lax", path: "/" });
+    }
+    return res;
+  };
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.search = "";
-    return NextResponse.redirect(url);
+    return remember(NextResponse.redirect(url));
   }
   if (user && pathname === "/login") {
     const url = request.nextUrl.clone();
@@ -46,5 +53,5 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return remember(response);
 }
