@@ -134,6 +134,18 @@ def normalize_unit(reference_price: float | None, fmt: str | None) -> tuple[floa
     return reference_price, f
 
 
+def unit_price_from_pack(price: float, pack_size: str) -> tuple[float | None, str | None]:
+    """'12 ud' a 2,85 € → (0,2375 €/ud); '500 g' → €/kg; '33 cl' → €/L."""
+    m = re.match(r"^(\d+(?:\.\d+)?)\s*(kg|g|l|ml|cl|ud)$", pack_size.strip().lower())
+    if not m:
+        return None, None
+    qty, u = float(m.group(1)), m.group(2)
+    if qty <= 0:
+        return None, None
+    factor, unit = {"kg": (1, "kg"), "g": (0.001, "kg"), "l": (1, "l"), "ml": (0.001, "l"), "cl": (0.01, "l"), "ud": (1, "ud")}[u]
+    return price / (qty * factor), unit
+
+
 def build_products(df: pl.DataFrame, catalog: pl.DataFrame) -> pl.DataFrame:
     df = df.filter(
         ((pl.col("chain") == "mercadona") & (pl.col("zone") == MERCADONA_ZONE))
@@ -154,6 +166,9 @@ def build_products(df: pl.DataFrame, catalog: pl.DataFrame) -> pl.DataFrame:
             pack_size = f"{size_str} {r['size_format']}"
         else:
             pack_size = pack_size_from_name(r.get("display_name"))
+        # Sin precio por unidad en origen (pasa en Dia): se deduce del tamaño del envase
+        if unit_price is None and pack_size and r.get("unit_price") is not None:
+            unit_price, unit = unit_price_from_pack(float(r["unit_price"]), pack_size)
         category = r.get("category")
         if r.get("subcategory"):
             category = f"{category} > {r['subcategory']}" if category else r["subcategory"]

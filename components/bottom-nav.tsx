@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { SEARCH_EVENT } from "@/lib/events";
 import { useSyncExternalStore } from "react";
 import {
-  BookIcon, CalendarIcon, CartIcon, ChartIcon, ChevronDown, ChevronLeft, ChevronRight, HeartIcon, HelpIcon, HomeIcon, LeafIcon,
+  BookIcon, BoxIcon, CalendarIcon, CartIcon, ChartIcon, ChevronDown, ChevronLeft, ChevronRight, HeartIcon, HelpIcon, HomeIcon, LeafIcon,
   SearchIcon, SettingsIcon, StoreIcon, UsersIcon,
 } from "./icons";
 
@@ -19,6 +19,7 @@ const MAIN = [
 ];
 const SECONDARY = [
   { href: "/amigos", label: "Amigos", Icon: UsersIcon },
+  { href: "/despensa", label: "Despensa", Icon: BoxIcon },
   { href: "/favoritos", label: "Favoritos", Icon: HeartIcon },
   { href: "/ajustes#supermercados", label: "Supermercados", Icon: StoreIcon },
   { href: "/historico", label: "Histórico", Icon: ChartIcon, soon: true },

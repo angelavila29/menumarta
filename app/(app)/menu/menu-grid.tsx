@@ -19,6 +19,9 @@ type Props = {
   weekRange: string;
   todayIndex: number | null;
   listTotal: number;
+  weekCost: number | null;
+  weekCostWhere: string | null;
+  budget: number | null;
   cheapestName: string | null;
   ingredientsCount: number;
   cookSessions: number;
@@ -108,7 +111,21 @@ export function MenuGrid(p: Props) {
           bigClass={filled === 0 ? "text-3xl" : "text-xl"}
           small={filled === 0 ? "comidas planificadas" : `para ${filled} comidas${outCount > 0 ? ` · ${outCount} fuera` : ""}`}
         />
-        <Stat icon={<CartIcon className="h-7 w-7" />} iconBg="bg-brand-soft text-brand" label="Lista estimada" big={euro(p.listTotal)} />
+        <Stat
+          icon={<CartIcon className="h-7 w-7" />}
+          iconBg={p.budget !== null && p.weekCost !== null && p.weekCost > p.budget ? "bg-red-50 text-red-700" : "bg-brand-soft text-brand"}
+          label="Compra estimada de la semana"
+          big={p.weekCost !== null ? euro(p.weekCost) : euro(p.listTotal)}
+          small={
+            p.weekCost === null
+              ? "en tu lista actual"
+              : p.budget === null
+                ? p.weekCostWhere ?? undefined
+                : p.weekCost > p.budget
+                  ? `te pasas ${euro(p.weekCost - p.budget)} de tus ${euro(p.budget)}`
+                  : `dentro de tus ${euro(p.budget)} · ${p.weekCostWhere}`
+          }
+        />
         <Stat
           icon={<StoreIcon className="h-7 w-7" />}
           iconBg="bg-olive-soft text-olive-dark"

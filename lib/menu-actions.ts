@@ -17,7 +17,7 @@ export async function generateWeekAction(weekStart: string) {
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
@@ -51,7 +51,15 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
   const existing = await loadSlots(supabase, menu.id);
   const blocked = new Set(existing.filter((s) => s.kind === "out").map((s) => `${s.day}-${s.meal}`));
   const sessions = profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, 14 - blocked.size);
-  const slots = generateWeek(allowed, { sessions, blocked }).map((s) => ({ ...s, menu_id: menu.id }));
+  const goals: string[] = profile?.goals ?? [];
+  const slots = generateWeek(allowed, {
+    sessions,
+    blocked,
+    ingredients,
+    thrifty: profile?.weekly_budget != null || goals.includes("ahorrar"),
+    quick: goals.includes("tiempo"),
+    healthy: goals.includes("saludable"),
+  }).map((s) => ({ ...s, menu_id: menu.id }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
 }
@@ -77,13 +85,14 @@ export async function setServingsAction(menuId: string, servings: number) {
 export type ConfirmItem = { ingredient: string; productId: number; quantity: number };
 
 /** Añade los productos revisados a la lista activa y guarda el mapeo ingrediente→producto. */
-export async function confirmMenuListAction(rawItems: ConfirmItem[]) {
+export async function confirmMenuListAction(rawItems: ConfirmItem[], staples: { productId: number; quantity: number }[] = []) {
   const { supabase, user } = await requireUser();
   const listId = await getOrCreateActiveList(supabase, user.id);
 
   // El mismo producto puede venir de varios ingredientes (patata en g y en ud): sumamos cantidades
   const qtyByProduct = new Map<number, number>();
   const productByIngredient = new Map<string, number>();
+  for (const st of staples.slice(0, 40)) qtyByProduct.set(st.productId, (qtyByProduct.get(st.productId) ?? 0) + st.quantity);
   for (const it of rawItems) {
     qtyByProduct.set(it.productId, (qtyByProduct.get(it.productId) ?? 0) + it.quantity);
     if (!productByIngredient.has(it.ingredient)) productByIngredient.set(it.ingredient, it.productId);
@@ -95,8 +104,10 @@ export async function confirmMenuListAction(rawItems: ConfirmItem[]) {
     .eq("list_id", listId);
   const byProduct = new Map((existing ?? []).map((e) => [e.product_id as number, e]));
 
+  const stapleOnly = new Set(staples.map((st) => st.productId).filter((id) => !rawItems.some((it) => it.productId === id)));
   for (const [productId, quantity] of qtyByProduct) {
     const prev = byProduct.get(productId);
+    if (prev && stapleOnly.has(productId)) continue; // un básico que ya está en la lista no se duplica
     if (prev) {
       await supabase
         .from("shopping_list_items")

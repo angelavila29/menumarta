@@ -15,10 +15,11 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
 - [x] 1. Menú para una persona (19 sep): cocinar N veces por semana, sobras y táper repartidos en
       los días siguientes (misma comida, máximo 3 raciones y 3 días), y huecos "como fuera" que el
       generador respeta. Por defecto 6 veces si vives solo o en pareja. Se ajusta en "Ajustes del menú".
-- [ ] 2. Despensa y básicos: marcar lo que ya tengo para que no se compre; lista de básicos
-      recurrentes (leche, pan, café, papel) que entra sola cada semana.
-- [ ] 3. Presupuesto de verdad: coste estimado de la semana antes de crear la lista, aviso si se
-      pasa, y generador que prefiere recetas baratas que comparten ingredientes.
+- [x] 2. Despensa y básicos (19 sep): página /despensa con lo que ya tengo (no se compra) y mis
+      básicos de cada semana (entran solos al organizar la compra).
+- [x] 3. Presupuesto de verdad (19 sep): coste estimado de la semana en el menú y barra frente al
+      presupuesto al organizar la compra. El generador premia ingredientes compartidos y, según
+      objetivos, recetas económicas, rápidas o sanas (22,2 ingredientes de media frente a 24,6).
 
 ## B. Uso real en el móvil
 - [ ] 4. Acceso sin fricción: entrar con código de 6 dígitos en vez de enlace (el enlace abre
@@ -33,8 +34,9 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
       cuando la fuente (opencesta) las publique.
 - [ ] 8. Emparejamiento fiable entre cadenas: cargar `equivalences.jsonl` de opencesta y usarlo
       antes que la heurística por nombre.
-- [ ] 9. Plan de compra con opciones: todo en mi habitual, todo en el más barato o repartido,
-      respetando `compare_mode` y `main_supermarket` (hoy se guardan y no se usan).
+- [x] 9. Plan de compra con opciones (19 sep): todo en cada cadena o repartido, con total, recomendado
+      según `compare_mode` y `main_supermarket`. Pantalla "Organizar la compra" rediseñada.
+      La ingesta deduce el precio por unidad del tamaño cuando falta (de 449 productos sin él a 1).
 
 ## D. Social y hábito
 - [ ] 10. Piso compartido: lista común con compañeros y reparto del gasto.

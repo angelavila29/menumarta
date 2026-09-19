@@ -62,3 +62,6 @@ export const BookIcon = ({ className }: P) => (
 export const UsersIcon = ({ className }: P) => (
   <svg {...base} className={className}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6" /></svg>
 );
+export const BoxIcon = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M4 8 12 4l8 4v9l-8 4-8-4z" /><path d="M4 8l8 4 8-4M12 12v9" /></svg>
+);

@@ -79,7 +79,19 @@ export function defaultCookSessions(householdSize: number, activeSlots: number):
  * táper en los días siguientes (misma comida, hasta 3 días después). Los huecos de `blocked`
  * ("como fuera") no se tocan. Máximo 2 recetas por etiqueta principal; si no hay otra, se relaja.
  */
-export function generateWeek(recipes: Recipe[], opts: { sessions?: number; blocked?: Set<string> } = {}): Slot[] {
+export type GeneratePrefs = {
+  sessions?: number;
+  blocked?: Set<string>;
+  ingredients?: Map<number, string[]>; // para premiar recetas que comparten ingredientes
+  thrifty?: boolean; // presupuesto u objetivo de ahorrar
+  quick?: boolean; // objetivo de ahorrar tiempo
+  healthy?: boolean; // objetivo de comer más sano
+};
+
+// Ingredientes de fondo de armario: compartirlos no ahorra nada
+const BACKGROUND = new Set(["aceite de oliva", "ajo", "cebolla", "laurel", "pimentón", "harina", "perejil"]);
+
+export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[] {
   const blocked = opts.blocked ?? new Set<string>();
   const keyOf = (day: number, meal: string) => `${day}-${meal}`;
   const order: { day: number; meal: "comida" | "cena" }[] = [];
@@ -96,6 +108,7 @@ export function generateWeek(recipes: Recipe[], opts: { sessions?: number; block
   const tagCount = new Map<string, number>();
   const shuffled = [...recipes].sort(() => Math.random() - 0.5);
   const assigned = new Map<string, number>();
+  const bought = new Set<string>(); // ingredientes que ya hay que comprar esta semana
   const cookedAt = new Map<number, { day: number; count: number; meal: Recipe["meal"] }>();
   const isFree = (day: number, meal: string) => day <= 6 && !blocked.has(keyOf(day, meal)) && !assigned.has(keyOf(day, meal));
   let done = 0;
@@ -103,8 +116,21 @@ export function generateWeek(recipes: Recipe[], opts: { sessions?: number; block
   for (const slot of active) {
     if (assigned.has(keyOf(slot.day, slot.meal)) || done >= sessions) continue;
     const candidates = shuffled.filter((r) => !used.has(r.id) && (r.meal === slot.meal || r.meal === "ambas"));
-    const recipe = candidates.find((r) => (tagCount.get(r.tags[0] ?? "") ?? 0) < 2) ?? candidates[0];
+    const varied = candidates.filter((r) => (tagCount.get(r.tags[0] ?? "") ?? 0) < 2);
+    // Entre unas pocas al azar (para que cada semana sea distinta) gana la que mejor encaja
+    const shortlist = (varied.length > 0 ? varied : candidates).slice(0, 5);
+    const score = (r: Recipe) => {
+      const shared = (opts.ingredients?.get(r.id) ?? []).filter((i) => !BACKGROUND.has(i) && bought.has(i)).length;
+      return (
+        shared * 2 +
+        (opts.thrifty && r.tags.includes("económico") ? 3 : 0) +
+        (opts.quick && r.tags.includes("rápido") ? 2 : 0) +
+        (opts.healthy && r.tags.some((t) => ["verdura", "legumbre", "pescado", "ensalada"].includes(t)) ? 2 : 0)
+      );
+    };
+    const recipe = shortlist.slice().sort((a, b) => score(b) - score(a))[0];
     if (!recipe) continue;
+    for (const i of opts.ingredients?.get(recipe.id) ?? []) bought.add(i);
     used.add(recipe.id);
     tagCount.set(recipe.tags[0] ?? "", (tagCount.get(recipe.tags[0] ?? "") ?? 0) + 1);
     assigned.set(keyOf(slot.day, slot.meal), recipe.id);

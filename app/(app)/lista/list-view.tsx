@@ -140,6 +140,7 @@ export function ListView({ items, chains: userChains, comparison, weekStart }: {
                 <MenuBtn onClick={() => setGroupBy(groupBy === "super" ? "categoria" : "super")}>
                   Agrupar por {groupBy === "super" ? "categoría" : "supermercado"}
                 </MenuBtn>
+                <Link href="/despensa" className="block w-full px-4 py-2.5 text-left text-sm hover:bg-cream">Despensa y básicos</Link>
                 <MenuBtn disabled={checkedCount === 0} onClick={() => startTransition(() => clearChecked())}>
                   Vaciar comprados ({checkedCount})
                 </MenuBtn>

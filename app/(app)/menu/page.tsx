@@ -12,6 +12,7 @@ import {
   weekOffsetFrom,
   type Recipe,
 } from "@/lib/menu";
+import { buildPlanRows, recommendedPlan, summarize } from "@/lib/plan";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { MenuGrid, type BalanceItem, type MenuSettings } from "./menu-grid";
 
@@ -31,7 +32,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
   const weekStart = currentWeekStart(offset);
 
   const [{ data: profile }, supers, { data: chainRows }, listId] = await Promise.all([
-    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions,weekly_budget,compare_mode,main_supermarket").eq("id", user.id).maybeSingle(),
     userSupermarketIds(supabase, user.id),
     supabase.from("supermarkets").select("id,name,has_prices"),
     getOrCreateActiveList(supabase, user.id),
@@ -53,6 +54,16 @@ export default async function MenuPage(props: PageProps<"/menu">) {
   const pricedIds = myChains.filter((c) => c.has_prices).map((c) => c.id as string);
   const comparison = items.length > 0 && pricedIds.length > 1 ? await compareList(supabase, items, pricedIds) : null;
   const cheapestName = comparison?.cheapest && comparison.comparable > 0 ? superName(comparison.cheapest.id) : null;
+
+  // Coste estimado de comprar esta semana (envases enteros, sin lo que hay en la despensa)
+  const planRows = needs.length > 0 && pricedIds.length > 0 ? await buildPlanRows(supabase, user.id, needs, pricedIds) : [];
+  const plans = summarize(planRows, pricedIds);
+  const pick = plans.length > 0 ? recommendedPlan(plans, profile?.compare_mode ?? "avisar", profile?.main_supermarket ?? null) : null;
+  const { data: stapleRows } = await supabase.from("staple_items").select("quantity,product:products(price)").eq("user_id", user.id);
+  const staplesCost = (stapleRows ?? []).reduce((a, r) => a + Number((r.product as unknown as { price: number | null } | null)?.price ?? 0) * Number(r.quantity), 0);
+  const planTotal = plans.find((p) => p.id === pick)?.total;
+  const weekCost = planTotal !== undefined ? planTotal + staplesCost : null;
+  const weekCostWhere = pick === "mixed" ? "repartido entre tiendas" : pick ? `todo en ${superName(pick)}` : null;
 
   // Equilibrio: platos por familia según las etiquetas de cada receta
   const recipeById = new Map(recipes.map((r) => [r.id, r]));
@@ -87,6 +98,9 @@ export default async function MenuPage(props: PageProps<"/menu">) {
       weekRange={formatWeekRange(weekStart)}
       todayIndex={offset === 0 ? (new Date().getDay() + 6) % 7 : null}
       listTotal={listTotal}
+      weekCost={weekCost}
+      weekCostWhere={weekCostWhere}
+      budget={profile?.weekly_budget ?? null}
       cheapestName={cheapestName}
       ingredientsCount={needs.length}
       cookSessions={profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, 14 - slots.filter((s) => s.kind === "out").length)}
