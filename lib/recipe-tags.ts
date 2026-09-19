@@ -3,7 +3,9 @@ export const MAIN_TAGS: [string, string][] = [
   ["legumbre", "Legumbres"], ["pasta", "Pasta"], ["arroz", "Arroz"], ["carne", "Carne"], ["pescado", "Pescado"],
   ["huevo", "Huevos"], ["sopa", "Sopa o crema"], ["ensalada", "Ensalada"], ["verdura", "Verdura"], ["guiso", "Guiso u otro"],
 ];
-export const EXTRA_TAGS: [string, string][] = [["vegetariano", "Vegetariana"], ["económico", "Económica"], ["rápido", "Rápida"]];
+export const EXTRA_TAGS: [string, string][] = [
+  ["vegetariano", "Vegetariana"], ["económico", "Económica"], ["rápido", "Rápida"], ["táper", "De táper"], ["pocas ollas", "Pocas ollas"],
+];
 export const VISIBILITY: [string, string, string][] = [
   ["friends", "Mis amigos", "La verán las personas que tengas como amigas."],
   ["public", "Todo el mundo", "La verá cualquiera que use Sobremesa."],

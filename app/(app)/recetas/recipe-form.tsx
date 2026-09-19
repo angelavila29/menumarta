@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { CheckIcon, PlusIcon } from "@/components/icons";
 import { saveRecipe, type RecipeInput } from "@/lib/recipe-bank-actions";
+import { parseRecipeText } from "@/lib/recipe-parse";
 import { EXTRA_TAGS, MAIN_TAGS, VISIBILITY } from "@/lib/recipe-tags";
 
 type IngRow = { name: string; qty: string; unit: string };
@@ -31,6 +32,24 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
   const [steps, setSteps] = useState<string[]>(initial?.steps.length ? initial.steps : ["", ""]);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasted, setPasted] = useState("");
+  const [pasteMsg, setPasteMsg] = useState("");
+
+  function fillFromText() {
+    const r = parseRecipeText(pasted, knownIngredients);
+    if (r.ingredients.length === 0 && r.steps.length === 0) {
+      setPasteMsg("No he encontrado ingredientes ni pasos en ese texto. Prueba a pegarlo con un ingrediente por línea.");
+      return;
+    }
+    if (r.name) setName(r.name.slice(0, 80));
+    if (r.servings) setServings(r.servings);
+    if (r.timeMinutes) setTime(String(r.timeMinutes));
+    if (r.ingredients.length > 0) setIngs(r.ingredients.map((i) => ({ name: i.name, qty: String(i.qty), unit: i.unit })));
+    if (r.steps.length > 0) setSteps(r.steps);
+    setPasteMsg(`Relleno con ${r.ingredients.length} ingredientes y ${r.steps.length} pasos. Revísalo antes de publicar.`);
+    setPasteOpen(false);
+  }
 
   const setIng = (i: number, patch: Partial<IngRow>) => setIngs((xs) => xs.map((x, j) => (j === i ? { ...x, ...patch } : x)));
   const setStep = (i: number, v: string) => setSteps((xs) => xs.map((x, j) => (j === i ? v : x)));
@@ -60,6 +79,35 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
   return (
     <form onSubmit={submit} className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
       <div className="flex min-w-0 flex-col gap-4">
+        {!initial?.id && (
+          <section className="rounded-2xl bg-olive-soft p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-bold text-olive-dark">¿Ya la tienes escrita?</h2>
+                <p className="text-sm text-olive-dark/90">Pega el texto de una web, de WhatsApp o de tus notas y rellenamos el formulario.</p>
+              </div>
+              <button type="button" onClick={() => setPasteOpen((v) => !v)} className="rounded-xl bg-olive px-4 py-2.5 font-semibold text-white hover:bg-olive-dark">
+                {pasteOpen ? "Cerrar" : "Pegar receta"}
+              </button>
+            </div>
+            {pasteOpen && (
+              <div className="mt-3">
+                <textarea
+                  value={pasted}
+                  onChange={(e) => setPasted(e.target.value)}
+                  rows={8}
+                  aria-label="Texto de la receta"
+                  placeholder={"Lentejas de la abuela\nPara 4 personas\n\nIngredientes:\n400 g de lentejas\n2 zanahorias\n...\n\nPreparación:\n1. Sofríe la cebolla..."}
+                  className="w-full rounded-xl border border-cream-dark bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
+                />
+                <button type="button" onClick={fillFromText} disabled={pasted.trim().length < 20} className="mt-2 rounded-xl bg-brand px-5 py-2.5 font-semibold text-white hover:bg-brand-dark disabled:opacity-50">
+                  Rellenar el formulario
+                </button>
+              </div>
+            )}
+            {pasteMsg && <p role="status" className="mt-2 text-sm text-olive-dark">{pasteMsg}</p>}
+          </section>
+        )}
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-lg font-bold">Lo básico</h2>
           <label className="block">

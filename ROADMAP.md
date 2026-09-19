@@ -31,8 +31,9 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
       arriba y ordenado por familias.
 
 ## C. Contenido y datos
-- [ ] 6. Recetas de estudiante: rápidas, baratas, de táper, de pocas ollas, con filtros; y
-      "pega aquí el texto de una receta" para subirlas sin rellenar el formulario a mano.
+- [x] 6. Recetas de estudiante (19 sep): 26 recetas nuevas (56 en total; de 8 a 25 de 20 minutos o
+      menos, de 6 a 21 económicas, 31 de táper), filtros en el banco y "Pegar receta" que rellena
+      el formulario a partir de texto (`lib/recipe-parse.ts`).
 - [ ] 7. Más supermercados y zona honesta: avisar de qué zona son los precios; añadir cadenas
       cuando la fuente (opencesta) las publique.
 - [ ] 8. Emparejamiento fiable entre cadenas: cargar `equivalences.jsonl` de opencesta y usarlo

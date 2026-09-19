@@ -5,7 +5,8 @@
     "servings": 4,
     "tags": [
       "legumbre",
-      "económico"
+      "económico",
+      "táper"
     ],
     "ingredients": [
       {
@@ -71,7 +72,8 @@
     "servings": 4,
     "tags": [
       "legumbre",
-      "vegetariano"
+      "vegetariano",
+      "táper"
     ],
     "ingredients": [
       {
@@ -122,7 +124,8 @@
     "servings": 4,
     "tags": [
       "legumbre",
-      "económico"
+      "económico",
+      "táper"
     ],
     "ingredients": [
       {
@@ -178,7 +181,8 @@
     "servings": 4,
     "tags": [
       "arroz",
-      "carne"
+      "carne",
+      "táper"
     ],
     "ingredients": [
       {
@@ -239,7 +243,8 @@
     "servings": 4,
     "tags": [
       "arroz",
-      "vegetariano"
+      "vegetariano",
+      "táper"
     ],
     "ingredients": [
       {
@@ -300,7 +305,8 @@
     "servings": 4,
     "tags": [
       "pasta",
-      "económico"
+      "económico",
+      "táper"
     ],
     "ingredients": [
       {
@@ -351,7 +357,8 @@
     "servings": 4,
     "tags": [
       "pasta",
-      "carne"
+      "carne",
+      "táper"
     ],
     "ingredients": [
       {
@@ -560,7 +567,8 @@
     "meal": "comida",
     "servings": 4,
     "tags": [
-      "carne"
+      "carne",
+      "táper"
     ],
     "ingredients": [
       {
@@ -790,7 +798,8 @@
     "servings": 4,
     "tags": [
       "legumbre",
-      "carne"
+      "carne",
+      "táper"
     ],
     "ingredients": [
       {
@@ -845,7 +854,8 @@
     "servings": 4,
     "tags": [
       "verdura",
-      "vegetariano"
+      "vegetariano",
+      "táper"
     ],
     "ingredients": [
       {
@@ -957,7 +967,8 @@
     "servings": 4,
     "tags": [
       "guiso",
-      "carne"
+      "carne",
+      "táper"
     ],
     "ingredients": [
       {
@@ -1083,7 +1094,8 @@
     "servings": 4,
     "tags": [
       "carne",
-      "guiso"
+      "guiso",
+      "táper"
     ],
     "ingredients": [
       {
@@ -1144,7 +1156,8 @@
     "servings": 4,
     "tags": [
       "huevo",
-      "económico"
+      "económico",
+      "táper"
     ],
     "ingredients": [
       {
@@ -1190,7 +1203,8 @@
     "servings": 4,
     "tags": [
       "sopa",
-      "vegetariano"
+      "vegetariano",
+      "táper"
     ],
     "ingredients": [
       {
@@ -1444,7 +1458,8 @@
     "servings": 4,
     "tags": [
       "sopa",
-      "vegetariano"
+      "vegetariano",
+      "táper"
     ],
     "ingredients": [
       {
@@ -1630,6 +1645,1279 @@
       "Dora el ajo laminado con el aceite y saltea el brócoli 3 minutos.",
       "Añade los huevos batidos con sal y remueve hasta que cuajen.",
       "Termina con unas gotas de limón y acompaña con pan."
+    ]
+  },
+  {
+    "name": "Arroz tres delicias rápido",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "arroz",
+      "rápido",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "El clásico de aprovechamiento: sale mejor con arroz del día anterior.",
+    "ingredients": [
+      {
+        "ingredient": "arroz",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "guisantes",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "jamón cocido",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece el arroz y déjalo enfriar (o usa arroz ya cocido).",
+      "Haz una tortilla fina con los huevos y córtala en tiras.",
+      "Saltea la zanahoria en daditos y los guisantes 5 minutos.",
+      "Añade el arroz, el jamón en dados y la tortilla y saltea 3 minutos a fuego fuerte."
+    ]
+  },
+  {
+    "name": "Ensalada de pasta con atún",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "pasta",
+      "rápido",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Se come fría: perfecta para llevar en táper.",
+    "ingredients": [
+      {
+        "ingredient": "macarrones",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "maíz en lata",
+        "qty": 140,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceitunas",
+        "qty": 40,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece la pasta, escúrrela y enfríala bajo el grifo.",
+      "Trocea el tomate y escurre el atún y el maíz.",
+      "Mezcla todo con las aceitunas y aliña con aceite y sal."
+    ]
+  },
+  {
+    "name": "Lentejas rápidas con chorizo",
+    "meal": "comida",
+    "servings": 2,
+    "tags": [
+      "legumbre",
+      "rápido",
+      "económico",
+      "táper",
+      "pocas ollas"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Con lentejas de bote, listas en veinte minutos y en una sola olla.",
+    "ingredients": [
+      {
+        "ingredient": "lentejas cocidas",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "chorizo",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 3,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Sofríe la cebolla y la zanahoria picadas 5 minutos.",
+      "Añade el chorizo en rodajas y el pimentón y remueve un minuto.",
+      "Incorpora las lentejas escurridas y un vaso de agua.",
+      "Cuece 10 minutos y rectifica de sal."
+    ]
+  },
+  {
+    "name": "Garbanzos salteados con verduras",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "legumbre",
+      "rápido",
+      "vegetariano",
+      "táper",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Una sartén, un bote de garbanzos y la verdura que tengas.",
+    "ingredients": [
+      {
+        "ingredient": "garbanzos cocidos",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 3,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Trocea las verduras en dados pequeños.",
+      "Saltéalas con el aceite 8 minutos.",
+      "Añade los garbanzos escurridos y el pimentón y saltea 4 minutos más."
+    ]
+  },
+  {
+    "name": "Pollo al horno con patatas",
+    "meal": "comida",
+    "servings": 2,
+    "tags": [
+      "carne",
+      "económico",
+      "táper",
+      "pocas ollas"
+    ],
+    "time_minutes": 55,
+    "difficulty": "Fácil",
+    "description": "Todo a una bandeja y al horno. No hay que vigilarlo.",
+    "ingredients": [
+      {
+        "ingredient": "muslo de pollo",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Precalienta el horno a 200 °C.",
+      "Corta las patatas y la cebolla en gajos y ponlos en una bandeja con el ajo.",
+      "Coloca el pollo encima, riega con aceite, zumo de limón y sal.",
+      "Hornea 45 minutos, dando la vuelta al pollo a mitad de cocción."
+    ]
+  },
+  {
+    "name": "Salteado de pollo con verduras y arroz",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "carne",
+      "táper"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Tipo wok, con lo que haya en la nevera.",
+    "ingredients": [
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Pon a cocer el arroz.",
+      "Corta el pollo en tiras y las verduras en bastones.",
+      "Saltea el pollo a fuego fuerte 4 minutos y resérvalo.",
+      "Saltea las verduras 5 minutos, vuelve a añadir el pollo y sirve con el arroz."
+    ]
+  },
+  {
+    "name": "Espaguetis con ajo y guindilla",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "pasta",
+      "rápido",
+      "económico",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Cuatro ingredientes y quince minutos.",
+    "ingredients": [
+      {
+        "ingredient": "espaguetis",
+        "qty": 180,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "guindilla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "perejil",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 30,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece los espaguetis y guarda medio vaso del agua.",
+      "Dora el ajo laminado y la guindilla en el aceite a fuego suave.",
+      "Mezcla la pasta con el aceite y un poco del agua de cocción.",
+      "Sirve con perejil y queso rallado."
+    ]
+  },
+  {
+    "name": "Macarrones con chorizo y tomate",
+    "meal": "comida",
+    "servings": 2,
+    "tags": [
+      "pasta",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Los macarrones de toda la vida.",
+    "ingredients": [
+      {
+        "ingredient": "macarrones",
+        "qty": 180,
+        "unit": "g"
+      },
+      {
+        "ingredient": "chorizo",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 40,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece los macarrones.",
+      "Sofríe la cebolla picada y el chorizo en rodajas.",
+      "Añade el tomate frito y cocina 5 minutos.",
+      "Mezcla con la pasta y termina con el queso."
+    ]
+  },
+  {
+    "name": "Tortilla francesa con ensalada",
+    "meal": "cena",
+    "servings": 2,
+    "tags": [
+      "huevo",
+      "rápido",
+      "económico",
+      "vegetariano"
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "La cena de emergencia que nunca falla.",
+    "ingredients": [
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "lechuga",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Bate los huevos con sal.",
+      "Cuaja la tortilla en una sartén con un poco de aceite.",
+      "Prepara una ensalada con la lechuga y el tomate.",
+      "Sirve con pan."
+    ]
+  },
+  {
+    "name": "Wrap de pollo y lechuga",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "carne",
+      "rápido",
+      "táper"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Para comer con las manos o llevar a clase.",
+    "ingredients": [
+      {
+        "ingredient": "tortillas de trigo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "lechuga",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso en lonchas",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta el pollo en tiras y saltéalo con sal 6 minutos.",
+      "Trocea la lechuga y el tomate.",
+      "Calienta las tortillas unos segundos.",
+      "Rellena con el pollo, el queso y la verdura y enrolla."
+    ]
+  },
+  {
+    "name": "Quesadillas de jamón y queso",
+    "meal": "cena",
+    "servings": 2,
+    "tags": [
+      "carne",
+      "rápido",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "Diez minutos y una sartén.",
+    "ingredients": [
+      {
+        "ingredient": "tortillas de trigo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "jamón cocido",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 100,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Reparte el jamón y el queso sobre dos tortillas y tapa con las otras dos.",
+      "Dóralas en una sartén sin aceite 2 minutos por cada lado.",
+      "Corta en triángulos y sirve."
+    ]
+  },
+  {
+    "name": "Ensalada de garbanzos con atún",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "ensalada",
+      "rápido",
+      "económico",
+      "táper",
+      "pocas ollas"
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "Sin cocinar nada: abrir, mezclar y listo.",
+    "ingredients": [
+      {
+        "ingredient": "garbanzos cocidos",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceitunas",
+        "qty": 40,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Escurre y enjuaga los garbanzos.",
+      "Pica el tomate y la cebolla.",
+      "Mezcla todo con el atún y las aceitunas y aliña."
+    ]
+  },
+  {
+    "name": "Arroz con tomate y huevo duro",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "arroz",
+      "económico",
+      "vegetariano",
+      "táper"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Barato, saciante y aguanta bien en táper.",
+    "ingredients": [
+      {
+        "ingredient": "arroz",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece los huevos 10 minutos y pélalos.",
+      "Rehoga el ajo, añade el arroz y el doble de agua y cuece 18 minutos.",
+      "Sirve el arroz con el tomate caliente y el huevo en cuartos."
+    ]
+  },
+  {
+    "name": "Patatas guisadas con chorizo",
+    "meal": "comida",
+    "servings": 2,
+    "tags": [
+      "guiso",
+      "económico",
+      "táper",
+      "pocas ollas"
+    ],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "description": "Guiso de cuchara con cuatro cosas.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "chorizo",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "laurel",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Sofríe la cebolla y el pimiento picados.",
+      "Añade el chorizo y el pimentón y remueve.",
+      "Incorpora las patatas cascadas y el laurel y cubre con agua.",
+      "Cuece 25 minutos hasta que la patata esté tierna."
+    ]
+  },
+  {
+    "name": "Crema de verduras",
+    "meal": "cena",
+    "servings": 2,
+    "tags": [
+      "sopa",
+      "económico",
+      "vegetariano",
+      "táper",
+      "pocas ollas"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Haz de más y congela: es la cena de varios días.",
+    "ingredients": [
+      {
+        "ingredient": "zanahoria",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Trocea todas las verduras.",
+      "Rehógalas 5 minutos con el aceite.",
+      "Cubre con agua, sala y cuece 20 minutos.",
+      "Tritura hasta que quede fina."
+    ]
+  },
+  {
+    "name": "Revuelto de calabacín y queso",
+    "meal": "cena",
+    "servings": 2,
+    "tags": [
+      "huevo",
+      "rápido",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Cena ligera de sartén única.",
+    "ingredients": [
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 40,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta el calabacín en medias lunas finas y saltéalo 8 minutos.",
+      "Añade los huevos batidos y el queso.",
+      "Remueve a fuego suave hasta que cuaje y sirve con pan."
+    ]
+  },
+  {
+    "name": "Sopa de fideos con huevo",
+    "meal": "cena",
+    "servings": 2,
+    "tags": [
+      "sopa",
+      "rápido",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Reconfortante y lista en un cuarto de hora.",
+    "ingredients": [
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 750,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "fideos",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      }
+    ],
+    "steps": [
+      "Lleva el caldo a ebullición.",
+      "Añade los fideos y cuece 4 minutos.",
+      "Casca los huevos dentro, remueve y cuece un minuto más."
+    ]
+  },
+  {
+    "name": "Salmón a la plancha con arroz",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "pescado",
+      "rápido"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Pescado sin complicaciones.",
+    "ingredients": [
+      {
+        "ingredient": "salmón",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece el arroz.",
+      "Sala el salmón y hazlo a la plancha 3 minutos por cada lado.",
+      "Sirve con el arroz y unas gotas de limón."
+    ]
+  },
+  {
+    "name": "Merluza en papillote con verduras",
+    "meal": "cena",
+    "servings": 2,
+    "tags": [
+      "pescado",
+      "pocas ollas"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Todo en un paquete de papel al horno: no mancha.",
+    "ingredients": [
+      {
+        "ingredient": "merluza",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Precalienta el horno a 200 °C.",
+      "Corta las verduras en tiras finas y ponlas sobre papel de horno.",
+      "Coloca la merluza encima con sal, aceite y limón, y cierra el paquete.",
+      "Hornea 15 minutos."
+    ]
+  },
+  {
+    "name": "Pisto con arroz",
+    "meal": "comida",
+    "servings": 2,
+    "tags": [
+      "verdura",
+      "económico",
+      "vegetariano",
+      "táper"
+    ],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "description": "Mucha verdura y aguanta varios días en la nevera.",
+    "ingredients": [
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Pica todas las verduras en dados.",
+      "Pocha la cebolla y los pimientos 10 minutos y añade el calabacín otros 10.",
+      "Incorpora el tomate frito y cocina 10 minutos más.",
+      "Sirve con arroz blanco."
+    ]
+  },
+  {
+    "name": "Pasta con calabacín y queso fresco",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "pasta",
+      "rápido",
+      "vegetariano"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Ligera y cremosa sin nata.",
+    "ingredients": [
+      {
+        "ingredient": "macarrones",
+        "qty": 180,
+        "unit": "g"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso fresco",
+        "qty": 125,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece la pasta.",
+      "Saltea el ajo y el calabacín en dados 8 minutos.",
+      "Mezcla con la pasta y el queso fresco desmenuzado."
+    ]
+  },
+  {
+    "name": "Hamburguesa casera con patatas",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "carne"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Mejor y más barata que la de fuera.",
+    "ingredients": [
+      {
+        "ingredient": "carne picada",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "lechuga",
+        "qty": 0.25,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso en lonchas",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en gajos y ásalas o fríelas.",
+      "Forma dos hamburguesas con la carne salada.",
+      "Hazlas a la plancha 3 minutos por cada lado y pon el queso encima.",
+      "Monta con el pan, la lechuga y el tomate."
+    ]
+  },
+  {
+    "name": "Tostadas con tomate, jamón y huevo",
+    "meal": "cena",
+    "servings": 2,
+    "tags": [
+      "huevo",
+      "rápido",
+      "económico"
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "Cena de diez minutos con lo que siempre hay.",
+    "ingredients": [
+      {
+        "ingredient": "pan",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "jamón serrano",
+        "qty": 60,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Tuesta el pan y úntalo con el tomate rallado, aceite y sal.",
+      "Fríe o haz a la plancha los huevos.",
+      "Monta las tostadas con el jamón y el huevo encima."
+    ]
+  },
+  {
+    "name": "Ensalada de pasta con pollo",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "pasta",
+      "táper"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Fría y completa, ideal para comer fuera de casa.",
+    "ingredients": [
+      {
+        "ingredient": "macarrones",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "maíz en lata",
+        "qty": 140,
+        "unit": "g"
+      },
+      {
+        "ingredient": "lechuga",
+        "qty": 0.25,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece la pasta y enfríala.",
+      "Haz el pollo a la plancha y córtalo en dados.",
+      "Mezcla todo con la lechuga, el tomate y el maíz y aliña."
+    ]
+  },
+  {
+    "name": "Berenjenas rellenas de carne",
+    "meal": "comida",
+    "servings": 2,
+    "tags": [
+      "carne",
+      "táper"
+    ],
+    "time_minutes": 50,
+    "difficulty": "Media",
+    "description": "Se pueden dejar hechas y recalentar.",
+    "ingredients": [
+      {
+        "ingredient": "berenjena",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "carne picada",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 60,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Parte las berenjenas a lo largo y ásalas 20 minutos a 200 °C.",
+      "Vacía la pulpa y pícala.",
+      "Sofríe la cebolla y la carne, añade la pulpa y el tomate.",
+      "Rellena, cubre con queso y gratina 10 minutos."
+    ]
+  },
+  {
+    "name": "Cuscús con verduras y garbanzos",
+    "meal": "ambas",
+    "servings": 2,
+    "tags": [
+      "verdura",
+      "rápido",
+      "táper"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "El cuscús se hace solo con agua caliente.",
+    "ingredients": [
+      {
+        "ingredient": "cuscús",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "garbanzos cocidos",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 0.5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 200,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Calienta el caldo, viértelo sobre el cuscús, tapa y deja reposar 5 minutos.",
+      "Saltea la zanahoria y el calabacín en dados 6 minutos.",
+      "Añade los garbanzos escurridos 2 minutos.",
+      "Suelta el cuscús con un tenedor y mezcla todo."
     ]
   }
 ]

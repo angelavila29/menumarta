@@ -21,6 +21,7 @@ export type BankRecipe = {
 };
 
 const VIEWS: [string, string][] = [["todas", "Todas"], ["mias", "Mías"], ["amigos", "De amigos"], ["sobremesa", "De Sobremesa"], ["guardadas", "Guardadas"]];
+const QUICK: [string, string][] = [["20min", "⏱️ 20 min o menos"], ["económico", "💶 Económica"], ["táper", "🥡 De táper"], ["pocas ollas", "🍳 Pocas ollas"], ["vegetariano", "🥬 Vegetariana"]];
 const VIS_LABEL: Record<string, string> = { private: "Solo yo", friends: "Amigos", public: "Pública" };
 
 function norm(s: string) {
@@ -32,6 +33,7 @@ export function RecipeBank({ recipes, initialView, initialAuthor, friendCount, f
   const [author, setAuthor] = useState<string | null>(initialAuthor);
   const [q, setQ] = useState("");
   const [meal, setMeal] = useState("");
+  const [quick, setQuick] = useState<string[]>([]);
 
   const counts: Record<string, number> = {
     todas: recipes.length,
@@ -51,6 +53,9 @@ export function RecipeBank({ recipes, initialView, initialAuthor, friendCount, f
       if (view === "guardadas" && !r.saved) return false;
     }
     if (meal && r.meal !== meal && r.meal !== "ambas") return false;
+    for (const f of quick) {
+      if (f === "20min" ? !(r.time !== null && r.time <= 20) : !r.tags.includes(f)) return false;
+    }
     if (q.trim() && !norm(`${r.name} ${r.tags.join(" ")} ${r.author}`).includes(norm(q.trim()))) return false;
     return true;
   });
@@ -112,6 +117,17 @@ export function RecipeBank({ recipes, initialView, initialAuthor, friendCount, f
           <Link href="/amigos" className="font-semibold underline">Cambiar</Link>
         </p>
       )}
+
+      <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
+        {QUICK.map(([id, label]) => {
+          const on = quick.includes(id);
+          return (
+            <button key={id} type="button" aria-pressed={on} onClick={() => setQuick(on ? quick.filter((x) => x !== id) : [...quick, id])} className={`shrink-0 rounded-xl border px-3 py-1.5 text-sm ${on ? "border-olive bg-olive-soft font-medium text-olive-dark" : "border-cream-dark bg-white hover:bg-cream"}`}>
+              {label}
+            </button>
+          );
+        })}
+      </div>
 
       {author && (
         <p className="mt-3 flex items-center gap-2 text-sm">
