@@ -4,11 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SEARCH_EVENT } from "@/lib/events";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   BookIcon, BoxIcon, CalendarIcon, CartIcon, ChartIcon, ChevronDown, ChevronLeft, ChevronRight, HeartIcon, HelpIcon, HomeIcon, LeafIcon,
   SearchIcon, SettingsIcon, StoreIcon, UsersIcon,
 } from "./icons";
+import { DotsIcon } from "./icons-extra";
 
 const MAIN = [
   { href: "/", label: "Inicio", Icon: HomeIcon },
@@ -33,28 +34,76 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-/** Barra inferior (móvil). */
+/** Barra inferior (móvil). El botón "Más" abre el resto de secciones. */
 export function BottomNav() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const extra = [...SECONDARY, ...FOOTER];
+  const inExtra = extra.some((t) => isActive(pathname, t.href.split("#")[0]));
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-cream-dark bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-      <ul className="mx-auto flex max-w-lg">
-        {MAIN.map(({ href, label, Icon }) => {
-          const active = isActive(pathname, href);
-          return (
-            <li key={href} className="flex-1">
-              <Link
-                href={href}
-                className={`flex flex-col items-center gap-1 py-2.5 text-[11px] ${active ? "font-semibold text-brand" : "text-muted"}`}
-              >
-                <Icon className="h-6 w-6" />
-                {label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+    <>
+      {open && (
+        <div className="fixed inset-0 z-30 md:hidden" role="dialog" aria-modal="true" aria-label="Más secciones">
+          <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)} className="absolute inset-0 bg-ink/30" />
+          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl">
+            <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-cream-dark" />
+            <ul className="grid grid-cols-3 gap-2">
+              {extra.map(({ href, label, Icon }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    className="flex flex-col items-center gap-2 rounded-2xl bg-cream px-2 py-4 text-center text-xs font-medium text-ink"
+                  >
+                    <Icon className="h-6 w-6 text-brand" />
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+      <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-cream-dark bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+        <ul className="mx-auto flex max-w-lg">
+          {MAIN.map(({ href, label, Icon }) => {
+            const active = !open && isActive(pathname, href);
+            return (
+              <li key={href} className="flex-1">
+                <Link
+                  href={href}
+                  className={`flex flex-col items-center gap-1 px-0.5 py-2.5 text-[10px] ${active ? "font-semibold text-brand" : "text-muted"}`}
+                >
+                  <Icon className="h-6 w-6" />
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
+          <li className="flex-1">
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              className={`flex w-full flex-col items-center gap-1 px-0.5 py-2.5 text-[10px] ${open || inExtra ? "font-semibold text-brand" : "text-muted"}`}
+            >
+              <DotsIcon className="h-6 w-6" />
+              Más
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </>
   );
 }
 

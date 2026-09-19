@@ -1,6 +1,7 @@
 import { signOut } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
 import type { SettingsInput } from "@/lib/settings-actions";
+import { AccountSection } from "./account-section";
 import { SettingsForm, type Chain } from "./settings-form";
 
 export default async function SettingsPage() {
@@ -48,6 +49,7 @@ export default async function SettingsPage() {
         chains={chains}
         location={{ label: p?.address ?? p?.postal_code ?? null, lat: p?.lat ?? null, lng: p?.lng ?? null }}
       />
+      <AccountSection />
       <form action={signOut} className="mt-8 border-t border-cream-dark pt-4">
         <button type="submit" className="text-sm font-medium text-red-700 hover:underline">
           Cerrar sesión

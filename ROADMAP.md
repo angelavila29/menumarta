@@ -78,6 +78,31 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
   "pegar receta", equivalencias de opencesta, aviso de zona, histórico, hábitos, fotos, piso
   compartido, registro por invitación, carga y error, tests y comprobaciones automáticas.
 
+## F. Lo que faltaba (19 sep, tarde)
+- [x] Nada escondido en el móvil: la barra inferior tiene un botón "Más" con Amigos, Despensa,
+      Favoritos, Supermercados, Histórico, Configuración y Ayuda. Antes solo se llegaba a ellas
+      desde la barra lateral del ordenador, y ninguna de las dos personas que la usan había
+      tocado la despensa ni los básicos.
+- [x] El histórico de precios deja de crecer sin freno: `prune_price_history` guarda el detalle
+      diario de los últimos 120 días y una foto por semana del resto. Lo llama la ingesta cada día.
+      Sin esto eran ~10.000 filas diarias contra los 500 MB del plan gratuito.
+- [x] Permisos: `handle_new_user`, `check_signup_allowed` y `rls_auto_enable` ya no se pueden llamar
+      desde el cliente (solo las usa un disparador), y `immutable_unaccent` tiene search_path fijo.
+      Comprobado que el alta y la lista de invitados siguen funcionando.
+- [x] Tus datos son tuyos: en Ajustes puedes descargar en JSON todo lo que guardamos y borrar la
+      cuenta escribiendo BORRAR. Borrar se lleva perfil, recetas, menús, listas, despensa, amistades
+      y las fotos subidas, y libera tu correo por si quieres volver.
+- [x] Registro de errores: cuando una pantalla falla se apunta en `app_errors` (ruta y mensaje) para
+      poder mirarlo. Se limpia sola a los 30 días.
+- [x] "Cuscús" ya encuentra producto: los supermercados lo escriben "Cous cous". Hay una tabla de
+      grafías en `lib/search.ts`. Con esto los 61 ingredientes de las recetas tienen producto.
+
+## Pendiente, decidido a propósito
+- Las extensiones `pg_trgm` y `unaccent` siguen en el esquema `public`. Moverlas rompería la columna
+  generada `products.name_norm`, que es de lo que vive el buscador.
+- La protección de contraseñas filtradas sigue desactivada: aquí no hay contraseñas, se entra por
+  enlace o código.
+
 ## Lo único que queda en tus manos
 1. Revocar en Supabase el token de acceso que compartiste en el chat (Account → Access Tokens).
 2. Punto 4: crear una cuenta gratuita en Resend o Brevo y ejecutar `scripts/setup_email.ts`;

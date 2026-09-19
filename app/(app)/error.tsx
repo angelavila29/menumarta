@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { reportError } from "@/lib/report-actions";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const pathname = usePathname();
   useEffect(() => {
     console.error(error);
-  }, [error]);
+    void reportError({ path: pathname, message: error.message, digest: error.digest });
+  }, [error, pathname]);
 
   return (
     <main className="mx-auto max-w-lg py-10 text-center">

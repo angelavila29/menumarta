@@ -283,6 +283,19 @@ class Supa:
             if r.status_code >= 400:
                 raise RuntimeError(f"insert product_equivalences {r.status_code}: {r.text[:300]}")
 
+    def prune_history(self, keep_days: int = 120) -> int | None:
+        """Deja el detalle diario de los ultimos meses y una foto por semana del resto."""
+        r = self.client.post(f"{self.base}/rpc/prune_price_history", json={"p_keep_days": keep_days})
+        if r.status_code >= 400:
+            raise RuntimeError(f"prune_price_history {r.status_code}: {r.text[:300]}")
+        try:
+            return int(r.json())
+        except (ValueError, TypeError):
+            return None
+
+    def prune_errors(self) -> None:
+        self.client.post(f"{self.base}/rpc/prune_app_errors", json={})
+
     def insert_history(self, rows: list[dict]) -> None:
         r = self.client.post(
             f"{self.base}/price_history",
@@ -389,6 +402,14 @@ def main() -> None:
             print(f"  ERROR equivalencias: {e}")
             eq_rows = []
 
+    # El historico crece ~10.000 filas al dia: recortamos lo viejo a una foto semanal.
+    pruned = None
+    try:
+        pruned = supa.prune_history()
+        supa.prune_errors()
+    except Exception as e:  # noqa: BLE001
+        print(f"  ERROR limpieza de price_history: {e}")
+
     print("\nResumen")
     for chain, n in counts.iter_rows():
         print(f"  {chain}: {n} productos")
@@ -397,6 +418,8 @@ def main() -> None:
     print(f"  fallos: {failed}")
     print(f"  equivalencias entre cadenas: {len(eq_rows)}")
     print(f"  filas enviadas a price_history (se ignoran las ya existentes): {history_rows}")
+    if pruned is not None:
+        print(f"  filas antiguas borradas del historico: {pruned}")
     if failed:
         sys.exit(1)
 

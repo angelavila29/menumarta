@@ -20,11 +20,23 @@ export function wordRegex(word: string): string {
 
 const STOP = new Set(["de", "del", "la", "el", "los", "las", "con", "en", "y", "al", "para", "lata"]);
 
+/**
+ * Cómo se escribe el ingrediente en casa → cómo lo escriben los supermercados.
+ * Solo para casos donde la grafía no coincide en nada: 'cuscús' nunca encuentra
+ * 'Cous cous Hacendado' por mucho que quitemos tildes.
+ */
+const SYNONYMS: Record<string, string> = {
+  cuscus: "cous",
+  couscous: "cous",
+  yoghurt: "yogur",
+};
+
 export function keywords(text: string): string[] {
   return text
     .split(/\s+/)
     .map((w) => w.trim())
-    .filter((w) => w.length > 1 && !STOP.has(unaccent(w)));
+    .filter((w) => w.length > 1 && !STOP.has(unaccent(w)))
+    .map((w) => SYNONYMS[unaccent(w)] ?? w);
 }
 
 /** Categorías que nunca son un ingrediente (regex sobre products.category, case-insensitive). */

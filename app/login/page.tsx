@@ -4,6 +4,7 @@ import { LoginForm } from "./login-form";
 export default async function LoginPage(props: PageProps<"/login">) {
   const sp = await props.searchParams;
   const error = typeof sp.error === "string" ? sp.error : null;
+  const deleted = sp.borrada === "1";
   return (
     <main className="flex flex-1 flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm">
@@ -12,6 +13,11 @@ export default async function LoginPage(props: PageProps<"/login">) {
         <p className="mb-8 text-center text-muted">
           Menú semanal y lista de la compra con precios reales.
         </p>
+        {deleted && (
+          <p className="mb-4 rounded-lg bg-olive-soft p-3 text-center text-sm text-olive-dark">
+            Tu cuenta y tus datos se han borrado. Gracias por probarla.
+          </p>
+        )}
         {error && (
           <p className="mb-4 rounded-lg bg-red-50 p-3 text-center text-sm text-red-700">
             El enlace no es válido o ha caducado. Pide otro.

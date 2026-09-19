@@ -9,7 +9,9 @@ de supermercados españoles (Madrid). Usuarios: dos personas (uso personal).
 - Next.js 16 (App Router, TypeScript, Tailwind v4), desplegado en Vercel.
   - OJO: en Next 16 el middleware se llama `proxy.ts` (no `middleware.ts`).
 - Supabase (Postgres + Auth magic link) como base de datos y login.
-  Esquema en `supabase/schema.sql`, `supabase/schema_menu.sql`, `supabase/schema_onboarding.sql`, `supabase/schema_social.sql`, `supabase/schema_pantry.sql` y `supabase/schema_extras.sql` (idempotentes, se pegan en el SQL Editor).
+  Esquema en `supabase/schema.sql`, `supabase/schema_menu.sql`, `supabase/schema_onboarding.sql`, `supabase/schema_social.sql`, `supabase/schema_pantry.sql`, `supabase/schema_extras.sql`, `supabase/schema_allowlist.sql`,
+  `supabase/schema_mantenimiento.sql`, `supabase/schema_cuenta.sql` y `supabase/schema_errores.sql`
+  (idempotentes, se pegan en el SQL Editor).
   Clientes en `lib/supabase/client.ts` (navegador) y `lib/supabase/server.ts` (servidor).
 - Ingesta de precios: script Python en `ingest/` que corre en GitHub Actions cada día
   y carga datos en Supabase con la service_role key. Fuente: dataset Parquet diario
