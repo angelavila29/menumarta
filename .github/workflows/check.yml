@@ -17,5 +17,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # Next genera los tipos de las rutas; sin esto tsc no conoce PageProps ni LayoutProps
+      - run: npx next typegen
       - run: npx tsc --noEmit
       - run: npm test
