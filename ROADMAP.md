@@ -97,6 +97,19 @@ Se ataca por orden. Al terminar un punto se marca aquí y se anota la fecha.
 - [x] "Cuscús" ya encuentra producto: los supermercados lo escriben "Cous cous". Hay una tabla de
       grafías en `lib/search.ts`. Con esto los 61 ingredientes de las recetas tienen producto.
 
+## G. ¿Qué cocino hoy? (21 sep)
+Idea de Marta: decir qué tienes en la nevera y cuánto quieres gastar, y que salga la receta que
+mejor encaja.
+- [x] Versión sin IA en `/cocinar`: marcas ingredientes (es la misma despensa), pones un tope de
+      gasto y las recetas se ordenan: primero las que puedes hacer ya, luego las que menos piden
+      comprar, con el precio real de los envases que faltan. Un botón manda lo que falta a la lista.
+      Respeta dieta y alergias. La lógica está en `lib/cook.ts`, con tests.
+- [x] Accesos: tarjeta en la portada, barra lateral y panel "Más" del móvil.
+- [x] "Pan" ya propone una barra de pan y no pan rallado.
+- [ ] Fase con IA, solo si hace falta: inventar recetas cuando nada del banco encaja. Tiene coste
+      por uso, así que se activaría solo para correos concretos. Antes, mirar con datos reales
+      cuántas veces la versión sin IA no propone nada útil.
+
 ## Pendiente, decidido a propósito
 - Las extensiones `pg_trgm` y `unaccent` siguen en el esquema `public`. Moverlas rompería la columna
   generada `products.name_norm`, que es de lo que vive el buscador.

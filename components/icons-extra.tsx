@@ -18,3 +18,6 @@ export const WhatsAppIcon = ({ className }: P) => (
 export const ReceiptIcon = ({ className }: P) => (
   <svg {...base} className={className}><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z" /><path d="M9 8h6M9 12h6M9 16h4" /></svg>
 );
+export const FridgeIcon = ({ className }: P) => (
+  <svg {...base} className={className}><rect x="6" y="3" width="12" height="18" rx="2" /><path d="M6 10h12M9.5 6.5v1.5M9.5 13v3" /></svg>
+);

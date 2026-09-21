@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, ChevronRight, HeartIcon, PiggyIcon, PlusIcon, SearchIcon } from "@/components/icons";
 import { ChainLogo } from "@/components/chain-logo";
+import { FridgeIcon } from "@/components/icons-extra";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { compareList } from "@/lib/compare";
 import { euro, formatWeekRange, superName } from "@/lib/format";
@@ -205,6 +206,18 @@ export default async function HomePage() {
           )}
         </section>
       </div>
+
+      {/* ¿Qué cocino hoy? */}
+      <Link href="/cocinar" className="flex items-center gap-4 rounded-2xl bg-olive-soft p-4 shadow-sm hover:brightness-95">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-olive text-white">
+          <FridgeIcon className="h-6 w-6" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-lg font-bold leading-tight text-olive-dark">¿Qué cocino hoy?</span>
+          <span className="block text-sm text-olive-dark/80">Dinos qué tienes en la nevera y cuánto quieres gastar.</span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-olive-dark" />
+      </Link>
 
       {/* Fila 2: buscador + favoritos */}
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_1.4fr]">

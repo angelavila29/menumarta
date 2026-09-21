@@ -14,6 +14,7 @@ export async function setPantryItem(ingredient: string, has: boolean) {
     await supabase.from("pantry_items").delete().eq("user_id", user.id).eq("ingredient_name", name);
   }
   revalidatePath("/despensa");
+  revalidatePath("/cocinar");
   revalidatePath("/menu");
 }
 

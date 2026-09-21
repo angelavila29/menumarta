@@ -9,7 +9,7 @@ import {
   BookIcon, BoxIcon, CalendarIcon, CartIcon, ChartIcon, ChevronDown, ChevronLeft, ChevronRight, HeartIcon, HelpIcon, HomeIcon, LeafIcon,
   SearchIcon, SettingsIcon, StoreIcon, UsersIcon,
 } from "./icons";
-import { DotsIcon } from "./icons-extra";
+import { DotsIcon, FridgeIcon } from "./icons-extra";
 
 const MAIN = [
   { href: "/", label: "Inicio", Icon: HomeIcon },
@@ -19,6 +19,7 @@ const MAIN = [
   { href: "/buscar", label: "Buscar", Icon: SearchIcon },
 ];
 const SECONDARY = [
+  { href: "/cocinar", label: "Qué cocino", Icon: FridgeIcon },
   { href: "/amigos", label: "Amigos", Icon: UsersIcon },
   { href: "/despensa", label: "Despensa", Icon: BoxIcon },
   { href: "/favoritos", label: "Favoritos", Icon: HeartIcon },
