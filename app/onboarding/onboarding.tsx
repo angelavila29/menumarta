@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
 import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, LeafIcon, PlusIcon } from "@/components/icons";
@@ -58,6 +59,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
   const [goals, setGoals] = useState<Set<string>>(new Set(initial.goals));
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
+  const router = useRouter();
 
   const next = () => setStep((s) => Math.min(TOTAL, s + 1));
   const back = () => setStep((s) => Math.max(1, s - 1));
@@ -93,7 +95,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
     const postal = address.trim().match(/\b\d{5}\b/)?.[0] ?? null;
     start(async () => {
       try {
-        await saveOnboarding({
+        const { to } = await saveOnboarding({
           point: located.point,
           postalCode: postal,
           chains: chosen.map((c) => ({ id: c.id, name: c.name })),
@@ -107,6 +109,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
           avoidFoods: Array.from(avoid),
           goals: Array.from(goals),
         });
+        router.push(to);
       } catch (e) {
         setError(e instanceof Error ? e.message : "No se ha podido guardar.");
       }

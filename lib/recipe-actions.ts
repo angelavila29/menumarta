@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { addToList } from "@/lib/actions";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { cheapestProductFor, packsNeeded, type Need } from "@/lib/menu";
@@ -32,14 +31,15 @@ export async function addIngredientToList(recipeId: number, need: Need) {
   revalidatePath(`/recetas/${recipeId}`);
 }
 
-export async function addRecipeToList(recipeId: number, needs: Need[]) {
+/** Devuelve la ruta a la que ir después (el cliente navega; redirect() aquí llegaría como error). */
+export async function addRecipeToList(recipeId: number, needs: Need[]): Promise<{ to: string }> {
   const { supabase, user } = await requireUser();
   for (const need of needs.slice(0, 40)) {
     const product = await productForNeed(supabase, user.id, need);
     if (product) await addToList(product.id, packsNeeded(need, product));
   }
   revalidatePath(`/recetas/${recipeId}`);
-  redirect("/lista");
+  return { to: "/lista" };
 }
 
 export async function toggleRecipeFavorite(recipeId: number, makeFavorite: boolean) {

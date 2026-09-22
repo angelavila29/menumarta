@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteMyAccount, exportMyData } from "@/lib/account-actions";
 
@@ -9,6 +10,7 @@ export function AccountSection() {
   const [confirming, setConfirming] = useState(false);
   const [word, setWord] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   function download() {
     setError(null);
@@ -31,10 +33,10 @@ export function AccountSection() {
     setError(null);
     start(async () => {
       try {
-        await deleteMyAccount(word);
+        const { to } = await deleteMyAccount(word);
+        router.push(to);
       } catch (e) {
         const msg = e instanceof Error ? e.message : "";
-        if (msg.includes("NEXT_REDIRECT")) throw e;
         setError(msg || "No se ha podido borrar la cuenta.");
       }
     });

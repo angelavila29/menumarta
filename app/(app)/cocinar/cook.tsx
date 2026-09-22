@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
 import { CartIcon, CheckIcon } from "@/components/icons";
@@ -156,6 +157,7 @@ export function Cook({
 function ResultCard({ r }: { r: CookResult }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
+  const router = useRouter();
   const total = r.recipe.ingredients.length;
   const done = r.missing.length === 0;
   const buyable = r.missing.filter((m) => m.product);
@@ -207,9 +209,9 @@ function ResultCard({ r }: { r: CookResult }) {
               onClick={() =>
                 start(async () => {
                   try {
-                    await addRecipeToList(r.recipe.id, buyable.map((m) => m.need));
-                  } catch (e) {
-                    if (e instanceof Error && e.message.includes("NEXT_REDIRECT")) throw e;
+                    const { to } = await addRecipeToList(r.recipe.id, buyable.map((m) => m.need));
+                    router.push(to);
+                  } catch {
                     setError("No se ha podido añadir a la lista.");
                   }
                 })

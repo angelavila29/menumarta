@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { CartIcon, HeartIcon, PlusIcon } from "@/components/icons";
 import type { Need } from "@/lib/menu";
@@ -35,6 +36,7 @@ export function IngredientAddButton({ recipeId, need }: { recipeId: number; need
 export function AddAllButton({ recipeId, needs }: { recipeId: number; needs: Need[] }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
+  const router = useRouter();
   return (
     <>
       <button
@@ -43,7 +45,8 @@ export function AddAllButton({ recipeId, needs }: { recipeId: number; needs: Nee
         onClick={() =>
           start(async () => {
             try {
-              await addRecipeToList(recipeId, needs);
+              const { to } = await addRecipeToList(recipeId, needs);
+              router.push(to);
             } catch {
               setError("No se han podido añadir los ingredientes.");
             }

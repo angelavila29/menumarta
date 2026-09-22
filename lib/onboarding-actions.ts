@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { geocode, nearbyChains, reverseGeocode, type GeoPoint, type NearbyChain, type Store } from "@/lib/geo";
 import { currentWeekStart, loadSlots, getOrCreateMenu } from "@/lib/menu";
@@ -63,7 +62,7 @@ export type OnboardingInput = {
 };
 
 /** Guarda todo el onboarding y, si la semana está vacía, genera el primer menú. */
-export async function saveOnboarding(input: OnboardingInput) {
+export async function saveOnboarding(input: OnboardingInput): Promise<{ to: string }> {
   const { supabase, user } = await requireUser();
   if (input.chains.length === 0) throw new Error("Elige al menos un supermercado.");
 
@@ -111,5 +110,7 @@ export async function saveOnboarding(input: OnboardingInput) {
 
   revalidatePath("/", "layout");
   const inviteCode = (await cookies()).get("invite_code")?.value;
-  redirect(inviteCode ? `/amigos?codigo=${inviteCode}` : "/menu");
+  // Devolvemos la ruta en vez de redirect(): el cliente la usa con router.push.
+  // Un redirect() dentro de una acción llamada desde el cliente llega como error "NEXT_REDIRECT".
+  return { to: inviteCode ? `/amigos?codigo=${inviteCode}` : "/menu" };
 }

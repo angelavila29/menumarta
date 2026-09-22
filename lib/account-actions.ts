@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 
 /**
@@ -50,7 +49,7 @@ export async function exportMyData(): Promise<string> {
 }
 
 /** Borra la cuenta y todo lo que cuelga de ella. No tiene vuelta atrás. */
-export async function deleteMyAccount(confirmation: string) {
+export async function deleteMyAccount(confirmation: string): Promise<{ to: string }> {
   const { supabase, user } = await requireUser();
   if (confirmation.trim().toUpperCase() !== "BORRAR") {
     throw new Error("Escribe BORRAR para confirmar.");
@@ -66,5 +65,5 @@ export async function deleteMyAccount(confirmation: string) {
   const { error } = await supabase.rpc("delete_my_account");
   if (error) throw new Error(error.message);
   await supabase.auth.signOut();
-  redirect("/login?borrada=1");
+  return { to: "/login?borrada=1" };
 }
