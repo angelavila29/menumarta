@@ -2919,5 +2919,2528 @@
       "Añade los garbanzos escurridos 2 minutos.",
       "Suelta el cuscús con un tenedor y mezcla todo."
     ]
+  },
+  {
+    "name": "Espaguetis carbonara a la española",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "rápido",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "La carbonara de piso de estudiantes: nata, bacon y queso. Sale en lo que tarda la pasta.",
+    "ingredients": [
+      {
+        "ingredient": "espaguetis",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "bacon",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "nata",
+        "qty": 200,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 60,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Pon a cocer los espaguetis en agua con sal el tiempo que diga el paquete.",
+      "Mientras, pica la cebolla y el bacon y dóralos en la sartén con el aceite.",
+      "Añade la nata, baja el fuego y deja que espese 3 minutos.",
+      "Escurre la pasta, mézclala con la salsa y termina con el queso rallado y pimienta."
+    ]
+  },
+  {
+    "name": "Macarrones con queso al horno",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "económico",
+      "vegetariano",
+      "táper"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Macarrones con tomate y una capa de queso gratinado. Aguantan perfectamente al día siguiente.",
+    "ingredients": [
+      {
+        "ingredient": "macarrones",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece los macarrones y escúrrelos un minuto antes de lo que diga el paquete.",
+      "Sofríe la cebolla picada con el aceite, añade el tomate frito y mezcla con la pasta.",
+      "Pasa todo a una fuente, cubre con el queso rallado y gratina 8 minutos a 220 °C."
+    ]
+  },
+  {
+    "name": "Pasta con pesto y tomate cherry",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "rápido",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Un bote de pesto y unos tomates: cena resuelta en un cuarto de hora.",
+    "ingredients": [
+      {
+        "ingredient": "espaguetis",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pesto",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate cherry",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 40,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Cuece la pasta en agua con sal.",
+      "Parte los tomates cherry por la mitad.",
+      "Escurre la pasta, mezcla con el pesto y los tomates y sirve con el queso por encima."
+    ]
+  },
+  {
+    "name": "Tallarines con salmón ahumado y nata",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "pescado",
+      "rápido"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Parece de restaurante y se hace en 20 minutos con un paquete de salmón ahumado.",
+    "ingredients": [
+      {
+        "ingredient": "espaguetis",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "salmón ahumado",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "nata",
+        "qty": 200,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece la pasta en agua con sal.",
+      "Sofríe la cebolla picada muy fina con el aceite, añade la nata y deja espesar 3 minutos.",
+      "Apaga el fuego, añade el salmón en tiras y un chorrito de limón.",
+      "Mezcla con la pasta escurrida y sirve con pimienta."
+    ]
+  },
+  {
+    "name": "Tortellini con nata y jamón",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "rápido",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Pasta fresca rellena, que se cuece en 3 minutos, con una salsa de nata y jamón.",
+    "ingredients": [
+      {
+        "ingredient": "tortellini",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "nata",
+        "qty": 200,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "jamón cocido",
+        "qty": 120,
+        "unit": "g"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 50,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Cuece los tortellini el tiempo que marque el paquete (suelen ser 3 minutos).",
+      "En una sartén calienta la nata con el jamón en taquitos 3 minutos.",
+      "Mezcla con los tortellini escurridos y termina con el queso rallado."
+    ]
+  },
+  {
+    "name": "Gnocchi con tomate y mozzarella",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "rápido",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Los gnocchi se hacen en 2 minutos. Con tomate y mozzarella fundida es un plato redondo.",
+    "ingredients": [
+      {
+        "ingredient": "gnocchi",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "mozzarella",
+        "qty": 125,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece los gnocchi: en cuanto floten, sácalos.",
+      "Dora el ajo picado con el aceite y añade el tomate frito.",
+      "Mezcla los gnocchi con la salsa, reparte la mozzarella en trozos y tapa un minuto para que se funda."
+    ]
+  },
+  {
+    "name": "Ensalada de arroz con atún y maíz",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "arroz",
+      "ensalada",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Arroz frío con atún, maíz, tomate y huevo. Perfecta para llevar y aguanta tres días en la nevera.",
+    "ingredients": [
+      {
+        "ingredient": "arroz",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "maíz en lata",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "vinagre",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece el arroz 15 minutos, escúrrelo y pásalo por agua fría.",
+      "Cuece los huevos 10 minutos y trocéalos.",
+      "Mezcla el arroz con el atún escurrido, el maíz, el tomate en dados y el huevo.",
+      "Aliña con aceite, vinagre y sal."
+    ]
+  },
+  {
+    "name": "Arroz con salchichas y tomate",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "arroz",
+      "económico",
+      "rápido",
+      "táper"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Salchichas doradas con tomate sobre arroz blanco. Barato, rápido y de los que gustan a todo el mundo.",
+    "ingredients": [
+      {
+        "ingredient": "arroz",
+        "qty": 320,
+        "unit": "g"
+      },
+      {
+        "ingredient": "salchichas",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece el arroz 15 minutos en agua con sal y escúrrelo.",
+      "Corta las salchichas en trozos y dóralas con la cebolla picada.",
+      "Añade el tomate frito, deja 5 minutos a fuego bajo y sirve sobre el arroz."
+    ]
+  },
+  {
+    "name": "Pechuga de pollo empanada con arroz",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Filetes de pollo empanados como los de casa, con arroz blanco. Congelan bien ya empanados.",
+    "ingredients": [
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan rallado",
+        "qty": 120,
+        "unit": "g"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 60,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece el arroz 15 minutos y escúrrelo.",
+      "Sala los filetes de pollo, pásalos por huevo batido con el ajo picado y después por pan rallado.",
+      "Fríelos en aceite caliente 3 minutos por cada lado hasta que estén dorados.",
+      "Sirve con el arroz."
+    ]
+  },
+  {
+    "name": "Filetes de pollo a la plancha con patatas al horno",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "description": "Lo más básico y lo que más se repite: pollo a la plancha y patatas al horno con pimentón.",
+    "ingredients": [
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en gajos, mézclalas con aceite, sal y pimentón y hornea 30 minutos a 200 °C.",
+      "Sala los filetes y hazlos a la plancha con el ajo picado, 3 minutos por lado.",
+      "Sirve con un chorro de limón por encima."
+    ]
+  },
+  {
+    "name": "Pollo al curry con arroz",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "arroz",
+      "táper"
+    ],
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "description": "Pollo en salsa de curry con nata o leche de coco. Un clásico de táper que mejora al día siguiente.",
+    "ingredients": [
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "nata",
+        "qty": 200,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "curry",
+        "qty": 10,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece el arroz 15 minutos y escúrrelo.",
+      "Sofríe la cebolla y el ajo picados, añade el pollo en dados y dóralo.",
+      "Espolvorea el curry, remueve un minuto y añade la nata.",
+      "Cocina 10 minutos a fuego bajo y sirve sobre el arroz."
+    ]
+  },
+  {
+    "name": "Pollo a la cerveza con patatas",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "guiso",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 50,
+    "difficulty": "Fácil",
+    "description": "Muslos de pollo guisados con cebolla y una lata de cerveza. Barato y con mucha salsa para el pan.",
+    "ingredients": [
+      {
+        "ingredient": "muslo de pollo",
+        "qty": 1000,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cerveza",
+        "qty": 330,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "laurel",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Sala el pollo y dóralo en la cazuela con el aceite; resérvalo.",
+      "Sofríe la cebolla y el ajo picados 8 minutos.",
+      "Vuelve a poner el pollo, añade la cerveza y el laurel y cocina 25 minutos tapado.",
+      "Añade las patatas en trozos y cocina 15 minutos más hasta que estén tiernas."
+    ]
+  },
+  {
+    "name": "Fajitas de pollo",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "rápido"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Pollo y pimientos salteados en tortillas de trigo. Cena de viernes sin complicaciones.",
+    "ingredients": [
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tortillas de trigo",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta el pollo, los pimientos y la cebolla en tiras.",
+      "Saltea la verdura 5 minutos, añade el pollo con sal y pimentón y cocina 8 minutos más.",
+      "Calienta las tortillas en una sartén o en el microondas.",
+      "Rellena cada tortilla con el salteado y queso rallado, y enróllala."
+    ]
+  },
+  {
+    "name": "Filetes rusos con puré de patatas",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "description": "Carne picada con ajo y perejil, empanada y frita, con puré de patatas casero.",
+    "ingredients": [
+      {
+        "ingredient": "carne picada",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan rallado",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "perejil",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "leche",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "mantequilla",
+        "qty": 20,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 50,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece las patatas peladas 20 minutos, cháfalas con la leche, la mantequilla y sal.",
+      "Mezcla la carne con el huevo, el ajo y el perejil picados y sal; forma filetes planos.",
+      "Pásalos por pan rallado y fríelos 3 minutos por lado.",
+      "Sirve con el puré."
+    ]
+  },
+  {
+    "name": "Picadillo de carne con patatas y pimiento",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "económico",
+      "pocas ollas",
+      "táper"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Carne picada salteada con patatas en dados y pimiento. Un solo cacharro y mucho sabor.",
+    "ingredients": [
+      {
+        "ingredient": "carne picada",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en dados pequeños y fríelas en la sartén con el aceite hasta que estén doradas.",
+      "Aparta las patatas y sofríe la cebolla, el pimiento y el ajo picados.",
+      "Añade la carne con sal y pimentón y cocina hasta que pierda el color rosado.",
+      "Vuelve a añadir las patatas, mezcla y sirve."
+    ]
+  },
+  {
+    "name": "Burritos de carne picada y arroz",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "arroz",
+      "táper"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Tortillas rellenas de carne con tomate, arroz y queso. Se pueden preparar por la mañana y calentar.",
+    "ingredients": [
+      {
+        "ingredient": "carne picada",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tortillas de trigo",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece el arroz 15 minutos y escúrrelo.",
+      "Sofríe la cebolla, añade la carne con sal y pimentón y, cuando esté hecha, el tomate frito.",
+      "Reparte arroz, carne y queso en cada tortilla, cierra los lados y enrolla.",
+      "Dora los burritos un minuto por cada lado en la sartén."
+    ]
+  },
+  {
+    "name": "Chuletas de cerdo con patatas al horno",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "pocas ollas"
+    ],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "description": "Chuletas a la plancha con ajo y patatas asadas. Lo de toda la vida.",
+    "ingredients": [
+      {
+        "ingredient": "chuletas de cerdo",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en rodajas gruesas, alíñalas con aceite y sal y hornea 30 minutos a 200 °C.",
+      "Sala las chuletas y hazlas a la plancha fuerte 4 minutos por lado con el ajo en láminas.",
+      "Sirve con las patatas y un chorro de limón."
+    ]
+  },
+  {
+    "name": "Costillas de cerdo al horno",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 60,
+    "difficulty": "Fácil",
+    "description": "Costillas adobadas con ajo, pimentón y limón, al horno con patatas. Se hacen solas.",
+    "ingredients": [
+      {
+        "ingredient": "costillas de cerdo",
+        "qty": 1200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 10,
+        "unit": "g"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Mezcla el aceite con el ajo picado, el pimentón, el zumo del limón y sal, y unta las costillas.",
+      "Ponlas en una bandeja con las patatas en gajos y hornea 50 minutos a 190 °C, dándoles la vuelta a mitad."
+    ]
+  },
+  {
+    "name": "Salchichas con puré de patatas",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "económico",
+      "rápido"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Salchichas a la plancha con puré casero. Cena barata que nunca falla.",
+    "ingredients": [
+      {
+        "ingredient": "salchichas",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "leche",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "mantequilla",
+        "qty": 20,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece las patatas peladas y en trozos 20 minutos.",
+      "Cháfalas con la leche caliente, la mantequilla y sal hasta tener un puré cremoso.",
+      "Haz las salchichas a la plancha con una gota de aceite hasta que estén doradas."
+    ]
+  },
+  {
+    "name": "Bocadillo de lomo con queso y pimientos",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "rápido",
+      "económico"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Lomo a la plancha, queso fundido y pimientos asados de bote en pan crujiente.",
+    "ingredients": [
+      {
+        "ingredient": "lomo de cerdo",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "queso en lonchas",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimientos asados",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Haz los filetes de lomo a la plancha con sal, 2 minutos por lado.",
+      "Pon una loncha de queso encima del lomo en la sartén para que se funda.",
+      "Abre el pan, reparte el lomo con queso y los pimientos, y aprieta un poco."
+    ]
+  },
+  {
+    "name": "Empanadillas de atún al horno",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "pescado",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Un paquete de obleas rellenas de atún con tomate y huevo, al horno. Frías también están buenas.",
+    "ingredients": [
+      {
+        "ingredient": "masa de empanadillas",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece 2 huevos 10 minutos y pícalos.",
+      "Sofríe la cebolla picada, añade el atún escurrido, el tomate frito y el huevo picado.",
+      "Rellena las obleas (un paquete trae 16), ciérralas con un tenedor y píntalas con el otro huevo batido.",
+      "Hornea 15 minutos a 200 °C hasta que estén doradas."
+    ]
+  },
+  {
+    "name": "Pizza casera con base de supermercado",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "rápido",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Base de pizza refrigerada, tomate, mozzarella y lo que haya en la nevera. Sale por la mitad que pedirla.",
+    "ingredients": [
+      {
+        "ingredient": "base de pizza",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "mozzarella",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "jamón cocido",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "champiñones",
+        "qty": 150,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Extiende las bases y cúbrelas con una capa fina de tomate frito.",
+      "Reparte la mozzarella en trozos, el jamón y los champiñones en láminas.",
+      "Hornea 12 minutos a 220 °C hasta que el borde esté dorado."
+    ]
+  },
+  {
+    "name": "San Jacobos con ensalada",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "rápido",
+      "económico"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Jamón y queso empanados y fritos, con ensalada para compensar.",
+    "ingredients": [
+      {
+        "ingredient": "jamón cocido",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso en lonchas",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan rallado",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "lechuga",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 60,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Pon una loncha de queso entre dos de jamón y dobla los bordes.",
+      "Pasa cada paquete por huevo batido y pan rallado.",
+      "Fríe en aceite caliente 2 minutos por lado hasta que estén dorados.",
+      "Sirve con la lechuga y el tomate aliñados."
+    ]
+  },
+  {
+    "name": "Noodles con verduras y salsa de soja",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "verdura",
+      "rápido",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Fideos salteados con zanahoria, pimiento y soja. Un wok de casa en 15 minutos.",
+    "ingredients": [
+      {
+        "ingredient": "noodles",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "salsa de soja",
+        "qty": 40,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece los noodles el tiempo que diga el paquete y escúrrelos.",
+      "Corta la verdura en tiras finas y saltéala a fuego fuerte 5 minutos con el ajo.",
+      "Añade los huevos batidos, remueve, y después los noodles y la soja.",
+      "Saltea 2 minutos más y sirve."
+    ]
+  },
+  {
+    "name": "Tostas de aguacate y huevo",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo",
+      "rápido",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "Pan tostado con aguacate machacado, huevo a la plancha y tomate. Cena ligera en 10 minutos.",
+    "ingredients": [
+      {
+        "ingredient": "pan",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aguacate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Tuesta el pan.",
+      "Machaca el aguacate con unas gotas de limón y sal, y úntalo en el pan.",
+      "Haz los huevos a la plancha y ponlos encima con el tomate en rodajas y un hilo de aceite."
+    ]
+  },
+  {
+    "name": "Patatas a lo pobre con huevo",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo",
+      "económico",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "description": "Patatas, cebolla y pimiento pochados despacio, con un huevo por encima. Cena de abuela.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 60,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en rodajas finas, la cebolla en juliana y el pimiento en tiras.",
+      "Ponlo todo en la sartén con el aceite, el ajo y sal a fuego medio-bajo, tapado, 25 minutos, removiendo de vez en cuando.",
+      "Cuando las patatas estén tiernas, casca los huevos encima, tapa y deja 3 minutos."
+    ]
+  },
+  {
+    "name": "Tortilla de calabacín",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo",
+      "económico",
+      "vegetariano",
+      "táper"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Como la de patatas pero más ligera y sin freír. Fría en el táper también está buena.",
+    "ingredients": [
+      {
+        "ingredient": "huevo",
+        "qty": 6,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "calabacín",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Pocha la cebolla y el calabacín en dados con el aceite y sal, 12 minutos.",
+      "Bate los huevos con el queso, mezcla con la verdura y cuaja la tortilla 4 minutos por cada lado."
+    ]
+  },
+  {
+    "name": "Tortilla de atún y cebolla",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo",
+      "rápido",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Dos latas de atún, cebolla pochada y huevos. Cena de despensa en 20 minutos.",
+    "ingredients": [
+      {
+        "ingredient": "huevo",
+        "qty": 6,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Pocha la cebolla picada con el aceite 8 minutos.",
+      "Bate los huevos con sal, añade el atún escurrido y la cebolla.",
+      "Cuaja la tortilla a fuego medio 3 minutos por cada lado."
+    ]
+  },
+  {
+    "name": "Huevos al plato con tomate y jamón",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo",
+      "rápido",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Huevos horneados sobre tomate con jamón. Se comen mojando pan.",
+    "ingredients": [
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "jamón serrano",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Calienta el tomate frito con el ajo picado y el aceite y repártelo en cazuelitas o una fuente.",
+      "Casca los huevos encima, reparte el jamón en trozos y hornea 10 minutos a 200 °C hasta que la clara cuaje.",
+      "Sirve con pan."
+    ]
+  },
+  {
+    "name": "Patatas al horno con huevo frito y pimientos",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "huevo",
+      "económico",
+      "vegetariano"
+    ],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "description": "Patatas asadas, pimientos fritos y huevo. Como unos huevos rotos, pero con menos aceite.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 50,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en bastones, alíñalas con aceite y sal y hornea 30 minutos a 210 °C.",
+      "Fríe los pimientos en tiras con el ajo hasta que estén blandos.",
+      "Fríe los huevos y sírvelos sobre las patatas con los pimientos."
+    ]
+  },
+  {
+    "name": "Judías verdes con patatas y huevo",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "verdura",
+      "económico",
+      "vegetariano",
+      "táper",
+      "pocas ollas"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Judías verdes y patatas cocidas, con huevo duro y un refrito de ajo. Cena ligera de siempre.",
+    "ingredients": [
+      {
+        "ingredient": "judías verdes",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 3,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece las patatas en trozos y las judías 20 minutos en agua con sal; cuece los huevos en la misma olla los últimos 10 minutos.",
+      "Escurre y pon en una fuente con los huevos en cuartos.",
+      "Dora el ajo en láminas con el aceite, apaga, añade el pimentón y vierte por encima."
+    ]
+  },
+  {
+    "name": "Coliflor al horno con queso",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "verdura",
+      "vegetariano",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "description": "Coliflor cocida y gratinada con bechamel de bote y queso. Convence hasta a quien no le gusta la coliflor.",
+    "ingredients": [
+      {
+        "ingredient": "coliflor",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "bechamel",
+        "qty": 300,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan rallado",
+        "qty": 20,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Separa la coliflor en ramilletes y cuécela 12 minutos en agua con sal.",
+      "Escúrrela, ponla en una fuente y cúbrela con la bechamel, el queso y el pan rallado.",
+      "Gratina 12 minutos a 220 °C."
+    ]
+  },
+  {
+    "name": "Menestra de verduras salteada con jamón",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "verdura",
+      "rápido",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Bolsa de menestra congelada salteada con ajo y jamón. Verdura sin pelar nada.",
+    "ingredients": [
+      {
+        "ingredient": "menestra de verduras",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "jamón serrano",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece la menestra 8 minutos en agua con sal y escúrrela bien.",
+      "Dora el ajo en láminas y el jamón en tiras con el aceite, añade la verdura y saltea 5 minutos.",
+      "Sirve con un huevo frito o cocido por persona."
+    ]
+  },
+  {
+    "name": "Champiñones al ajillo con pan",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "verdura",
+      "rápido",
+      "económico",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Champiñones salteados con mucho ajo y perejil. Tapa de bar convertida en cena.",
+    "ingredients": [
+      {
+        "ingredient": "champiñones",
+        "qty": 600,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "perejil",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Limpia los champiñones y córtalos en cuartos.",
+      "Dora el ajo picado con el aceite, añade los champiñones y saltea a fuego fuerte 8 minutos.",
+      "Termina con perejil, sal y un chorro de limón. Sirve con pan tostado."
+    ]
+  },
+  {
+    "name": "Alubias pintas con arroz",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "legumbre",
+      "arroz",
+      "económico",
+      "vegetariano",
+      "táper"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Alubias de bote guisadas con sofrito y pimentón, con arroz blanco. Plato completo por muy poco.",
+    "ingredients": [
+      {
+        "ingredient": "alubias pintas cocidas",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "arroz",
+        "qty": 250,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "laurel",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece el arroz 15 minutos y escúrrelo.",
+      "Sofríe la cebolla, el pimiento y el ajo picados 8 minutos; añade el pimentón y el tomate frito.",
+      "Incorpora las alubias escurridas, el laurel y un vaso de agua, y cocina 10 minutos.",
+      "Sirve las alubias con el arroz."
+    ]
+  },
+  {
+    "name": "Ensalada de lentejas",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "legumbre",
+      "ensalada",
+      "rápido",
+      "económico",
+      "vegetariano",
+      "táper"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Lentejas de bote con tomate, pimiento, cebolla y huevo, bien aliñadas. Frías, para el calor y para llevar.",
+    "ingredients": [
+      {
+        "ingredient": "lentejas cocidas",
+        "qty": 800,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "vinagre",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece los huevos 10 minutos y trocéalos.",
+      "Escurre y lava las lentejas.",
+      "Pica el tomate, el pimiento y la cebolla en dados pequeños y mézclalo todo.",
+      "Aliña con aceite, vinagre y sal y deja reposar 10 minutos."
+    ]
+  },
+  {
+    "name": "Hummus casero con pan de pita y zanahoria",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "legumbre",
+      "rápido",
+      "económico",
+      "vegetariano",
+      "pocas ollas"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Garbanzos de bote triturados con ajo, limón y aceite. Para untar en pita y mojar zanahoria.",
+    "ingredients": [
+      {
+        "ingredient": "garbanzos cocidos",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "limón",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 3,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan de pita",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 50,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Tritura los garbanzos escurridos con el ajo, el zumo del limón, el aceite, sal y un poco de agua hasta que quede cremoso.",
+      "Sírvelo con pimentón por encima, el pan de pita tostado y la zanahoria en bastones."
+    ]
+  },
+  {
+    "name": "Gazpacho",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "sopa",
+      "verdura",
+      "rápido",
+      "económico",
+      "vegetariano",
+      "táper"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Tomate, pepino, pimiento, ajo, aceite y vinagre. Batidora y nevera. Dura tres días.",
+    "ingredients": [
+      {
+        "ingredient": "tomate",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pepino",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 60,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "vinagre",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Trocea el tomate, el pepino pelado y el pimiento.",
+      "Tritúralo todo con el ajo, el pan, el aceite, el vinagre y sal hasta que quede fino.",
+      "Añade agua fría al gusto y enfría al menos una hora."
+    ]
+  },
+  {
+    "name": "Salmorejo con huevo y jamón",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "sopa",
+      "rápido",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Tomate, pan y aceite bien batidos, con huevo duro y jamón por encima. Más espeso que el gazpacho y llena más.",
+    "ingredients": [
+      {
+        "ingredient": "tomate",
+        "qty": 8,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "jamón serrano",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 80,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "vinagre",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece los huevos 10 minutos.",
+      "Tritura el tomate troceado con el pan, el ajo, el vinagre y sal; añade el aceite poco a poco hasta que quede cremoso.",
+      "Enfría y sirve con el huevo y el jamón picados por encima."
+    ]
+  },
+  {
+    "name": "Ensaladilla rusa",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "ensalada",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "description": "Patata, zanahoria, huevo, atún y mayonesa. La de siempre, para comer fría dos o tres días.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "guisantes",
+        "qty": 100,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceitunas",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "mayonesa",
+        "qty": 200,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece las patatas y las zanahorias peladas y en dados 15 minutos; añade los guisantes los últimos 5 y los huevos aparte 10 minutos.",
+      "Escurre y deja enfriar.",
+      "Mezcla con el atún escurrido, el huevo picado, las aceitunas y la mayonesa. Enfría antes de servir."
+    ]
+  },
+  {
+    "name": "Ensalada campera",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "ensalada",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Patata cocida, tomate, pimiento, cebolla, huevo y atún con buen aceite. La ensalada de verano de toda España.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "tomate",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceitunas",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 50,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "vinagre",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece las patatas con piel 20 minutos y los huevos 10; pela y trocea.",
+      "Pica el tomate, el pimiento y la cebolla.",
+      "Mezcla todo con el atún y las aceitunas y aliña con aceite, vinagre y sal."
+    ]
+  },
+  {
+    "name": "Ensalada de tomate, atún y cebolla",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "ensalada",
+      "rápido",
+      "económico",
+      "pocas ollas"
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "Tres ingredientes y buen aceite. La cena de verano más rápida que existe.",
+    "ingredients": [
+      {
+        "ingredient": "tomate",
+        "qty": 5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "atún en lata",
+        "qty": 160,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceitunas",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "pan",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta el tomate en gajos y la cebolla en juliana fina.",
+      "Añade el atún escurrido y las aceitunas.",
+      "Aliña con aceite y sal y sirve con pan."
+    ]
+  },
+  {
+    "name": "Sopa de ajo",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "sopa",
+      "económico",
+      "rápido",
+      "pocas ollas"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Pan del día anterior, ajo, pimentón y un huevo. La sopa más barata y de las que más reconfortan.",
+    "ingredients": [
+      {
+        "ingredient": "pan",
+        "qty": 200,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 5,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 8,
+        "unit": "g"
+      },
+      {
+        "ingredient": "caldo de pollo",
+        "qty": 1000,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "jamón serrano",
+        "qty": 60,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Dora el ajo en láminas con el aceite, añade el jamón picado y el pan en trozos y rehoga.",
+      "Apaga un momento, añade el pimentón y remueve; vuelve al fuego con el caldo y cocina 10 minutos.",
+      "Casca los huevos dentro, tapa y deja 3 minutos hasta que cuajen."
+    ]
+  },
+  {
+    "name": "Crema de puerro y patata",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "sopa",
+      "vegetariano",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Puerro y patata cocidos y batidos con un poco de nata. Suave, barata y de táper.",
+    "ingredients": [
+      {
+        "ingredient": "puerro",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "patata",
+        "qty": 3,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "nata",
+        "qty": 100,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Pocha el puerro y la cebolla picados con el aceite 8 minutos.",
+      "Añade la patata en trozos, cubre con agua y sal y cuece 20 minutos.",
+      "Tritura con la nata hasta que quede fina."
+    ]
+  },
+  {
+    "name": "Ensalada César de pollo",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "ensalada",
+      "carne",
+      "rápido"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "Lechuga, pollo a la plancha, picatostes, queso y salsa César de bote. Cena completa sin encender el horno.",
+    "ingredients": [
+      {
+        "ingredient": "lechuga",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "picatostes",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 50,
+        "unit": "g"
+      },
+      {
+        "ingredient": "salsa césar",
+        "qty": 120,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Haz el pollo a la plancha con sal, 4 minutos por lado, y córtalo en tiras.",
+      "Trocea la lechuga y mézclala con el pollo, los picatostes y el queso.",
+      "Aliña con la salsa César justo antes de servir."
+    ]
+  },
+  {
+    "name": "Croquetas de jamón",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "description": "Bechamel espesa con jamón, frías, boleadas y empanadas. Cuestan un rato, pero congelan de maravilla: haz el doble.",
+    "ingredients": [
+      {
+        "ingredient": "jamón serrano",
+        "qty": 150,
+        "unit": "g"
+      },
+      {
+        "ingredient": "leche",
+        "qty": 600,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "harina",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "mantequilla",
+        "qty": 40,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan rallado",
+        "qty": 120,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 150,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Pocha la cebolla muy picada con la mantequilla, añade el jamón picado y después la harina; remueve 2 minutos.",
+      "Añade la leche poco a poco sin dejar de remover hasta tener una masa espesa que se despegue de la sartén. Sal al gusto.",
+      "Extiende en una fuente, tapa y enfría al menos 2 horas (mejor de un día para otro).",
+      "Forma las croquetas, pásalas por huevo y pan rallado y fríelas en aceite bien caliente hasta dorarlas."
+    ]
+  },
+  {
+    "name": "Croquetas de pollo de aprovechamiento",
+    "meal": "cena",
+    "servings": 4,
+    "tags": [
+      "carne",
+      "económico",
+      "táper"
+    ],
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "description": "Para el pollo que sobró del asado o del cocido. Misma bechamel que las de jamón.",
+    "ingredients": [
+      {
+        "ingredient": "pechuga de pollo",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "leche",
+        "qty": 600,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "harina",
+        "qty": 80,
+        "unit": "g"
+      },
+      {
+        "ingredient": "mantequilla",
+        "qty": 40,
+        "unit": "g"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "huevo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pan rallado",
+        "qty": 120,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 150,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece o usa pollo ya hecho y desmenúzalo fino.",
+      "Pocha la cebolla con la mantequilla, añade el pollo y la harina y remueve 2 minutos.",
+      "Añade la leche poco a poco removiendo hasta que la masa espese y se despegue. Sal y pimienta.",
+      "Enfría al menos 2 horas, forma las croquetas, empana con huevo y pan rallado y fríe hasta dorar."
+    ]
+  },
+  {
+    "name": "Lasaña de carne con placas precocinadas",
+    "meal": "comida",
+    "servings": 4,
+    "tags": [
+      "pasta",
+      "carne",
+      "táper"
+    ],
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "description": "Boloñesa casera, bechamel de bote y placas que no hay que cocer. Da para dos comidas y congela bien.",
+    "ingredients": [
+      {
+        "ingredient": "placas para lasaña",
+        "qty": 12,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "carne picada",
+        "qty": 500,
+        "unit": "g"
+      },
+      {
+        "ingredient": "tomate frito",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "bechamel",
+        "qty": 500,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "queso rallado",
+        "qty": 120,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Sofríe la cebolla, la zanahoria y el ajo picados; añade la carne con sal y, cuando esté hecha, el tomate frito. Cocina 10 minutos.",
+      "Remoja las placas en agua caliente el tiempo que indique el paquete.",
+      "Monta en una fuente: bechamel, placas, carne, y repite hasta terminar con bechamel y el queso rallado.",
+      "Hornea 25 minutos a 190 °C hasta que esté dorada."
+    ]
   }
 ]

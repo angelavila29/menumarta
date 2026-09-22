@@ -112,6 +112,20 @@ mejor encaja.
       por uso, así que se activaría solo para correos concretos. Antes, mirar con datos reales
       cuántas veces la versión sin IA no propone nada útil.
 
+## H. Volumen de recetas (22 sep)
+- [x] 48 recetas nuevas de casa española para gente joven: pasta rápida (carbonara, pesto,
+      gnocchi, tortellini), pollo y cerdo básicos (empanado, curry, cerveza, chuletas, costillas),
+      cosas de estudiante (salchichas con puré, pizza con base, fajitas, burritos, san jacobos,
+      noodles), huevos y patatas (a lo pobre, tortillas, huevos al plato), verduras y legumbres
+      (judías verdes, coliflor, menestra, alubias pintas, hummus), frías de verano (gazpacho,
+      salmorejo, ensaladilla, campera), sopas y croquetas de jamón y de pollo, y lasaña.
+      El banco pasa de 56 a 104. Los 93 ingredientes distintos tienen producto con precio.
+- [x] Ajustes de emparejamiento que salieron al probar: "vinagre" busca vinagre de vino, la
+      mayonesa va en ml como en la tienda, y las empanadillas usan "masa de empanadillas" porque
+      Mercadona no vende obleas sueltas.
+- [ ] Ideas para la siguiente tanda: desayunos y meriendas cuando el menú los planifique, más
+      pescado barato (sardinas, caballa en lata) y platos de aprovechamiento.
+
 ## Pendiente, decidido a propósito
 - Las extensiones `pg_trgm` y `unaccent` siguen en el esquema `public`. Moverlas rompería la columna
   generada `products.name_norm`, que es de lo que vive el buscador.

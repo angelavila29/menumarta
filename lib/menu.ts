@@ -237,7 +237,7 @@ export function packsNeeded(need: Need, product: Product): number {
  * TODO: aproximación. Mejorar con equivalencias de opencesta o con un LLM en la fase 2.
  */
 /** Ingredientes cuyo nombre a secas trae otra cosa: "pan" encontraba pan rallado antes que una barra. */
-const SEARCH_AS: Record<string, string> = { pan: "barra pan" };
+const SEARCH_AS: Record<string, string> = { pan: "barra pan", vinagre: "vinagre vino" };
 
 export async function cheapestProductFor(supabase: Supa, need: Need, supers: string[]): Promise<Product | null> {
   if (supers.length === 0) return null;
