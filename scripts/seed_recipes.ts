@@ -59,7 +59,7 @@ async function main() {
       )
       .select("id")
       .single();
-    if (error) throw new Error(`${r.name}: ${error.message}`);
+    if (error) throw new Error(`${r.name}: ${error.message ?? JSON.stringify(error).slice(0, 300)}`);
 
     await supabase.from("recipe_ingredients").delete().eq("recipe_id", rec.id);
     const rows = r.ingredients.map((i) => ({
