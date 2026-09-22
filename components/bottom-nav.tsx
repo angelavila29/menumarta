@@ -18,8 +18,8 @@ const MAIN = [
   { href: "/lista", label: "Compra", Icon: CartIcon },
   { href: "/buscar", label: "Buscar", Icon: SearchIcon },
 ];
+const COOK = { href: "/cocinar", label: "Qué cocino", Icon: FridgeIcon };
 const SECONDARY = [
-  { href: "/cocinar", label: "Qué cocino", Icon: FridgeIcon },
   { href: "/amigos", label: "Amigos", Icon: UsersIcon },
   { href: "/despensa", label: "Despensa", Icon: BoxIcon },
   { href: "/favoritos", label: "Favoritos", Icon: HeartIcon },
@@ -36,10 +36,10 @@ function isActive(pathname: string, href: string) {
 }
 
 /** Barra inferior (móvil). El botón "Más" abre el resto de secciones. */
-export function BottomNav() {
+export function BottomNav({ canCook = false }: { canCook?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const extra = [...SECONDARY, ...FOOTER];
+  const extra = [...(canCook ? [COOK] : []), ...SECONDARY, ...FOOTER];
   const inExtra = extra.some((t) => isActive(pathname, t.href.split("#")[0]));
 
   useEffect(() => {
@@ -161,7 +161,7 @@ function subscribe(cb: () => void) {
 }
 
 /** Barra lateral (escritorio), plegable. El estado se guarda en el navegador. */
-export function SideNav() {
+export function SideNav({ canCook = false }: { canCook?: boolean }) {
   const collapsed = useSyncExternalStore(subscribe, readCollapsed, () => false);
 
   function toggle() {
@@ -200,7 +200,7 @@ export function SideNav() {
       </ul>
       <div className="my-4 border-t border-cream-dark" />
       <ul className="flex flex-col gap-1">
-        {SECONDARY.map((t) => (
+        {[...(canCook ? [COOK] : []), ...SECONDARY].map((t) => (
           <li key={t.href}><NavItem {...t} collapsed={collapsed} /></li>
         ))}
       </ul>

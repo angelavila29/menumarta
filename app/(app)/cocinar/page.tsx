@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { hasFeature } from "@/lib/access";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { normIngredient, type CookRecipe } from "@/lib/cook";
 import { cheapestProductFor, type Need, type Recipe } from "@/lib/menu";
@@ -10,6 +12,16 @@ const COMMON = ["aceite de oliva", "ajo", "cebolla", "huevo", "arroz", "patata",
 
 export default async function CookPage() {
   const { supabase, user } = await requireUser();
+  if (!(await hasFeature(supabase, user, "cocinar"))) {
+    return (
+      <main className="mx-auto max-w-lg py-10 text-center">
+        <p aria-hidden className="text-5xl">🧑‍🍳</p>
+        <h1 className="mt-3 text-2xl font-bold">Todavía en pruebas</h1>
+        <p className="mt-2 text-muted">Esta función solo está abierta a unas pocas personas de momento.</p>
+        <Link href="/" className="mt-5 inline-block rounded-xl bg-brand px-5 py-3 font-semibold text-white hover:bg-brand-dark">Ir al inicio</Link>
+      </main>
+    );
+  }
   const [{ data: recipeRows }, { data: ingRows }, { data: pantry }, { data: profile }, supers, { data: chainRows }, { data: mapRows }] = await Promise.all([
     supabase.from("recipes").select("id,name,meal,servings,tags,owner_id,author_name,photo_url,time_minutes").order("name"),
     supabase.from("recipe_ingredients").select("recipe_id,ingredient_name,qty,unit").order("id"),

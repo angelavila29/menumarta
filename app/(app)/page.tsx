@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, ChevronRight, HeartIcon, PiggyIcon, PlusIcon, SearchIcon } from "@/components/icons";
 import { ChainLogo } from "@/components/chain-logo";
 import { FridgeIcon } from "@/components/icons-extra";
+import { hasFeature } from "@/lib/access";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { compareList } from "@/lib/compare";
 import { euro, formatWeekRange, superName } from "@/lib/format";
@@ -14,6 +15,7 @@ import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 export default async function HomePage() {
   const { supabase, user } = await requireUser();
   const weekStart = currentWeekStart();
+  const canCook = await hasFeature(supabase, user, "cocinar");
   const [profile, supers, menu, recipes, listId, { data: favRows }, { data: priced }] = await Promise.all([
     supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle().then((r) => r.data),
     userSupermarketIds(supabase, user.id),
@@ -207,8 +209,8 @@ export default async function HomePage() {
         </section>
       </div>
 
-      {/* ¿Qué cocino hoy? */}
-      <Link href="/cocinar" className="flex items-center gap-4 rounded-2xl bg-olive-soft p-4 shadow-sm hover:brightness-95">
+      {/* ¿Qué cocino hoy? (en pruebas: solo para algunos correos) */}
+      {canCook && <Link href="/cocinar" className="flex items-center gap-4 rounded-2xl bg-olive-soft p-4 shadow-sm hover:brightness-95">
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-olive text-white">
           <FridgeIcon className="h-6 w-6" />
         </span>
@@ -217,7 +219,7 @@ export default async function HomePage() {
           <span className="block text-sm text-olive-dark/80">Dinos qué tienes en la nevera y cuánto quieres gastar.</span>
         </span>
         <ChevronRight className="h-5 w-5 shrink-0 text-olive-dark" />
-      </Link>
+      </Link>}
 
       {/* Fila 2: buscador + favoritos */}
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_1.4fr]">

@@ -105,6 +105,8 @@ mejor encaja.
       comprar, con el precio real de los envases que faltan. Un botón manda lo que falta a la lista.
       Respeta dieta y alergias. La lógica está en `lib/cook.ts`, con tests.
 - [x] Accesos: tarjeta en la portada, barra lateral y panel "Más" del móvil.
+- [x] Solo para los correos de la tabla `feature_access` (22 sep): de momento el de Ángel. El de
+      Marta se añade cuando lo tengamos. Quien no esté ve "Todavía en pruebas" y no ve los accesos.
 - [x] "Pan" ya propone una barra de pan y no pan rallado.
 - [ ] Fase con IA, solo si hace falta: inventar recetas cuando nada del banco encaja. Tiene coste
       por uso, así que se activaría solo para correos concretos. Antes, mirar con datos reales
