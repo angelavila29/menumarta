@@ -54,3 +54,26 @@ export const PACK_WORDS = new Set(["pack", "x", "botella", "bolsa", "brik", "lat
 export function freshSince(days = 3): string {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 }
+
+/**
+ * Ordena resultados de búsqueda por relevancia, no por precio: primero lo que empieza por lo
+ * buscado ("Leche desnatada"), luego lo que lo tiene como palabra propia, y al final lo que solo
+ * lo contiene dentro de otra cosa ("Cápsulas de café con leche"). A igual relevancia, nombre más
+ * corto y más barato por unidad.
+ */
+export function rankByRelevance<T extends { name: string; unit_price: number | null }>(list: T[], query: string): T[] {
+  const words = unaccent(query).trim().split(/\s+/).filter(Boolean);
+  const esc = (w: string) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // palabra completa, admitiendo plural: "pan" casa con "pan" y "panes", no con "panceta"
+  const whole = (w: string) => new RegExp(`(^|[^a-z0-9])${esc(w)}(es|s)?($|[^a-z0-9])`);
+  const atStart = (w: string) => new RegExp(`^${esc(w)}(es|s)?($|[^a-z0-9])`);
+  const score = (p: T) => {
+    const n = unaccent(p.name);
+    let rel = 300; // solo aparece dentro de otra palabra o no aparece
+    if (words.length > 0 && words.every((w) => whole(w).test(n))) {
+      rel = atStart(words[0]).test(n) ? 0 : 100 + Math.min(n.search(whole(words[0])), 50);
+    }
+    return rel + Math.min(p.name.split(/\s+/).length, 10) * 2 + Math.min(p.unit_price ?? 999, 999) / 1000;
+  };
+  return list.slice().sort((a, b) => score(a) - score(b));
+}

@@ -7,7 +7,7 @@ import { getOrCreateActiveList } from "@/lib/lists";
 import { FAMILY_FILTERS } from "@/lib/categories";
 import { equivalentIn } from "@/lib/compare";
 import { parsePackSize } from "@/lib/menu";
-import { freshSince, keywords, NOT_FOOD_CATEGORY, unaccent, wordRegex } from "@/lib/search";
+import { freshSince, keywords, NOT_FOOD_CATEGORY, rankByRelevance, stem, unaccent, wordRegex } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product, type SearchResult } from "@/lib/types";
 
 export async function signOut() {
@@ -19,6 +19,37 @@ export async function signOut() {
 // ---------------------------------------------------------------------------
 // Búsqueda
 // ---------------------------------------------------------------------------
+type Rows = { data: unknown[] | null; error: { message: string } | null };
+type Filterable = {
+  filter: (col: string, op: string, v: string) => Filterable;
+  ilike: (col: string, v: string) => Filterable;
+  order: (col: string, o: { ascending: boolean; nullsFirst: boolean }) => { limit: (n: number) => PromiseLike<Rows> };
+};
+
+/**
+ * Tres consultas de más a menos precisa: el nombre EMPIEZA por la primera palabra (como palabra
+ * completa), todas las palabras aparecen como palabra completa, y por último simple "contiene".
+ * Si se hiciera una sola consulta ordenada por precio, "pan" se llenaría de pañuelos y pañales
+ * baratos antes de que entrase la barra de pan. Se resuelven juntas y se unen sin repetidos.
+ */
+async function wordSearch(build: () => Filterable, words: string[], limits: [number, number, number]): Promise<Product[]> {
+  if (words.length === 0) return [];
+  const startRe = `^${stem(words[0]).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(e|es|s)?\\M`;
+  let starts = build().filter("name_norm", "match", startRe);
+  let whole = build();
+  let contains = build();
+  for (const w of words) {
+    if (w !== words[0]) starts = starts.filter("name_norm", "match", wordRegex(w));
+    whole = whole.filter("name_norm", "match", wordRegex(w));
+    contains = contains.ilike("name_norm", `%${unaccent(w)}%`);
+  }
+  const order = (r: Filterable, n: number) => r.order("unit_price", { ascending: true, nullsFirst: false }).limit(n);
+  const [a, b, c] = await Promise.all([order(starts, limits[0]), order(whole, limits[1]), order(contains, limits[2])]);
+  for (const r of [a, b, c]) if (r.error) throw new Error(r.error.message);
+  const seen = new Set<number>();
+  return ([...(a.data ?? []), ...(b.data ?? []), ...(c.data ?? [])] as Product[]).filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
+}
+
 export async function searchProducts(query: string): Promise<Product[]> {
   const q = query.trim();
   if (q.length < 2) return [];
@@ -26,16 +57,13 @@ export async function searchProducts(query: string): Promise<Product[]> {
   const supers = await userSupermarketIds(supabase, user.id);
   if (supers.length === 0) return [];
 
-  let req = supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", supers).gte("updated_at", freshSince());
-  // Cada palabra debe aparecer en el nombre, sin distinguir tildes (índice pg_trgm sobre name_norm)
-  for (const word of q.split(/\s+/).filter(Boolean)) {
-    req = req.ilike("name_norm", `%${unaccent(word)}%`);
-  }
-  const { data, error } = await req
-    .order("unit_price", { ascending: true, nullsFirst: false })
-    .limit(30);
-  if (error) throw new Error(error.message);
-  return (data ?? []) as Product[];
+  const words = q.split(/\s+/).filter(Boolean);
+  const all = await wordSearch(
+    () => supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", supers).gte("updated_at", freshSince()) as unknown as Filterable,
+    words,
+    [30, 30, 15]
+  );
+  return rankByRelevance(all, q).slice(0, 30);
 }
 
 // ---------------------------------------------------------------------------
@@ -192,14 +220,22 @@ export async function browseProducts(input: BrowseInput): Promise<SearchResult[]
     products = found.filter((p): p is Product => p !== null);
     if (input.sort !== "relevancia") products = sortProducts(products, input.sort, "");
   } else {
-    let req = supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", chains).not("price", "is", null).gte("updated_at", freshSince());
-    for (const word of q.split(/\s+/).filter(Boolean)) req = req.ilike("name_norm", `%${unaccent(word)}%`);
-    if (family) req = req.filter("category", "imatch", family.pattern);
-    if (input.onlyOffers) req = req.eq("is_discounted", true);
-    if (favIds) req = req.in("id", favIds);
-    const { data, error } = await req.order("unit_price", { ascending: true, nullsFirst: false }).limit(60);
-    if (error) throw new Error(error.message);
-    products = sortProducts((data ?? []) as Product[], input.sort, q).slice(0, 24);
+    const words = q.split(/\s+/).filter(Boolean);
+    const build = () => {
+      let req = supabase.from("products").select(PRODUCT_COLUMNS).in("supermarket_id", chains).not("price", "is", null).gte("updated_at", freshSince());
+      if (family) req = req.filter("category", "imatch", family.pattern);
+      if (input.onlyOffers) req = req.eq("is_discounted", true);
+      if (favIds) req = req.in("id", favIds);
+      return req;
+    };
+    let merged: Product[];
+    if (words.length > 0) merged = await wordSearch(() => build() as unknown as Filterable, words, [40, 40, 20]);
+    else {
+      const { data, error } = await build().order("unit_price", { ascending: true, nullsFirst: false }).limit(60);
+      if (error) throw new Error(error.message);
+      merged = (data ?? []) as Product[];
+    }
+    products = sortProducts(merged, input.sort, q).slice(0, 24);
   }
 
   // Comparación con el equivalente en tus otras cadenas (aproximada, por nombre)
@@ -222,12 +258,7 @@ function sortProducts(list: Product[], sort: BrowseSort, q: string): Product[] {
   if (sort === "precio") return arr.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
   if (sort === "unidad") return arr.sort((a, b) => (a.unit_price ?? Infinity) - (b.unit_price ?? Infinity));
   if (sort === "nombre") return arr.sort((a, b) => a.name.localeCompare(b.name, "es"));
-  const nq = unaccent(q);
-  const score = (p: Product) =>
-    (nq && unaccent(p.name).startsWith(nq) ? 0 : 100) +
-    Math.min(p.name.split(/\s+/).length, 10) * 5 +
-    Math.min(p.unit_price ?? 999, 999) / 100;
-  return arr.sort((a, b) => score(a) - score(b));
+  return rankByRelevance(arr, q);
 }
 
 /** Euros que cuesta de más el equivalente para la misma cantidad que este envase. */
