@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
+import { FoodInput } from "@/components/food-input";
 import { CartIcon, CheckIcon } from "@/components/icons";
 import { RecipeArt } from "@/components/recipe-art";
 import { rankRecipes, type CookRecipe, type CookResult } from "@/lib/cook";
@@ -16,7 +17,7 @@ const BUDGETS = [0, 3, 5, 10];
 const PAGE = 12;
 
 export function Cook({
-  recipes, products, ingredients, commonCount, have: initialHave, people,
+  recipes, products, ingredients, commonCount, have: initialHave, people, foods,
 }: {
   recipes: CookRecipe[];
   products: [string, Product | null][];
@@ -24,10 +25,10 @@ export function Cook({
   commonCount: number;
   have: string[];
   people: number;
+  foods: string[];
 }) {
   const [have, setHave] = useState(new Set(initialHave));
-  const [editing, setEditing] = useState(initialHave.length === 0);
-  const [filter, setFilter] = useState("");
+  const [showAll, setShowAll] = useState(false);
   const [budgetText, setBudgetText] = useState("");
   const [shown, setShown] = useState(PAGE);
   const [, start] = useTransition();
@@ -50,9 +51,12 @@ export function Cook({
     start(() => setPantryItem(name, has));
   }
 
-  const f = filter.trim().toLowerCase();
-  const chips = ingredients.filter((i) => !f || i.includes(f));
-  const mine = ingredients.filter((i) => have.has(i));
+  const chips = showAll ? ingredients : ingredients.slice(0, commonCount);
+  const mine = Array.from(have).sort((a, b) => a.localeCompare(b, "es"));
+  function setMine(next: string[]) {
+    for (const n of next) if (!have.has(n)) toggle(n);
+    for (const h of have) if (!next.includes(h)) toggle(h);
+  }
 
   return (
     <main>
@@ -62,46 +66,27 @@ export function Cook({
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
         <div className="flex flex-col gap-5 lg:sticky lg:top-5">
           <section className="rounded-2xl bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-bold">Lo que tengo en casa ({have.size})</h2>
-                <p className="text-sm text-muted">Es tu misma despensa: lo que marques aquí tampoco se compra al hacer la lista del menú.</p>
-              </div>
-              <button type="button" onClick={() => setEditing((v) => !v)} className="shrink-0 rounded-xl border border-cream-dark px-3 py-1.5 text-sm font-medium hover:bg-cream">
-                {editing ? "Listo" : "Cambiar"}
-              </button>
+            <h2 className="text-lg font-bold">Lo que tengo en casa ({have.size})</h2>
+            <p className="text-sm text-muted">Es tu misma despensa: lo que marques aquí tampoco se compra al hacer la lista del menú.</p>
+            <div className="mt-3">
+              <FoodInput label="Añadir algo que tienes en casa" placeholder="Escribe un ingrediente: arroz, huevos…" value={mine} onChange={setMine} suggestions={foods} tone="olive" />
             </div>
-
-            {!editing ? (
-              mine.length === 0 ? (
-                <p className="mt-3 text-sm text-muted">Todavía no has marcado nada.</p>
-              ) : (
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {mine.map((name) => (
-                    <li key={name} className="inline-flex items-center gap-1.5 rounded-xl border border-olive bg-olive-soft px-3 py-1.5 text-sm font-medium capitalize text-olive-dark">
-                      <CheckIcon className="h-3.5 w-3.5" /> {name}
-                    </li>
-                  ))}
-                </ul>
-              )
-            ) : (
-              <>
-                <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filtrar ingredientes…" aria-label="Filtrar ingredientes" className="mt-3 w-full rounded-xl border border-cream-dark bg-white px-3 py-2.5 outline-none focus:border-brand" />
-                <ul className="mt-3 flex max-h-72 flex-wrap gap-2 overflow-y-auto lg:max-h-[50vh]">
-                  {chips.map((name, i) => {
-                    const on = have.has(name);
-                    return (
-                      <li key={name} className={!f && i === commonCount ? "basis-full border-t border-cream-dark pt-2" : ""}>
-                        <button type="button" aria-pressed={on} onClick={() => toggle(name)} className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm capitalize ${on ? "border-olive bg-olive-soft font-medium text-olive-dark" : "border-cream-dark bg-white hover:bg-cream"}`}>
-                          {on && <CheckIcon className="h-3.5 w-3.5" />} {name}
-                        </button>
-                      </li>
-                    );
-                  })}
-                  {chips.length === 0 && <li className="text-sm text-muted">Ninguna receta usa ese ingrediente todavía.</li>}
-                </ul>
-              </>
-            )}
+            <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-muted">{showAll ? "Todos los ingredientes" : "Los más habituales"}</p>
+            <ul className={`flex flex-wrap gap-2 ${showAll ? "max-h-72 overflow-y-auto lg:max-h-[45vh]" : ""}`}>
+              {chips.map((name) => {
+                const on = have.has(name);
+                return (
+                  <li key={name}>
+                    <button type="button" aria-pressed={on} onClick={() => toggle(name)} className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm capitalize ${on ? "border-olive bg-olive-soft font-medium text-olive-dark" : "border-cream-dark bg-white hover:bg-cream"}`}>
+                      {on && <CheckIcon className="h-3.5 w-3.5" />} {name}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <button type="button" onClick={() => setShowAll((v) => !v)} className="mt-3 text-sm font-medium text-brand hover:underline">
+              {showAll ? "Ver solo los habituales" : `Ver todos (${ingredients.length})`}
+            </button>
           </section>
 
           <section className="rounded-2xl bg-white p-5 shadow-sm">

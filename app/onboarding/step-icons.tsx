@@ -20,3 +20,5 @@ export const LeafBigIcon = ({ className }: P) =>
   wrap(<><path d="M14 44C14 24 26 12 46 10c-2 20-14 32-32 34z" fill="#e9f0df" stroke="#5f7f3e" /><path d="M14 44c8-10 16-18 26-24" stroke="#5f7f3e" /></>, className);
 export const TargetIcon = ({ className }: P) =>
   wrap(<><circle cx="28" cy="28" r="18" fill="#fbe9e1" /><circle cx="28" cy="28" r="10" fill="#fff" /><circle cx="28" cy="28" r="3" fill="#e0562f" /><path d="M28 10V4M46 28h6" /><Leaf /></>, className);
+export const PotIcon = ({ className }: P) =>
+  wrap(<><path d="M12 26h32" /><path d="M14 26v12a6 6 0 0 0 6 6h16a6 6 0 0 0 6-6V26" fill="#fbe9e1" /><path d="M8 30h4M44 30h4" /><path d="M22 20c0-3 3-3 3-6M31 20c0-3 3-3 3-6" /><Leaf /></>, className);

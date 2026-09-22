@@ -126,6 +126,17 @@ mejor encaja.
 - [ ] Ideas para la siguiente tanda: desayunos y meriendas cuando el menú los planifique, más
       pescado barato (sardinas, caballa en lata) y platos de aprovechamiento.
 
+## I. Onboarding y campos de alimentos (22 sep)
+- [x] Paso nuevo "Cocina" en el onboarding (ahora 8 pasos): cuántas veces cocinas a la semana por
+      rangos (1 o 2, 3 o 4, 5 o 6, 7 o más, me da igual), presupuesto semanal y tiempo máximo por
+      receta. Se guardan en el perfil y el generador del menú los usa desde el primer día.
+      En Ajustes, "Presupuesto y cocina" tiene el mismo selector de veces.
+- [x] Autocompletar en todos los campos de alimentos (`components/food-input.tsx`): evitar alimentos
+      en onboarding y ajustes, despensa y "¿Qué cocino hoy?". Sugiere entre los ingredientes de las
+      recetas más una lista de ~200 alimentos comunes (`lib/foods.ts`), admite texto libre y muestra
+      lo elegido como chips con una X. Despensa y cocinar enseñan solo los 12 habituales y un
+      "Ver todos".
+
 ## Pendiente, decidido a propósito
 - Las extensiones `pg_trgm` y `unaccent` siguen en el esquema `public`. Moverlas rompería la columna
   generada `products.name_norm`, que es de lo que vive el buscador.

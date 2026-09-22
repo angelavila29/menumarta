@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
+import { FoodInput } from "@/components/food-input";
 import { CheckIcon, SearchIcon } from "@/components/icons";
 import { searchProducts } from "@/lib/actions";
 import { euro, packSize, superName } from "@/lib/format";
@@ -10,10 +11,10 @@ import type { Product } from "@/lib/types";
 
 type Staple = { product: Product; quantity: number };
 
-export function Pantry({ ingredients, commonCount, have: initialHave, staples: initialStaples }: { ingredients: string[]; commonCount: number; have: string[]; staples: Staple[] }) {
+export function Pantry({ ingredients, commonCount, have: initialHave, staples: initialStaples, foods }: { ingredients: string[]; commonCount: number; have: string[]; staples: Staple[]; foods: string[] }) {
   const [have, setHave] = useState(new Set(initialHave));
   const [staples, setStaples] = useState(initialStaples);
-  const [filter, setFilter] = useState("");
+  const [showAll, setShowAll] = useState(false);
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [msg, setMsg] = useState("");
@@ -35,8 +36,12 @@ export function Pantry({ ingredients, commonCount, have: initialHave, staples: i
     start(() => setStaple(p.id, quantity));
   }
 
-  const f = filter.trim().toLowerCase();
-  const shown = ingredients.filter((i) => !f || i.includes(f));
+  const shown = showAll ? ingredients : ingredients.slice(0, commonCount);
+  const mine = Array.from(have).sort((a, b) => a.localeCompare(b, "es"));
+  function setMine(next: string[]) {
+    for (const n of next) if (!have.has(n)) toggle(n);
+    for (const h of have) if (!next.includes(h)) toggle(h);
+  }
   const weekly = staples.reduce((a, s) => a + (s.product.price ?? 0) * s.quantity, 0);
 
   return (
@@ -48,12 +53,15 @@ export function Pantry({ ingredients, commonCount, have: initialHave, staples: i
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="text-lg font-bold">Lo que ya tengo en casa ({have.size})</h2>
           <p className="text-sm text-muted">Al crear la lista del menú, estos ingredientes no se añaden. Desmárcalo cuando se te acabe algo.</p>
-          <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filtrar ingredientes…" aria-label="Filtrar ingredientes" className="mt-3 w-full rounded-xl border border-cream-dark bg-white px-3 py-2.5 outline-none focus:border-brand" />
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {shown.map((name, i) => {
+          <div className="mt-3">
+            <FoodInput label="Añadir algo que tienes en casa" placeholder="Escribe un ingrediente: arroz, huevos…" value={mine} onChange={setMine} suggestions={foods} tone="olive" />
+          </div>
+          <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-muted">{showAll ? "Todos los ingredientes de las recetas" : "Los más habituales"}</p>
+          <ul className="flex flex-wrap gap-2">
+            {shown.map((name) => {
               const on = have.has(name);
               return (
-                <li key={name} className={!f && i === commonCount ? "basis-full border-t border-cream-dark pt-2" : ""}>
+                <li key={name}>
                   <button type="button" aria-pressed={on} onClick={() => toggle(name)} className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm capitalize ${on ? "border-olive bg-olive-soft font-medium text-olive-dark" : "border-cream-dark bg-white hover:bg-cream"}`}>
                     {on && <CheckIcon className="h-3.5 w-3.5" />} {name}
                   </button>
@@ -61,6 +69,9 @@ export function Pantry({ ingredients, commonCount, have: initialHave, staples: i
               );
             })}
           </ul>
+          <button type="button" onClick={() => setShowAll((v) => !v)} className="mt-3 text-sm font-medium text-brand hover:underline">
+            {showAll ? "Ver solo los habituales" : `Ver todos (${ingredients.length})`}
+          </button>
         </section>
 
         <section className="rounded-2xl bg-white p-5 shadow-sm">

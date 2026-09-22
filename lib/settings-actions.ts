@@ -13,6 +13,7 @@ export type SettingsInput = {
   avoidFoods: string[];
   weeklyBudget: number | null;
   maxRecipeMinutes: number | null;
+  cookSessions: number | null;
   goals: string[];
   compareMode: string;
   mainSupermarket: string | null;
@@ -50,6 +51,7 @@ export async function saveSettings(input: SettingsInput) {
       avoid_foods: avoid,
       weekly_budget: Number.isFinite(budget) && budget > 0 ? Math.round(Math.min(budget, 2000)) : null,
       max_recipe_minutes: input.maxRecipeMinutes !== null && MINUTES.includes(input.maxRecipeMinutes) ? input.maxRecipeMinutes : null,
+      cook_sessions: input.cookSessions != null && Number.isFinite(input.cookSessions) ? Math.min(14, Math.max(1, Math.round(input.cookSessions))) : null,
       goals: input.goals.filter((g) => GOALS.includes(g)).slice(0, 2),
       compare_mode: COMPARE.includes(input.compareMode) ? input.compareMode : "avisar",
       main_supermarket: input.mainSupermarket && mine.includes(input.mainSupermarket) ? input.mainSupermarket : null,

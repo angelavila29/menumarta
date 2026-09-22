@@ -4,6 +4,7 @@ import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { normIngredient, type CookRecipe } from "@/lib/cook";
 import { cheapestProductFor, type Need, type Recipe } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
+import { FOODS, mergeFoods } from "@/lib/foods";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { Cook } from "./cook";
 
@@ -77,6 +78,7 @@ export default async function CookPage() {
       products={products}
       ingredients={[...common, ...names.filter((n) => !common.includes(n))]}
       commonCount={common.length}
+      foods={mergeFoods(FOODS, names)}
       have={(pantry ?? []).map((p) => normIngredient(p.ingredient_name as string))}
       people={people}
     />

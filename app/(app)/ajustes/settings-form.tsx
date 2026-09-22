@@ -5,10 +5,12 @@ import { useMemo, useState, useTransition } from "react";
 import { StoreMap } from "@/app/onboarding/store-map";
 import { ChainLogo } from "@/components/chain-logo";
 import { CartIcon, CheckIcon, HomeIcon, LeafIcon, PlusIcon, StarIcon, StoreIcon } from "@/components/icons";
+import { FoodInput } from "@/components/food-input";
+import { COOK_RANGES, cookRangeOf } from "@/lib/cook-sessions";
 import { saveSettings, type SettingsInput } from "@/lib/settings-actions";
 
 export type Chain = { id: string; name: string; has_prices: boolean };
-type Props = { initial: SettingsInput; email: string; chains: Chain[]; location: { label: string | null; lat: number | null; lng: number | null } };
+type Props = { initial: SettingsInput; email: string; chains: Chain[]; location: { label: string | null; lat: number | null; lng: number | null }; foods: string[] };
 
 const svg = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, viewBox: "0 0 24 24" };
 const UserIcon = ({ className }: { className?: string }) => (
@@ -46,11 +48,10 @@ const NOTIFS: [keyof SettingsInput, string, string][] = [
   ["notifySummary", "Resumen semanal", "Recibe un resumen de tu semana cada domingo."],
 ];
 
-export function SettingsForm({ initial, email, chains, location }: Props) {
+export function SettingsForm({ initial, email, chains, location, foods }: Props) {
   const [v, setV] = useState<SettingsInput>(initial);
   const [saved, setSaved] = useState<SettingsInput>(initial);
   const [tab, setTab] = useState("perfil");
-  const [avoidInput, setAvoidInput] = useState("");
   const [status, setStatus] = useState<"" | "ok" | "error">("");
   const [pending, start] = useTransition();
   const noStores = useMemo(() => [], []);
@@ -85,11 +86,6 @@ export function SettingsForm({ initial, email, chains, location }: Props) {
         setStatus("error");
       }
     });
-  }
-  function addAvoid() {
-    const a = avoidInput.trim().toLowerCase();
-    if (a && !v.avoidFoods.includes(a)) set("avoidFoods", [...v.avoidFoods, a]);
-    setAvoidInput("");
   }
 
   return (
@@ -177,39 +173,26 @@ export function SettingsForm({ initial, email, chains, location }: Props) {
               ))}
             </div>
             <p className="mb-2 text-sm font-semibold">Alimentos que no te gustan</p>
-            <div className="flex flex-wrap items-center gap-2">
-              {v.avoidFoods.map((a) => (
-                <span key={a} className="inline-flex items-center gap-2 rounded-xl bg-brand-soft px-3 py-2 text-sm text-brand-dark">
-                  {cap(a)}
-                  <button type="button" aria-label={`Quitar ${a}`} onClick={() => set("avoidFoods", v.avoidFoods.filter((x) => x !== a))}>✕</button>
-                </span>
-              ))}
-              <span className="flex min-w-48 flex-1 items-center gap-2 rounded-xl border border-cream-dark bg-white px-3 sm:max-w-xs">
-                <PlusIcon className="h-4 w-4 text-muted" />
-                <input
-                  value={avoidInput}
-                  onChange={(e) => setAvoidInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addAvoid();
-                    }
-                  }}
-                  onBlur={addAvoid}
-                  placeholder="Añadir alimento"
-                  aria-label="Añadir alimento que no te gusta"
-                  className="w-full bg-transparent py-2 text-sm outline-none"
-                />
-              </span>
-            </div>
+            <FoodInput
+              label="Añadir alimento que no te gusta"
+              placeholder="Escribe un alimento: coliflor, atún…"
+              value={v.avoidFoods}
+              onChange={(next) => set("avoidFoods", next)}
+              suggestions={foods}
+            />
           </Card>
 
           <Card id="cocina" icon={<ForkIcon className="h-7 w-7" />} title="Presupuesto y cocina" subtitle="Ajusta tus preferencias para que las recetas se adapten a tu día a día.">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <Field label="Presupuesto semanal" hint="Referencia para tu compra semanal.">
                 <select value={v.weeklyBudget ?? ""} onChange={(e) => set("weeklyBudget", e.target.value ? Number(e.target.value) : null)} className={inputCls}>
                   <option value="">Sin definir</option>
                   {BUDGETS.map((b) => <option key={b} value={b}>{b} €</option>)}
+                </select>
+              </Field>
+              <Field label="Veces que cocinas a la semana" hint="El resto de comidas salen de sobras. También lo puedes ajustar desde el menú.">
+                <select value={cookRangeOf(v.cookSessions)} onChange={(e) => set("cookSessions", COOK_RANGES.find((r) => r.id === e.target.value)?.value ?? null)} className={inputCls}>
+                  {COOK_RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
                 </select>
               </Field>
               <Field label="Tiempo máximo por receta" hint="El menú solo elegirá recetas que quepan en ese tiempo.">

@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth";
+import { FOODS, mergeFoods } from "@/lib/foods";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { Pantry } from "./pantry";
 
@@ -18,6 +19,7 @@ export default async function PantryPage() {
     <Pantry
       ingredients={ordered}
       commonCount={COMMON.filter((c) => all.includes(c)).length}
+      foods={mergeFoods(FOODS, all)}
       have={(mine ?? []).map((m) => m.ingredient_name as string)}
       staples={(staples ?? [])
         .map((s) => ({ product: s.product as unknown as Product | null, quantity: Number(s.quantity) }))

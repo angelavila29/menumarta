@@ -59,6 +59,9 @@ export type OnboardingInput = {
   allergies: string[];
   avoidFoods: string[];
   goals: string[];
+  cookSessions: number | null;
+  weeklyBudget: number | null;
+  maxRecipeMinutes: number | null;
 };
 
 /** Guarda todo el onboarding y, si la semana está vacía, genera el primer menú. */
@@ -87,6 +90,9 @@ export async function saveOnboarding(input: OnboardingInput): Promise<{ to: stri
       allergies: input.allergies,
       avoid_foods: input.avoidFoods.map((s) => s.trim().toLowerCase()).filter(Boolean),
       goals: input.goals,
+      cook_sessions: input.cookSessions != null && Number.isFinite(input.cookSessions) ? Math.min(14, Math.max(1, Math.round(input.cookSessions))) : null,
+      weekly_budget: input.weeklyBudget != null && input.weeklyBudget > 0 ? Math.min(2000, Math.round(input.weeklyBudget)) : null,
+      max_recipe_minutes: input.maxRecipeMinutes != null && input.maxRecipeMinutes > 0 ? Math.round(input.maxRecipeMinutes) : null,
       onboarded_at: new Date().toISOString(),
     },
     { onConflict: "id" }

@@ -1,20 +1,22 @@
 import { signOut } from "@/lib/actions";
 import { requireUser } from "@/lib/auth";
+import { FOODS, mergeFoods } from "@/lib/foods";
 import type { SettingsInput } from "@/lib/settings-actions";
 import { AccountSection } from "./account-section";
 import { SettingsForm, type Chain } from "./settings-form";
 
 export default async function SettingsPage() {
   const { supabase, user } = await requireUser();
-  const [{ data: p }, { data: mine }] = await Promise.all([
+  const [{ data: p }, { data: mine }, { data: ings }] = await Promise.all([
     supabase
       .from("profiles")
       .select(
-        "display_name,phone,address,postal_code,lat,lng,household_size,planning_meals,diet,allergies,avoid_foods,weekly_budget,max_recipe_minutes,goals,compare_mode,main_supermarket,notify_menu,notify_savings,notify_price_drops,notify_summary"
+        "display_name,phone,address,postal_code,lat,lng,household_size,planning_meals,diet,allergies,avoid_foods,weekly_budget,max_recipe_minutes,cook_sessions,goals,compare_mode,main_supermarket,notify_menu,notify_savings,notify_price_drops,notify_summary"
       )
       .eq("id", user.id)
       .maybeSingle(),
     supabase.from("user_supermarkets").select("supermarket:supermarkets(id,name,has_prices)").eq("user_id", user.id),
+    supabase.from("recipe_ingredients").select("ingredient_name"),
   ]);
 
   const chains: Chain[] = (mine ?? [])
@@ -32,6 +34,7 @@ export default async function SettingsPage() {
     avoidFoods: p?.avoid_foods ?? [],
     weeklyBudget: p?.weekly_budget ?? null,
     maxRecipeMinutes: p?.max_recipe_minutes ?? null,
+    cookSessions: p?.cook_sessions ?? null,
     goals: p?.goals ?? [],
     compareMode: p?.compare_mode ?? "avisar",
     mainSupermarket: p?.main_supermarket ?? null,
@@ -47,6 +50,7 @@ export default async function SettingsPage() {
         initial={initial}
         email={user.email ?? ""}
         chains={chains}
+        foods={mergeFoods(FOODS, (ings ?? []).map((i) => i.ingredient_name as string))}
         location={{ label: p?.address ?? p?.postal_code ?? null, lat: p?.lat ?? null, lng: p?.lng ?? null }}
       />
       <AccountSection />

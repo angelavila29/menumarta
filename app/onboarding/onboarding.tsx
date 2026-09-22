@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
-import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, LeafIcon, PlusIcon } from "@/components/icons";
+import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, LeafIcon } from "@/components/icons";
+import { FoodInput } from "@/components/food-input";
+import { COOK_RANGES, cookRangeOf } from "@/lib/cook-sessions";
 import { formatDistance, type NearbyChain } from "@/lib/geo";
 import { locateByAddress, locateByCoords, saveOnboarding, type LocateResult } from "@/lib/onboarding-actions";
-import { CartBigIcon, HouseIcon, LeafBigIcon, PinIcon, StoreBigIcon, TargetIcon } from "./step-icons";
+import { CartBigIcon, HouseIcon, LeafBigIcon, PinIcon, PotIcon, StoreBigIcon, TargetIcon } from "./step-icons";
 import { StoreMap } from "./store-map";
 
 export type Initial = {
@@ -23,12 +25,18 @@ export type Initial = {
   allergies: string[];
   avoidFoods: string[];
   goals: string[];
+  cookSessions: number | null;
+  weeklyBudget: number | null;
+  maxRecipeMinutes: number | null;
+  foods: string[];
   isFirstTime: boolean;
 };
 
 type Located = Extract<LocateResult, { ok: true }>;
-const TOTAL = 7;
-const STEP_NAMES = ["Bienvenida", "Tu hogar", "Tu zona", "Supermercados", "Tu habitual", "Alimentación", "Objetivos"];
+const TOTAL = 8;
+const STEP_NAMES = ["Bienvenida", "Tu hogar", "Cocina", "Tu zona", "Supermercados", "Tu habitual", "Alimentación", "Objetivos"];
+const BUDGETS = [30, 40, 50, 60, 80, 100, 150];
+const MINUTES = [15, 20, 30, 45, 60];
 
 // ¿Pantalla de escritorio? (para mostrar el mapa siempre junto a la lista)
 const DESKTOP_QUERY = "(min-width: 1024px)";
@@ -55,7 +63,9 @@ export function Onboarding({ initial }: { initial: Initial }) {
   const [diet, setDiet] = useState(initial.diet);
   const [allergies, setAllergies] = useState<Set<string>>(new Set(initial.allergies));
   const [avoid, setAvoid] = useState<Set<string>>(new Set(initial.avoidFoods));
-  const [avoidInput, setAvoidInput] = useState("");
+  const [cookRange, setCookRange] = useState(cookRangeOf(initial.cookSessions));
+  const [budget, setBudget] = useState<number | null>(initial.weeklyBudget);
+  const [maxMinutes, setMaxMinutes] = useState<number | null>(initial.maxRecipeMinutes);
   const [goals, setGoals] = useState<Set<string>>(new Set(initial.goals));
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -108,6 +118,9 @@ export function Onboarding({ initial }: { initial: Initial }) {
           allergies: Array.from(allergies),
           avoidFoods: Array.from(avoid),
           goals: Array.from(goals),
+          cookSessions: COOK_RANGES.find((r) => r.id === cookRange)?.value ?? null,
+          weeklyBudget: budget,
+          maxRecipeMinutes: maxMinutes,
         });
         router.push(to);
       } catch (e) {
@@ -208,6 +221,41 @@ export function Onboarding({ initial }: { initial: Initial }) {
       )}
 
       {step === 3 && (
+        <Screen icon={<PotIcon className="h-20 w-20" />} title="¿Cómo cocinas?" subtitle="Con esto el menú te propone cocinar las veces justas y recetas que te cuadren.">
+          <p className="mb-2 text-sm font-semibold">¿Cuántas veces cocinas a la semana?</p>
+          <div className="mb-1 grid grid-cols-2 gap-2 lg:grid-cols-5">
+            {COOK_RANGES.map((r) => (
+              <Chip key={r.id} on={cookRange === r.id} onClick={() => setCookRange(r.id)} big>{r.label}</Chip>
+            ))}
+          </div>
+          <p className="mb-5 text-xs text-muted">{COOK_RANGES.find((r) => r.id === cookRange)?.hint} El resto de comidas salen de sobras y platos que aguantan.</p>
+
+          <div className="lg:grid lg:grid-cols-2 lg:gap-8">
+          <div>
+          <p className="mb-2 text-sm font-semibold">Presupuesto semanal <span className="font-normal text-muted">(opcional)</span></p>
+          <div className="mb-5 flex flex-wrap gap-2">
+            <Chip on={budget === null} onClick={() => setBudget(null)}>Sin definir</Chip>
+            {BUDGETS.map((b) => (
+              <Chip key={b} on={budget === b} onClick={() => setBudget(b)}>{b} €</Chip>
+            ))}
+          </div>
+          </div>
+          <div>
+          <p className="mb-2 text-sm font-semibold">Tiempo máximo por receta</p>
+          <div className="mb-1 flex flex-wrap gap-2">
+            <Chip on={maxMinutes === null} onClick={() => setMaxMinutes(null)}>Sin límite</Chip>
+            {MINUTES.map((m) => (
+              <Chip key={m} on={maxMinutes === m} onClick={() => setMaxMinutes(m)}>{m} min</Chip>
+            ))}
+          </div>
+          <p className="text-xs text-muted">El menú solo elegirá recetas que quepan en ese tiempo.</p>
+          </div>
+          </div>
+          <Primary onClick={next} onBack={back}>Continuar</Primary>
+        </Screen>
+      )}
+
+      {step === 4 && (
         <Screen icon={<PinIcon className="h-20 w-20" />} title="¿Dónde haces la compra?" subtitle="Usamos tu zona para mostrarte supermercados cercanos.">
           <div className="lg:max-w-xl">
           <button type="button" onClick={byGps} disabled={pending} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3.5 font-semibold text-white disabled:opacity-60">
@@ -233,7 +281,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
         </Screen>
       )}
 
-      {step === 4 && located && (
+      {step === 5 && located && (
         <Screen icon={<CartBigIcon className="h-20 w-20" />} title="Tus supermercados cercanos" subtitle="Selecciona los que usas habitualmente.">
           <div className="mb-3 grid grid-cols-2 rounded-full bg-cream-dark p-1 text-sm font-medium lg:hidden">
             {(["lista", "mapa"] as const).map((t) => (
@@ -280,7 +328,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
         </Screen>
       )}
 
-      {step === 5 && (
+      {step === 6 && (
         <Screen icon={<StoreBigIcon className="h-20 w-20" />} title="Tu supermercado habitual" subtitle="También puedes decirnos cómo quieres comparar.">
           <div className="lg:grid lg:grid-cols-2 lg:gap-8">
           <div>
@@ -323,7 +371,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
         </Screen>
       )}
 
-      {step === 6 && (
+      {step === 7 && (
         <Screen icon={<LeafBigIcon className="h-20 w-20" />} title="Tu alimentación" subtitle="Adaptaremos tus menús y tu lista.">
           <div className="lg:grid lg:grid-cols-2 lg:gap-10">
           <div>
@@ -344,33 +392,24 @@ export function Onboarding({ initial }: { initial: Initial }) {
           <div>
           <p className="mb-2 text-sm font-semibold">Evitar alimentos <span className="font-normal text-muted">(opcional)</span></p>
           <div className="mb-2 flex flex-wrap gap-2">
-            {Array.from(new Set(["brócoli", "champiñones", "cerdo", ...avoid])).map((a) => (
+            {["brócoli", "champiñones", "cerdo", "pescado", "picante"].map((a) => (
               <Chip key={a} on={avoid.has(a)} onClick={() => setAvoid(toggleSet(avoid, a))}>{cap(a)}</Chip>
             ))}
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-cream-dark bg-white px-3">
-            <PlusIcon className="h-4 w-4 text-muted" />
-            <input
-              type="text"
-              value={avoidInput}
-              onChange={(e) => setAvoidInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && avoidInput.trim()) {
-                  setAvoid(new Set([...avoid, avoidInput.trim().toLowerCase()]));
-                  setAvoidInput("");
-                }
-              }}
-              placeholder="Añadir alimento"
-              className="w-full bg-transparent py-2.5 text-sm outline-none"
-            />
-          </div>
+          <FoodInput
+            label="Añadir alimento a evitar"
+            placeholder="Escribe un alimento: coliflor, atún…"
+            value={Array.from(avoid)}
+            onChange={(next) => setAvoid(new Set(next))}
+            suggestions={initial.foods}
+          />
           </div>
           </div>
           <Primary onClick={next} onBack={back}>Continuar</Primary>
         </Screen>
       )}
 
-      {step === 7 && (
+      {step === 8 && (
         <Screen icon={<TargetIcon className="h-20 w-20" />} title={<>¿Qué buscas con <span className="text-brand">Sobremesa</span>?</>} subtitle="Elige hasta dos opciones.">
           <div className="grid grid-cols-2 gap-2 lg:grid-cols-3 lg:gap-3">
             {[["ahorrar", "🐷", "Ahorrar dinero"], ["organizar", "🗓️", "Organizarme mejor"], ["saludable", "🥗", "Comer más saludable"], ["variado", "🥦", "Comer más variado"], ["tiempo", "⏱️", "Ahorrar tiempo"], ["todo", "❤️", "Todo un poco"]].map(([id, e, l]) => {
