@@ -6,6 +6,7 @@ import { CheckIcon, PlusIcon } from "@/components/icons";
 import { saveRecipe, type RecipeInput } from "@/lib/recipe-bank-actions";
 import { parseRecipeText } from "@/lib/recipe-parse";
 import { EXTRA_TAGS, MAIN_TAGS, VISIBILITY } from "@/lib/recipe-tags";
+import { reportError } from "@/lib/report-actions";
 import { createClient } from "@/lib/supabase/client";
 
 type IngRow = { name: string; qty: string; unit: string };
@@ -35,33 +36,40 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
   const [pending, start] = useTransition();
   const [photoUrl, setPhotoUrl] = useState<string | null>(initial?.photoUrl ?? null);
   const [uploading, setUploading] = useState(false);
+  const [photoError, setPhotoError] = useState("");
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasted, setPasted] = useState("");
   const [pasteMsg, setPasteMsg] = useState("");
 
-  // La foto se reduce a 1200 px en el dispositivo antes de subirla: pesa poco y sube rápido
+  // La foto se reduce a 1200 px en el dispositivo antes de subirla: pesa poco y sube rápido.
+  // En iPhone, createImageBitmap falla con algunas fotos (HEIC, muy grandes): se prueba
+  // también con un <img>, y si nada la decodifica se sube tal cual si el formato lo permite.
   async function onPhoto(file: File | undefined) {
     if (!file) return;
     setUploading(true);
-    setError("");
+    setPhotoError("");
     try {
-      const bitmap = await createImageBitmap(file);
-      const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(bitmap.width * scale);
-      canvas.height = Math.round(bitmap.height * scale);
-      canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.82));
-      if (!blob) throw new Error("No se ha podido leer la imagen.");
       const supabase = createClient();
       const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) throw new Error("Sesión caducada.");
-      const path = `${auth.user.id}/${Date.now()}.jpg`;
-      const { error: upErr } = await supabase.storage.from("recipe-photos").upload(path, blob, { contentType: "image/jpeg" });
+      if (!auth.user) throw new Error("Tu sesión ha caducado. Recarga la página y vuelve a entrar.");
+      const blob = (await shrinkImage(file)) ?? (ALLOWED.has(file.type) && file.size <= MAX_BYTES ? file : null);
+      if (!blob) {
+        throw new Error(
+          file.size > MAX_BYTES
+            ? "No he podido reducir la foto y pesa más de 2 MB. Prueba con una captura de pantalla o una foto más pequeña."
+            : "No he podido leer esa imagen. Prueba con otra foto o una captura de pantalla."
+        );
+      }
+      const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+      const path = `${auth.user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("recipe-photos").upload(path, blob, { contentType: blob.type || "image/jpeg" });
       if (upErr) throw new Error(upErr.message);
       setPhotoUrl(supabase.storage.from("recipe-photos").getPublicUrl(path).data.publicUrl);
     } catch (e) {
-      setError(e instanceof Error ? `No se ha podido subir la foto: ${e.message}` : "No se ha podido subir la foto.");
+      const msg = e instanceof Error ? e.message : "No se ha podido subir la foto.";
+      setPhotoError(msg);
+      // Para saber qué pasa en el móvil de cada uno: tipo y tamaño del archivo y navegador.
+      void reportError({ path: "/recetas/foto", message: `${msg} · ${file.type || "sin tipo"} · ${Math.round(file.size / 1024)} KB · ${navigator.userAgent.slice(0, 120)}` });
     } finally {
       setUploading(false);
     }
@@ -254,9 +262,10 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
             <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-cream-dark text-sm text-muted hover:border-brand hover:text-brand">
               <span aria-hidden className="text-3xl">📷</span>
               {uploading ? "Subiendo…" : "Añadir una foto del plato"}
-              <input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={(e) => onPhoto(e.target.files?.[0])} />
+              <input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={(e) => { onPhoto(e.target.files?.[0]); e.target.value = ""; }} />
             </label>
           )}
+          {photoError && <p role="alert" className="mt-2 rounded-xl bg-red-50 p-3 text-sm text-red-700">{photoError}</p>}
         </section>
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-lg font-bold">¿Quién puede verla?</h2>
@@ -284,4 +293,38 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
       </aside>
     </form>
   );
+}
+
+const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
+const MAX_BYTES = 2 * 1024 * 1024;
+
+/** Decodifica la imagen como pueda (bitmap o <img>) y la devuelve como JPEG de 1200 px. null si no hay manera. */
+async function shrinkImage(file: File): Promise<Blob | null> {
+  let source: ImageBitmap | HTMLImageElement | null = null;
+  try {
+    source = await createImageBitmap(file);
+  } catch {
+    source = await new Promise<HTMLImageElement | null>((resolve) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = url;
+      setTimeout(() => resolve(null), 15000);
+    });
+  }
+  if (!source) return null;
+  const w = "naturalWidth" in source ? source.naturalWidth : source.width;
+  const h = "naturalHeight" in source ? source.naturalHeight : source.height;
+  if (!w || !h) return null;
+  const scale = Math.min(1, 1200 / Math.max(w, h));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(w * scale);
+  canvas.height = Math.round(h * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.82));
+  if ("close" in source) source.close();
+  return blob;
 }
