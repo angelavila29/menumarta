@@ -65,3 +65,26 @@ test("los envases se cuentan enteros y por unidad de venta", () => {
   assert.equal(packsNeeded({ ingredient: "arroz", qty: 1500, unit: "g" }, product), 2);
   assert.equal(packsNeeded({ ingredient: "arroz", qty: 200, unit: "g" }, product), 1);
 });
+
+test("con despensa, el menú prefiere recetas que gastan lo que ya hay en casa", () => {
+  const recipes: Recipe[] = [
+    { id: 1, name: "Arroz con pollo", meal: "ambas", servings: 4, tags: ["arroz"], owner_id: null, author_name: null },
+    { id: 2, name: "Merluza en salsa", meal: "ambas", servings: 4, tags: ["pescado"], owner_id: null, author_name: null },
+    { id: 3, name: "Tortilla de atún", meal: "ambas", servings: 4, tags: ["huevo"], owner_id: null, author_name: null },
+    { id: 4, name: "Salmón al horno", meal: "ambas", servings: 4, tags: ["pescado"], owner_id: null, author_name: null },
+  ];
+  const ingredients = new Map<number, string[]>([
+    [1, ["arroz", "pechuga de pollo", "pimiento rojo", "cebolla"]],
+    [2, ["merluza", "guisantes", "vino blanco", "harina"]],
+    [3, ["huevo", "atún en lata", "cebolla"]],
+    [4, ["salmón", "calabacín", "limón"]],
+  ]);
+  const pantry = new Set(["arroz", "pechuga de pollo", "pimiento rojo", "huevo", "atún en lata"]);
+  let hits = 0;
+  for (let i = 0; i < 30; i++) {
+    const slots = generateWeek(recipes, { sessions: 2, ingredients, pantry });
+    const ids = new Set(slots.map((s) => s.recipe_id).filter((x): x is number => x !== null));
+    if (ids.has(1) && ids.has(3)) hits++;
+  }
+  assert.ok(hits >= 27, `las dos recetas de despensa deberían salir casi siempre (${hits}/30)`);
+});

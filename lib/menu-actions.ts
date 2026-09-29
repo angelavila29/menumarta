@@ -26,7 +26,11 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     loadIngredientNames(supabase),
     supabase.from("recipes").select("id,time_minutes"),
   ]);
-  const { data: favs } = await supabase.from("favorite_recipes").select("recipe_id").eq("user_id", userId);
+  const [{ data: favs }, { data: pantryRows }] = await Promise.all([
+    supabase.from("favorite_recipes").select("recipe_id").eq("user_id", userId),
+    supabase.from("pantry_items").select("ingredient_name").eq("user_id", userId),
+  ]);
+  const pantry = new Set((pantryRows ?? []).map((p) => (p.ingredient_name as string).toLowerCase()));
   const saved = new Set((favs ?? []).map((f) => f.recipe_id as number));
   // Recetas de amigos: todas o solo las guardadas, según la preferencia. Las públicas de
   // gente que no es amiga solo entran si las has guardado.
@@ -59,6 +63,7 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     thrifty: profile?.weekly_budget != null || goals.includes("ahorrar"),
     quick: goals.includes("tiempo"),
     healthy: goals.includes("saludable"),
+    pantry: pantry.size > 0 ? pantry : undefined,
   }).map((s) => ({ ...s, menu_id: menu.id, cooked: false }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);

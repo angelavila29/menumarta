@@ -92,6 +92,7 @@ export type GeneratePrefs = {
   thrifty?: boolean; // presupuesto u objetivo de ahorrar
   quick?: boolean; // objetivo de ahorrar tiempo
   healthy?: boolean; // objetivo de comer más sano
+  pantry?: Set<string>; // lo que ya hay en casa: premia recetas que lo gastan y penaliza las que obligan a comprar
 };
 
 // Ingredientes de fondo de armario: compartirlos no ahorra nada
@@ -114,7 +115,7 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
   const tagCount = new Map<string, number>();
   const shuffled = [...recipes].sort(() => Math.random() - 0.5);
   const assigned = new Map<string, number>();
-  const bought = new Set<string>(); // ingredientes que ya hay que comprar esta semana
+  const bought = new Set<string>(opts.pantry ?? []); // lo que ya tienes cuenta como "ya comprado"
   const cookedAt = new Map<number, { day: number; count: number; meal: Recipe["meal"] }>();
   const isFree = (day: number, meal: string) => day <= 6 && !blocked.has(keyOf(day, meal)) && !assigned.has(keyOf(day, meal));
   let done = 0;
@@ -124,11 +125,15 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
     const candidates = shuffled.filter((r) => !used.has(r.id) && (r.meal === slot.meal || r.meal === "ambas"));
     const varied = candidates.filter((r) => (tagCount.get(r.tags[0] ?? "") ?? 0) < 2);
     // Entre unas pocas al azar (para que cada semana sea distinta) gana la que mejor encaja
-    const shortlist = (varied.length > 0 ? varied : candidates).slice(0, 5);
+    // Con despensa, se miran más candidatas para que de verdad salga lo que aprovecha lo que hay
+    const shortlist = (varied.length > 0 ? varied : candidates).slice(0, opts.pantry ? 12 : 5);
     const score = (r: Recipe) => {
-      const shared = (opts.ingredients?.get(r.id) ?? []).filter((i) => !BACKGROUND.has(i) && bought.has(i)).length;
+      const ings = (opts.ingredients?.get(r.id) ?? []).filter((i) => !BACKGROUND.has(i));
+      const shared = ings.filter((i) => bought.has(i)).length;
+      const missing = opts.pantry ? ings.length - shared : 0;
       return (
-        shared * 2 +
+        shared * 2 -
+        missing * 1.5 +
         (opts.thrifty && r.tags.includes("económico") ? 3 : 0) +
         (opts.quick && r.tags.includes("rápido") ? 2 : 0) +
         (opts.healthy && r.tags.some((t) => ["verdura", "legumbre", "pescado", "ensalada"].includes(t)) ? 2 : 0)
