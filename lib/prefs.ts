@@ -47,6 +47,36 @@ export function recipeAllowed(recipe: Recipe, ingredients: string[], prefs: Pref
     if (a === "frutos secos" && hasAny(text, NUT_WORDS)) return false;
     if (a === "soja" && hasAny(text, SOY_WORDS)) return false;
   }
-  if (prefs.avoid.length > 0 && hasAny(text, prefs.avoid)) return false;
+  if (prefs.avoid.some((a) => isAvoidedIn(text, a))) return false;
   return true;
+}
+
+/**
+ * Cómo escribe la gente lo que no le gusta → cómo aparece en las recetas. "tomate natural" no
+ * casa con ningún ingrediente (las recetas dicen "tomate" o "tomate cherry"), y quien lo escribe
+ * así sí come tomate frito, que es otra cosa.
+ */
+const AVOID_ALIASES: Record<string, string[]> = {
+  "tomate natural": ["tomate", "tomate cherry", "tomates"],
+  "tomate crudo": ["tomate", "tomate cherry", "tomates"],
+  pescado: ["merluza", "bacalao", "salmón", "dorada", "lubina", "atún", "sardinas", "caballa", "pescado", "trucha", "rape"],
+  marisco: ["gambas", "langostinos", "mejillones", "calamares", "sepia", "pulpo", "marisco"],
+  "carne roja": ["ternera", "cerdo", "lomo", "chuletas", "costillas", "carne picada", "cordero"],
+  verdura: ["calabacín", "berenjena", "brócoli", "coliflor", "espinacas", "acelgas", "judías verdes", "pimiento", "puerro", "calabaza"],
+};
+
+/**
+ * Lo escrito tal cual se busca dentro del nombre y los ingredientes ("cerdo" pilla "lomo de cerdo").
+ * Un alias, en cambio, exige el ingrediente exacto: "tomate" no debe pillar "tomate frito".
+ */
+function isAvoidedIn(text: string[], avoid: string): boolean {
+  const alias = AVOID_ALIASES[norm(avoid)];
+  if (!alias) return hasAny(text, [avoid]);
+  const exact = new Set(alias.map(norm));
+  return text.some((t) => exact.has(norm(t)));
+}
+
+/** Para comprobar en la ficha si un ingrediente concreto choca con lo que evitas. */
+export function isAvoided(ingredient: string, avoid: string[]): boolean {
+  return avoid.some((a) => isAvoidedIn([ingredient], a));
 }

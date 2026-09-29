@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { recipeAllowed } from "../lib/prefs";
 import { currentWeekStart, defaultCookSessions, generateWeek, MAX_PORTIONS, packsNeeded, parsePackSize, toProductUnit, weekOffsetFrom, type Recipe } from "../lib/menu";
 
 const raw = JSON.parse(readFileSync("data/recipes.json", "utf8")) as { name: string; meal: Recipe["meal"]; servings: number; tags: string[] }[];
@@ -87,4 +88,13 @@ test("con despensa, el menú prefiere recetas que gastan lo que ya hay en casa",
     if (ids.has(1) && ids.has(3)) hits++;
   }
   assert.ok(hits >= 27, `las dos recetas de despensa deberían salir casi siempre (${hits}/30)`);
+});
+
+test("evitar 'tomate natural' quita las recetas con tomate fresco pero no las de tomate frito", () => {
+  const base = { id: 1, name: "x", meal: "ambas" as const, servings: 4, tags: [] as string[], owner_id: null, author_name: null };
+  const prefs = { diet: null, allergies: [], avoid: ["tomate natural", "coliflor"] };
+  assert.equal(recipeAllowed({ ...base, name: "Ensalada campera" }, ["patata", "tomate", "cebolla"], prefs), false);
+  assert.equal(recipeAllowed({ ...base, name: "Pasta al pesto" }, ["espaguetis", "pesto", "tomate cherry"], prefs), false);
+  assert.equal(recipeAllowed({ ...base, name: "Macarrones con atún" }, ["macarrones", "tomate frito", "atún en lata"], prefs), true);
+  assert.equal(recipeAllowed({ ...base, name: "Coliflor gratinada" }, ["coliflor", "bechamel"], prefs), false);
 });
