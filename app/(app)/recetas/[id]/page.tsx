@@ -9,6 +9,7 @@ import { euro } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { cheapestProductFor, currentWeekStart, DAYS, toProductUnit, type Need } from "@/lib/menu";
 import { nutritionPerServing, unitGramsOf } from "@/lib/nutrition";
+import { formatUnits } from "@/lib/qty";
 import { keywords, stem, unaccent } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { AddAllButton, AddToMenuControl, DeleteRecipeButton, FavoriteRecipeButton, IngredientAddButton } from "./recipe-client";
@@ -162,7 +163,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
 
         <div className="grid gap-4 md:grid-cols-[1fr_1.1fr]">
           <div className="flex flex-col gap-3">
-            <RecipeArt tags={tags} name={recipe.name} photoUrl={recipe.photo_url as string | null} className="aspect-[4/3] rounded-2xl text-8xl shadow-sm" />
+            <RecipeArt tags={tags} name={recipe.name} photoUrl={recipe.photo_url as string | null} className="aspect-square rounded-2xl text-8xl shadow-sm" />
             <div className="grid grid-cols-2 gap-2">
               <Stat emoji="⏱️" value={recipe.time_minutes ? `${recipe.time_minutes} min` : "—"} label="Tiempo total" />
               <Stat emoji="🧑‍🍳" value={recipe.difficulty ?? "—"} label="Dificultad" />
@@ -234,7 +235,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
               {similar.map((r) => (
                 <li key={r.id}>
                   <Link href={`/recetas/${r.id}`} className="group block">
-                    <RecipeArt tags={r.tags} name={r.name} photoUrl={r.photo} className="aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95" />
+                    <RecipeArt tags={r.tags} name={r.name} photoUrl={r.photo} className="aspect-square rounded-xl text-5xl transition group-hover:brightness-95" />
                     <p className="mt-1.5 line-clamp-2 text-sm font-medium leading-tight group-hover:text-brand">{r.name}</p>
                     <p className="mt-0.5 text-xs text-muted">
                       {r.time ? `⏱️ ${r.time} min` : ""}{r.time && r.difficulty ? " · " : ""}{r.difficulty ?? ""}
@@ -352,8 +353,8 @@ function fmtQty(qty: number, unit: string): string {
     if (v >= 1000) return `${(v / 1000).toLocaleString("es-ES", { maximumFractionDigits: 2 })} ${unit === "g" ? "kg" : "L"}`;
     return `${v} ${unit}`;
   }
-  const u = Math.max(0.5, Math.round(qty * 2) / 2);
-  return `${u.toLocaleString("es-ES")} ${u === 1 ? "unidad" : "unidades"}`;
+  const u = Math.max(0.25, Math.round(qty * 4) / 4);
+  return `${formatUnits(u)} ${u === 1 ? "unidad" : "unidades"}`;
 }
 
 function capitalize(s: string) {

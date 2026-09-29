@@ -302,17 +302,17 @@ function MealSlot({ label, meal, day, recipe, isOut, isLeftover, cooked, onCooke
       <div className="group relative" title="Cambiar plato">
         {recipe ? (
           <div className="relative">
-            <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className={`aspect-[4/3] rounded-xl text-5xl transition group-hover:brightness-95 ${isLeftover ? "opacity-60" : ""}`} />
+            <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className={`aspect-square rounded-xl text-5xl transition group-hover:brightness-95 ${isLeftover ? "opacity-60" : ""}`} />
             <span className={`absolute left-1.5 top-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${isLeftover ? "bg-white/90 text-muted" : "bg-brand text-white"}`}>
               {isLeftover ? "Sobras · táper" : "Cocinas"}
             </span>
           </div>
         ) : isOut ? (
-          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-xl bg-cream text-xs text-muted">
+          <div className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl bg-cream text-xs text-muted">
             <span aria-hidden className="text-3xl">🍴</span> Como fuera
           </div>
         ) : (
-          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-cream-dark text-xs text-muted group-hover:border-brand group-hover:text-brand">
+          <div className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-cream-dark text-xs text-muted group-hover:border-brand group-hover:text-brand">
             <PlusIcon className="h-5 w-5" /> Añadir
           </div>
         )}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
+import { formatUnits } from "@/lib/qty";
 import { CartIcon, CheckIcon, PiggyIcon } from "@/components/icons";
 import { searchProducts } from "@/lib/actions";
 import { euro, packSize, superName, unitPrice } from "@/lib/format";
@@ -311,5 +312,6 @@ function fmtQty(n: Need) {
   const q = Math.round(n.qty * 100) / 100;
   if (n.unit === "g" && q >= 1000) return `${(q / 1000).toLocaleString("es-ES")} kg`;
   if (n.unit === "ml" && q >= 1000) return `${(q / 1000).toLocaleString("es-ES")} L`;
-  return `${q.toLocaleString("es-ES")} ${n.unit === "ud" ? (q === 1 ? "unidad" : "unidades") : n.unit}`;
+  if (n.unit === "ud") return `${formatUnits(q)} ${q === 1 ? "unidad" : "unidades"}`;
+  return `${q.toLocaleString("es-ES")} ${n.unit}`;
 }

@@ -40,3 +40,20 @@ test("un texto sin formato no revienta", () => {
   assert.equal(r.name, "Tortilla");
   assert.equal(r.steps.length, 1);
 });
+
+import { formatUnits, parseQty } from "../lib/qty";
+
+test("cantidades con fracciones: 1/2, ½, 1 1/2, 0,5", () => {
+  assert.equal(parseQty("1/2"), 0.5);
+  assert.equal(parseQty("½"), 0.5);
+  assert.equal(parseQty("1 1/2"), 1.5);
+  assert.equal(parseQty("0,5"), 0.5);
+  assert.equal(parseQty("2"), 2);
+  assert.equal(parseQty("1/4"), 0.25);
+  assert.equal(parseQty("abc"), null);
+  assert.equal(parseQty("1/0"), null);
+  assert.equal(formatUnits(0.5), "½");
+  assert.equal(formatUnits(1.5), "1 ½");
+  assert.equal(formatUnits(2), "2");
+  assert.equal(formatUnits(0.25), "¼");
+});

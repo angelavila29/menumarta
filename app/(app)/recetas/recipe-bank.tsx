@@ -160,7 +160,7 @@ export function RecipeBank({ recipes, initialView, initialAuthor, friendCount, f
             <li key={r.id}>
               <Link href={`/recetas/${r.id}`} className="group block h-full overflow-hidden rounded-2xl bg-white shadow-sm">
                 <div className="relative">
-                  <RecipeArt tags={r.tags} name={r.name} photoUrl={r.photoUrl} className="aspect-[4/3] text-6xl transition group-hover:brightness-95" />
+                  <RecipeArt tags={r.tags} name={r.name} photoUrl={r.photoUrl} className="aspect-square text-6xl transition group-hover:brightness-95" />
                   {r.saved && <HeartIcon className="absolute right-2 top-2 h-6 w-6 fill-brand text-brand" />}
                 </div>
                 <div className="p-3">

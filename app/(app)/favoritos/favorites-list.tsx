@@ -19,7 +19,7 @@ export function FavoritesList({ products, recipes }: { products: Product[]; reci
             {recipes.map((r) => (
               <li key={r.id}>
                 <Link href={`/recetas/${r.id}`} className="group block overflow-hidden rounded-2xl bg-white shadow-sm">
-                  <RecipeArt tags={r.tags} name={r.name} photoUrl={r.photo_url} className="aspect-[4/3] text-6xl transition group-hover:brightness-95" />
+                  <RecipeArt tags={r.tags} name={r.name} photoUrl={r.photo_url} className="aspect-square text-6xl transition group-hover:brightness-95" />
                   <div className="p-3">
                     <p className="line-clamp-2 font-semibold leading-tight group-hover:text-brand">{r.name}</p>
                     <p className="mt-1 text-xs text-muted">
