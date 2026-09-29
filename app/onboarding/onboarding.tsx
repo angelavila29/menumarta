@@ -28,6 +28,7 @@ export type Initial = {
   cookSessions: number | null;
   weeklyBudget: number | null;
   maxRecipeMinutes: number | null;
+  bodyGoal: string | null;
   foods: string[];
   isFirstTime: boolean;
 };
@@ -66,6 +67,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
   const [cookRange, setCookRange] = useState(cookRangeOf(initial.cookSessions));
   const [budget, setBudget] = useState<number | null>(initial.weeklyBudget);
   const [maxMinutes, setMaxMinutes] = useState<number | null>(initial.maxRecipeMinutes);
+  const [bodyGoal, setBodyGoal] = useState<string | null>(initial.bodyGoal);
   const [goals, setGoals] = useState<Set<string>>(new Set(initial.goals));
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -121,6 +123,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
           cookSessions: COOK_RANGES.find((r) => r.id === cookRange)?.value ?? null,
           weeklyBudget: budget,
           maxRecipeMinutes: maxMinutes,
+          bodyGoal,
         });
         router.push(to);
       } catch (e) {
@@ -420,6 +423,18 @@ export function Onboarding({ initial }: { initial: Initial }) {
                 </button>
               );
             })}
+          </div>
+          <p className="mb-2 mt-5 text-sm font-semibold">¿Y con tu cuerpo? <span className="font-normal text-muted">(opcional)</span></p>
+          <p className="mb-2 text-xs text-muted">Con esto te decimos si el menú de cada semana cuadra y lo ajustamos. Peso y altura los puedes poner después en Ajustes.</p>
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+            {[["perder", "⚖️", "Perder peso"], ["mantener", "🙂", "Mantenerme"], ["ganar", "💪", "Ganar músculo"]].map(([id, e, l]) => (
+              <button key={id} type="button" onClick={() => setBodyGoal(bodyGoal === id ? null : id)} className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm font-medium ${bodyGoal === id ? "border-brand bg-brand-soft" : "border-cream-dark bg-white"}`}>
+                <span className="text-xl">{e}</span>{l}
+              </button>
+            ))}
+            <button type="button" onClick={() => setBodyGoal(null)} className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm font-medium ${bodyGoal === null ? "border-brand bg-brand-soft" : "border-cream-dark bg-white"}`}>
+              <span className="text-xl">🤷</span>Sin objetivo
+            </button>
           </div>
           <div className="mt-4 rounded-xl bg-olive-soft p-3">
             <p className="flex items-center gap-2 font-semibold text-olive-dark"><CheckIcon className="h-5 w-5" /> Todo listo</p>

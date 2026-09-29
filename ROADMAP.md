@@ -137,6 +137,18 @@ mejor encaja.
       lo elegido como chips con una X. Despensa y cocinar enseñan solo los 12 habituales y un
       "Ver todos".
 
+## J. Objetivo corporal y equilibrio del menú (30 sep)
+- [x] Perfil con sexo, edad, peso, altura, actividad y objetivo (perder peso, mantenerme, ganar
+      músculo). En Ajustes ("Tu cuerpo y tu objetivo") y el objetivo también en el último paso del
+      onboarding. Necesidades diarias con Mifflin-St Jeor (`lib/goal.ts`); comida+cena se toman
+      como el 55 % de las kcal y el 60 % de la proteína del día.
+- [x] En el menú, "Equilibrio de la semana" compara la media diaria de comida y cena con el objetivo:
+      calorías, proteína y raciones de verdura, con veredicto, consejos concretos y botón "Ajustar el
+      menú a mi objetivo". `lib/menu-nutrition.ts`, con tests.
+- [x] El generador puntúa según el objetivo: proteína para ganar músculo, ligereza y verdura para
+      perder peso. Es orientativo (las recetas no cuentan pan, postre ni bebidas) y así se dice.
+- [ ] Siguiente: raciones por persona (ración y media para quien necesita más) y desayunos.
+
 ## Pendiente, decidido a propósito
 - Las extensiones `pg_trgm` y `unaccent` siguen en el esquema `public`. Moverlas rompería la columna
   generada `products.name_norm`, que es de lo que vive el buscador.

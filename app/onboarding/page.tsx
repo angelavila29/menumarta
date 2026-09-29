@@ -7,7 +7,7 @@ export default async function OnboardingPage() {
   const [{ data: profile }, { data: mine }, { data: ings }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("address,postal_code,display_name,household_size,planning_meals,main_supermarket,compare_mode,diet,allergies,avoid_foods,goals,cook_sessions,weekly_budget,max_recipe_minutes")
+      .select("address,postal_code,display_name,household_size,planning_meals,main_supermarket,compare_mode,diet,allergies,avoid_foods,goals,cook_sessions,weekly_budget,max_recipe_minutes,body_goal")
       .eq("id", user.id)
       .maybeSingle(),
     supabase.from("user_supermarkets").select("supermarket_id").eq("user_id", user.id),
@@ -28,6 +28,7 @@ export default async function OnboardingPage() {
     cookSessions: profile?.cook_sessions ?? null,
     weeklyBudget: profile?.weekly_budget ?? null,
     maxRecipeMinutes: profile?.max_recipe_minutes ?? null,
+    bodyGoal: profile?.body_goal ?? null,
     foods: mergeFoods(FOODS, (ings ?? []).map((i) => i.ingredient_name as string)),
     isFirstTime: (mine ?? []).length === 0,
   };

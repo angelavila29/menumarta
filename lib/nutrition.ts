@@ -99,6 +99,8 @@ const T: Record<string, Row> = {
   "tomate cherry": { kcal: 18, protein: 0.9, carbs: 3.9, veg: true },
   tortellini: { kcal: 290, protein: 12, carbs: 45 },
   vinagre: { kcal: 20, protein: 0, carbs: 0.5 },
+  "patatas fritas": { kcal: 530, protein: 6, carbs: 52 },
+  "bolsa de patatas fritas": { kcal: 530, protein: 6, carbs: 52, unitGrams: 150 },
 };
 
 /** Peso típico en gramos de una unidad del ingrediente (1 cebolla ≈ 150 g). */

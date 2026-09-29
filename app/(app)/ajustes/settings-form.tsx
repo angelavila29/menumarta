@@ -7,6 +7,7 @@ import { ChainLogo } from "@/components/chain-logo";
 import { CartIcon, CheckIcon, HomeIcon, LeafIcon, PlusIcon, StarIcon, StoreIcon } from "@/components/icons";
 import { FoodInput } from "@/components/food-input";
 import { COOK_RANGES, cookRangeOf } from "@/lib/cook-sessions";
+import { hasBodyData, targetsFor, type Body } from "@/lib/goal";
 import { saveSettings, type SettingsInput } from "@/lib/settings-actions";
 
 export type Chain = { id: string; name: string; has_prices: boolean };
@@ -23,10 +24,15 @@ const ForkIcon = ({ className }: { className?: string }) => (
   <svg {...svg} className={className}><path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v5M9 3v5M17 3c-2 0-3 3-3 6s1 4 3 4v8" /></svg>
 );
 
+const TargetIcon = ({ className }: { className?: string }) => (
+  <svg {...svg} className={className}><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></svg>
+);
+
 const TABS = [
   { id: "perfil", label: "Perfil", Icon: UserIcon },
   { id: "hogar", label: "Hogar", Icon: HomeIcon },
   { id: "alimentacion", label: "Alimentación", Icon: LeafIcon },
+  { id: "objetivo", label: "Objetivo", Icon: TargetIcon },
   { id: "supermercados", label: "Supermercados", Icon: StoreIcon },
   { id: "notificaciones", label: "Notificaciones", Icon: BellIcon },
 ];
@@ -35,6 +41,8 @@ const DIETS = [["todo", "De todo"], ["vegetariano", "Vegetariana"], ["vegano", "
 const ALLERGIES = ["gluten", "lactosa", "frutos secos", "huevo", "marisco", "soja"];
 const GOALS = [["ahorrar", "Ahorrar dinero"], ["organizar", "Organizarme mejor"], ["saludable", "Comer más sano"], ["variado", "Comer más variado"], ["tiempo", "Ahorrar tiempo"], ["todo", "Todo un poco"]];
 const BUDGETS = [40, 50, 60, 70, 80, 100, 120, 150];
+const BODY_GOALS: [string, string][] = [["perder", "Perder peso"], ["mantener", "Mantenerme"], ["ganar", "Ganar músculo"]];
+const ACTIVITIES: [string, string][] = [["baja", "Poca"], ["media", "Media"], ["alta", "Alta"]];
 const MINUTES = [15, 20, 30, 45, 60, 90];
 const COMPARE = [
   ["avisar", "Dime si merece la pena cambiar", "Te avisaremos si hay una opción más barata."],
@@ -180,6 +188,41 @@ export function SettingsForm({ initial, email, chains, location, foods }: Props)
               onChange={(next) => set("avoidFoods", next)}
               suggestions={foods}
             />
+          </Card>
+
+          <Card id="objetivo" icon={<TargetIcon className="h-7 w-7" />} title="Tu cuerpo y tu objetivo" subtitle="Con esto valoramos si el menú semanal te cuadra y lo ajustamos. Es orientativo, no consejo médico.">
+            <p className="mb-2 text-sm font-semibold">¿Qué buscas?</p>
+            <div className="mb-4 flex flex-wrap gap-2">
+              <Chip on={v.bodyGoal === null} onClick={() => set("bodyGoal", null)}>Sin objetivo</Chip>
+              {BODY_GOALS.map(([id, label]) => (
+                <Chip key={id} on={v.bodyGoal === id} onClick={() => set("bodyGoal", id)}>{label}</Chip>
+              ))}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Field label="Sexo" hint="Para la fórmula del gasto diario.">
+                <select value={v.sex ?? ""} onChange={(e) => set("sex", e.target.value || null)} className={inputCls}>
+                  <option value="">Prefiero no decirlo</option>
+                  <option value="mujer">Mujer</option>
+                  <option value="hombre">Hombre</option>
+                </select>
+              </Field>
+              <Field label="Edad">
+                <input inputMode="numeric" value={v.age ?? ""} onChange={(e) => set("age", e.target.value ? Number(e.target.value) : null)} placeholder="22" className={inputCls} />
+              </Field>
+              <Field label="Peso (kg)">
+                <input inputMode="decimal" value={v.weightKg ?? ""} onChange={(e) => set("weightKg", e.target.value ? Number(e.target.value.replace(",", ".")) : null)} placeholder="65" className={inputCls} />
+              </Field>
+              <Field label="Altura (cm)">
+                <input inputMode="numeric" value={v.heightCm ?? ""} onChange={(e) => set("heightCm", e.target.value ? Number(e.target.value) : null)} placeholder="170" className={inputCls} />
+              </Field>
+            </div>
+            <p className="mb-2 mt-4 text-sm font-semibold">Actividad</p>
+            <div className="flex flex-wrap gap-2">
+              {ACTIVITIES.map(([id, label]) => (
+                <Chip key={id} small on={v.activity === id} onClick={() => set("activity", id)}>{label}</Chip>
+              ))}
+            </div>
+            <GoalSummary v={v} />
           </Card>
 
           <Card id="cocina" icon={<ForkIcon className="h-7 w-7" />} title="Presupuesto y cocina" subtitle="Ajusta tus preferencias para que las recetas se adapten a tu día a día.">
@@ -370,4 +413,22 @@ function Chip({ on, onClick, small, children }: { on: boolean; onClick: () => vo
 
 function cap(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function GoalSummary({ v }: { v: SettingsInput }) {
+  const body: Body = {
+    sex: (v.sex as Body["sex"]) ?? null, age: v.age, weightKg: v.weightKg, heightCm: v.heightCm,
+    activity: (v.activity as Body["activity"]) ?? null, bodyGoal: (v.bodyGoal as Body["bodyGoal"]) ?? null,
+  };
+  if (!v.bodyGoal) return <p className="mt-4 text-sm text-muted">Sin objetivo, el menú solo mira tus gustos, tu despensa y tu presupuesto.</p>;
+  const t = targetsFor(body);
+  return (
+    <div className="mt-4 rounded-xl bg-olive-soft p-3 text-sm text-olive-dark">
+      <p>
+        Orientación: unas <b>{t.kcalDay.toLocaleString("es-ES")} kcal</b> y <b>{t.proteinDay} g de proteína</b> al día. Entre comida y cena, que es lo que planifica el menú, unas{" "}
+        <b>{t.kcalMeals.toLocaleString("es-ES")} kcal</b> y <b>{t.proteinMeals} g</b>. Las recetas solo cuentan lo que llevan escrito, sin pan, postre ni bebidas.
+      </p>
+      {!hasBodyData(body) && <p className="mt-1 text-xs">Faltan datos (sexo, edad, peso o altura), así que es una estimación media. Rellénalos y afinará.</p>}
+    </div>
+  );
 }

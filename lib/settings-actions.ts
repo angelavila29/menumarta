@@ -15,6 +15,12 @@ export type SettingsInput = {
   maxRecipeMinutes: number | null;
   cookSessions: number | null;
   goals: string[];
+  sex: string | null;
+  age: number | null;
+  weightKg: number | null;
+  heightCm: number | null;
+  activity: string | null;
+  bodyGoal: string | null;
   compareMode: string;
   mainSupermarket: string | null;
   notifyMenu: boolean;
@@ -29,6 +35,11 @@ const ALLERGIES = ["gluten", "lactosa", "frutos secos", "huevo", "marisco", "soj
 const GOALS = ["ahorrar", "organizar", "saludable", "variado", "tiempo", "todo"];
 const COMPARE = ["avisar", "habitual", "barato"];
 const MINUTES = [15, 20, 30, 45, 60, 90];
+
+function numIn(v: number | null | undefined, min: number, max: number): number | null {
+  const n = Number(v);
+  return v != null && Number.isFinite(n) && n >= min && n <= max ? Math.round(n * 10) / 10 : null;
+}
 
 /** Guarda la configuración del perfil. Todo se valida aquí: el cliente no es de fiar. */
 export async function saveSettings(input: SettingsInput) {
@@ -53,6 +64,12 @@ export async function saveSettings(input: SettingsInput) {
       max_recipe_minutes: input.maxRecipeMinutes !== null && MINUTES.includes(input.maxRecipeMinutes) ? input.maxRecipeMinutes : null,
       cook_sessions: input.cookSessions != null && Number.isFinite(input.cookSessions) ? Math.min(14, Math.max(1, Math.round(input.cookSessions))) : null,
       goals: input.goals.filter((g) => GOALS.includes(g)).slice(0, 2),
+      sex: input.sex === "mujer" || input.sex === "hombre" ? input.sex : null,
+      age: numIn(input.age, 10, 110),
+      weight_kg: numIn(input.weightKg, 25, 300),
+      height_cm: numIn(input.heightCm, 100, 250),
+      activity: ["baja", "media", "alta"].includes(input.activity ?? "") ? input.activity : null,
+      body_goal: ["perder", "mantener", "ganar"].includes(input.bodyGoal ?? "") ? input.bodyGoal : null,
       compare_mode: COMPARE.includes(input.compareMode) ? input.compareMode : "avisar",
       main_supermarket: input.mainSupermarket && mine.includes(input.mainSupermarket) ? input.mainSupermarket : null,
       notify_menu: !!input.notifyMenu,

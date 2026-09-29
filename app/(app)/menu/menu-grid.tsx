@@ -10,6 +10,19 @@ import { RecipeArt } from "@/components/recipe-art";
 
 export type MenuSettings = { meals: string; diet: string; chains: string; prefs: string };
 export type BalanceItem = { label: string; emoji: string; bg: string; n: number };
+type Meter = { value: number; target: number; verdict: "ok" | "bajo" | "alto" };
+export type GoalPanel = {
+  bodyGoal: "perder" | "mantener" | "ganar" | null;
+  estimated: boolean;
+  kcal: Meter;
+  protein: Meter;
+  veg: Meter;
+  days: { kcal: number; protein: number; meals: number }[];
+  headline: string;
+  tips: string[];
+  score: number;
+  unknownSlots: number;
+};
 
 type Props = {
   menu: Menu;
@@ -26,6 +39,7 @@ type Props = {
   ingredientsCount: number;
   cookSessions: number;
   balance: BalanceItem[];
+  goal: GoalPanel;
   settings: MenuSettings;
 };
 
@@ -65,6 +79,10 @@ export function MenuGrid(p: Props) {
   const outCount = slots.filter((s) => s.kind === "out").length;
   const listHref = `/menu/lista${offset !== 0 ? `?semana=${offset}` : ""}`;
 
+  // "Ajustar a mi objetivo": regenerar sin preguntar; el generador ya mira el objetivo del perfil
+  function adjustToGoal() {
+    start(() => generateWeekAction(menu.week_start));
+  }
   function createMenu() {
     if (filled > 0 && !confirm("¿Sustituir el menú de esta semana por uno nuevo?")) return;
     start(() => generateWeekAction(menu.week_start));
@@ -196,7 +214,9 @@ export function MenuGrid(p: Props) {
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-olive text-white"><LeafIcon className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold leading-tight">Equilibrio de la semana</h2>
-              <p className="text-sm text-muted">Una alimentación variada y equilibrada.</p>
+              <p className="text-sm text-muted">
+                {p.goal.bodyGoal ? `Tu objetivo: ${GOAL_LABEL[p.goal.bodyGoal].toLowerCase()}.` : "Una alimentación variada y equilibrada."}
+              </p>
             </div>
             <span className="shrink-0 rounded-lg bg-cream px-2.5 py-1 text-sm">{filled} comidas</span>
           </div>
@@ -209,6 +229,49 @@ export function MenuGrid(p: Props) {
               </li>
             ))}
           </ul>
+
+          {filled > 0 && (
+            <div className="mt-5 border-t border-cream-dark pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-semibold">
+                  <span className={`mr-2 inline-block h-2.5 w-2.5 rounded-full ${p.goal.score === 3 ? "bg-olive" : p.goal.score >= 2 ? "bg-amber-400" : "bg-brand"}`} />
+                  {p.goal.headline}
+                </p>
+                <span className="text-xs text-muted">Media al día entre comida y cena</span>
+              </div>
+              <ul className="mt-3 flex flex-col gap-2.5">
+                <MeterRow label="Calorías" unit="kcal" m={p.goal.kcal} />
+                <MeterRow label="Proteína" unit="g" m={p.goal.protein} />
+                <MeterRow label="Verdura" unit="raciones" m={p.goal.veg} />
+              </ul>
+              {p.goal.tips.length > 0 && (
+                <ul className="mt-3 flex flex-col gap-1.5 text-sm">
+                  {p.goal.tips.map((t) => (
+                    <li key={t} className="flex gap-2"><span aria-hidden className="text-brand">•</span><span>{t}</span></li>
+                  ))}
+                </ul>
+              )}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {p.goal.bodyGoal ? (
+                  p.goal.score < 3 && (
+                    <button type="button" disabled={pending} onClick={adjustToGoal} className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-60">
+                      {pending ? "Ajustando…" : "Ajustar el menú a mi objetivo"}
+                    </button>
+                  )
+                ) : (
+                  <Link href="/ajustes#objetivo" className="rounded-xl border border-cream-dark bg-white px-4 py-2.5 text-sm font-medium hover:bg-cream">
+                    Poner un objetivo (perder peso, ganar músculo…)
+                  </Link>
+                )}
+                {p.goal.bodyGoal && (
+                  <Link href="/ajustes#objetivo" className="text-sm font-medium text-brand hover:underline">
+                    {p.goal.estimated ? "Añade peso y altura para afinar" : "Cambiar objetivo"}
+                  </Link>
+                )}
+              </div>
+              {p.goal.unknownSlots > 0 && <p className="mt-2 text-xs text-muted">{p.goal.unknownSlots} {p.goal.unknownSlots === 1 ? "plato no cuenta" : "platos no cuentan"}: no conocemos sus ingredientes.</p>}
+            </div>
+          )}
         </section>
 
         <section className="rounded-2xl bg-white p-5 shadow-sm">
@@ -352,4 +415,26 @@ function MealSlot({ label, meal, day, recipe, isOut, isLeftover, cooked, onCooke
 function dayDate(weekStart: string, d: number) {
   const [y, m, dd] = weekStart.split("-").map(Number);
   return new Date(y, m - 1, dd + d).toLocaleDateString("es-ES", { day: "numeric", month: "long" });
+}
+
+const GOAL_LABEL: Record<"perder" | "mantener" | "ganar", string> = { perder: "Perder peso", mantener: "Mantenerte", ganar: "Ganar músculo" };
+
+function MeterRow({ label, unit, m }: { label: string; unit: string; m: { value: number; target: number; verdict: "ok" | "bajo" | "alto" } }) {
+  const pct = m.target > 0 ? Math.min(130, (m.value / m.target) * 100) : 0;
+  const tone = m.verdict === "ok" ? "bg-olive" : m.verdict === "bajo" ? "bg-amber-400" : "bg-brand";
+  const word = m.verdict === "ok" ? "bien" : m.verdict === "bajo" ? "poco" : "mucho";
+  const fmt = (n: number) => n.toLocaleString("es-ES", { maximumFractionDigits: unit === "raciones" ? 1 : 0 });
+  return (
+    <li>
+      <div className="flex items-baseline justify-between text-sm">
+        <span className="font-medium">{label}</span>
+        <span className="text-muted">
+          <b className="text-ink">{fmt(m.value)}</b> de {fmt(m.target)} {unit} · <span className={m.verdict === "ok" ? "text-olive-dark" : "text-brand-dark"}>{word}</span>
+        </span>
+      </div>
+      <div className="mt-1 h-2 overflow-hidden rounded-full bg-cream-dark" aria-hidden>
+        <div className={`h-full rounded-full ${tone}`} style={{ width: `${Math.min(100, pct)}%` }} />
+      </div>
+    </li>
+  );
 }

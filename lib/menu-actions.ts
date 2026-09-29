@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { nutritionByRecipe } from "@/lib/menu-nutrition";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { currentWeekStart, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
@@ -17,15 +18,23 @@ export async function generateWeekAction(weekStart: string) {
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
-  const [recipes, ingredients, { data: times }] = await Promise.all([
+  const [recipes, ingredients, { data: times }, { data: ingRows }] = await Promise.all([
     loadRecipes(supabase),
     loadIngredientNames(supabase),
     supabase.from("recipes").select("id,time_minutes"),
+    supabase.from("recipe_ingredients").select("recipe_id,ingredient_name,qty,unit"),
   ]);
+  const bodyGoal = (profile?.body_goal as "perder" | "mantener" | "ganar" | null) ?? null;
+  const nutrition = bodyGoal
+    ? nutritionByRecipe(
+        (ingRows ?? []).map((r) => ({ recipe_id: r.recipe_id as number, ingredient_name: r.ingredient_name as string, qty: Number(r.qty), unit: r.unit as string })),
+        new Map(recipes.map((r) => [r.id, Number(r.servings) || 4]))
+      )
+    : undefined;
   const [{ data: favs }, { data: pantryRows }] = await Promise.all([
     supabase.from("favorite_recipes").select("recipe_id").eq("user_id", userId),
     supabase.from("pantry_items").select("ingredient_name").eq("user_id", userId),
@@ -64,6 +73,8 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     quick: goals.includes("tiempo"),
     healthy: goals.includes("saludable"),
     pantry: pantry.size > 0 ? pantry : undefined,
+    bodyGoal,
+    nutrition,
   }).map((s) => ({ ...s, menu_id: menu.id, cooked: false }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);

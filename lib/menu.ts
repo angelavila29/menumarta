@@ -96,7 +96,19 @@ export type GeneratePrefs = {
   quick?: boolean; // objetivo de ahorrar tiempo
   healthy?: boolean; // objetivo de comer más sano
   pantry?: Set<string>; // lo que ya hay en casa: premia recetas que lo gastan y penaliza las que obligan a comprar
+  /** objetivo corporal y nutrición por ración de cada receta: acerca el menú a lo que la persona busca */
+  bodyGoal?: "perder" | "mantener" | "ganar" | null;
+  nutrition?: Map<number, { kcal: number; protein: number; veg: number }>;
 };
+
+/** Puntos extra según el objetivo: proteína para ganar músculo, ligereza y verdura para perder peso. */
+function goalBonus(r: Recipe, opts: GeneratePrefs): number {
+  const n = opts.nutrition?.get(r.id);
+  if (!n || !opts.bodyGoal) return 0;
+  if (opts.bodyGoal === "ganar") return Math.min(12, n.protein / 4) - (n.protein < 15 ? 4 : 0);
+  if (opts.bodyGoal === "perder") return Math.min(4, n.veg * 2) - Math.max(0, (n.kcal - 550) / 60) + (n.protein >= 25 ? 2 : 0);
+  return 0;
+}
 
 // Ingredientes de fondo de armario: compartirlos no ahorra nada
 const BACKGROUND = new Set(["aceite de oliva", "ajo", "cebolla", "laurel", "pimentón", "harina", "perejil"]);
@@ -156,6 +168,7 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
         shared * 2 -
         missing * 1.5 -
         repeats * 3 +
+        goalBonus(r, opts) +
         (opts.thrifty && r.tags.includes("económico") ? 3 : 0) +
         (opts.quick && r.tags.includes("rápido") ? 2 : 0) +
         (opts.healthy && r.tags.some((t) => ["verdura", "legumbre", "pescado", "ensalada"].includes(t)) ? 2 : 0)

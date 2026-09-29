@@ -14,7 +14,9 @@ import {
 } from "@/lib/menu";
 import { buildPlanRows, recommendedPlan, summarize } from "@/lib/plan";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
-import { MenuGrid, type BalanceItem, type MenuSettings } from "./menu-grid";
+import { targetsFor, type Body } from "@/lib/goal";
+import { assess, nutritionByRecipe, weekBalance } from "@/lib/menu-nutrition";
+import { MenuGrid, type BalanceItem, type GoalPanel, type MenuSettings } from "./menu-grid";
 
 const DIET_LABEL: Record<string, string> = {
   todo: "Cocina casera de todo",
@@ -32,16 +34,17 @@ export default async function MenuPage(props: PageProps<"/menu">) {
   const weekStart = currentWeekStart(offset);
 
   const [{ data: profile }, supers, { data: chainRows }, listId] = await Promise.all([
-    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions,weekly_budget,compare_mode,main_supermarket").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions,weekly_budget,compare_mode,main_supermarket,sex,age,weight_kg,height_cm,activity,body_goal").eq("id", user.id).maybeSingle(),
     userSupermarketIds(supabase, user.id),
     supabase.from("supermarkets").select("id,name,has_prices"),
     getOrCreateActiveList(supabase, user.id),
   ]);
   const menu = await getOrCreateMenu(supabase, user.id, weekStart, profile?.household_size ?? 2);
-  const [recipes, slots, { data: itemRows }] = await Promise.all([
+  const [recipes, slots, { data: itemRows }, { data: ingRows }] = await Promise.all([
     loadRecipes(supabase),
     loadSlots(supabase, menu.id),
     supabase.from("shopping_list_items").select(`quantity,product:products(${PRODUCT_COLUMNS})`).eq("list_id", listId),
+    supabase.from("recipe_ingredients").select("recipe_id,ingredient_name,qty,unit"),
   ]);
   const needs = await aggregateIngredients(supabase, slots, menu.servings);
 
@@ -78,6 +81,35 @@ export default async function MenuPage(props: PageProps<"/menu">) {
     { label: "Carnes", emoji: "🥩", bg: "bg-rose-100", n: count(["carne"]) },
   ];
 
+  // Equilibrio frente al objetivo corporal (kcal, proteína y verdura de comidas y cenas)
+  const body: Body = {
+    sex: (profile?.sex as Body["sex"]) ?? null,
+    age: profile?.age ?? null,
+    weightKg: profile?.weight_kg != null ? Number(profile.weight_kg) : null,
+    heightCm: profile?.height_cm ?? null,
+    activity: (profile?.activity as Body["activity"]) ?? null,
+    bodyGoal: (profile?.body_goal as Body["bodyGoal"]) ?? null,
+  };
+  const nutrition = nutritionByRecipe(
+    (ingRows ?? []).map((r) => ({ recipe_id: r.recipe_id as number, ingredient_name: r.ingredient_name as string, qty: Number(r.qty), unit: r.unit as string })),
+    new Map(recipes.map((r) => [r.id, Number(r.servings) || 4]))
+  );
+  const wb = weekBalance(slots, nutrition);
+  const targets = targetsFor(body);
+  const verdict = assess(wb, targets, body.bodyGoal);
+  const goal: GoalPanel = {
+    bodyGoal: body.bodyGoal,
+    estimated: targets.estimated,
+    kcal: { value: wb.avgKcal, target: targets.kcalMeals, verdict: verdict.kcal },
+    protein: { value: wb.avgProtein, target: targets.proteinMeals, verdict: verdict.protein },
+    veg: { value: wb.avgVeg, target: targets.vegMeals, verdict: verdict.veg },
+    days: wb.days.map((d) => ({ kcal: d.kcal, protein: d.protein, meals: d.meals })),
+    headline: verdict.headline,
+    tips: verdict.tips,
+    score: verdict.score,
+    unknownSlots: wb.unknownSlots,
+  };
+
   // Ajustes del menú
   const meals = (profile?.planning_meals ?? ["comida", "cena"]).map((m: string) => MEAL_LABEL[m] ?? m);
   const restrictions = [...(profile?.allergies ?? []), ...(profile?.avoid_foods ?? [])].map((a: string) => `sin ${a}`);
@@ -105,6 +137,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
       ingredientsCount={needs.length}
       cookSessions={profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, 14 - slots.filter((s) => s.kind === "out").length)}
       balance={balance}
+      goal={goal}
       settings={settings}
     />
   );
