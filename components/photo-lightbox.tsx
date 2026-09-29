@@ -25,7 +25,7 @@ export function PhotoLightbox({ src, alt, children, className = "" }: { src: str
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} aria-label="Ver la foto en grande" className={`block w-full cursor-zoom-in text-left ${className}`}>
+      <button type="button" onClick={() => setOpen(true)} aria-label="Ver la foto en grande" className={`block w-full cursor-pointer text-left ${className}`}>
         {children}
       </button>
       {open && (
