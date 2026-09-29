@@ -20,8 +20,8 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       {background && (
         <div
           aria-hidden
-          className="pointer-events-none fixed inset-0 -z-10 bg-center bg-no-repeat opacity-[0.09]"
-          style={{ backgroundImage: `url(${background})`, backgroundSize: "min(70vw, 520px)" }}
+          className="pointer-events-none fixed inset-0 -z-10 bg-no-repeat opacity-[0.14]"
+          style={{ backgroundImage: `url(${background})`, backgroundSize: "min(80vw, 640px)", backgroundPosition: "left center" }}
         />
       )}
       <SideNav canCook={canCook} />
