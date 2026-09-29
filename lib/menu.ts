@@ -75,9 +75,12 @@ export async function loadSlots(supabase: Supa, menuId: string): Promise<Slot[]>
 
 export const MAX_PORTIONS = 3; // una receta cocinada da como mucho 3 comidas (por conservación)
 
-/** Veces que se cocina por defecto: quien vive solo o en pareja no cocina 14 veces. */
+/**
+ * Veces que se cocina por defecto si no se ha elegido: quien vive solo cocina 7 (cada plato dos
+ * días, para que la semana no se haga repetitiva), en pareja 6, y a partir de tres, cada comida.
+ */
 export function defaultCookSessions(householdSize: number, activeSlots: number): number {
-  return Math.min(activeSlots, householdSize <= 2 ? 6 : activeSlots);
+  return Math.min(activeSlots, householdSize === 1 ? 7 : householdSize === 2 ? 6 : activeSlots);
 }
 
 /**
@@ -98,6 +101,20 @@ export type GeneratePrefs = {
 // Ingredientes de fondo de armario: compartirlos no ahorra nada
 const BACKGROUND = new Set(["aceite de oliva", "ajo", "cebolla", "laurel", "pimentón", "harina", "perejil"]);
 
+/**
+ * Palabras que definen un plato: "Pisto con arroz" y "Pisto con huevo" comparten "pisto";
+ * "Salchichas con puré" y "Filetes rusos con puré" comparten "puré". Repetirlas aburre.
+ */
+const NAME_STOP = new Set(["con", "de", "del", "y", "a", "al", "la", "el", "en", "las", "los", "para", "casera", "casero", "rápido", "rápida"]);
+function dishWords(name: string): string[] {
+  return name.toLowerCase().split(/\s+/).filter((w) => w.length > 2 && !NAME_STOP.has(w));
+}
+
+/** Los dos primeros ingredientes de una receta son casi siempre los que la definen. */
+function mainOf(ings: string[]): string[] {
+  return ings.slice(0, 2);
+}
+
 export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[] {
   const blocked = opts.blocked ?? new Set<string>();
   const keyOf = (day: number, meal: string) => `${day}-${meal}`;
@@ -116,6 +133,8 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
   const shuffled = [...recipes].sort(() => Math.random() - 0.5);
   const assigned = new Map<string, number>();
   const bought = new Set<string>(opts.pantry ?? []); // lo que ya tienes cuenta como "ya comprado"
+  const mains = new Map<string, number>(); // ingrediente principal de cada receta elegida: patata, huevo, pollo…
+  const dishes = new Set<string>(); // palabras de los platos elegidos: "pisto", "puré", "ensalada"…
   const cookedAt = new Map<number, { day: number; count: number; meal: Recipe["meal"] }>();
   const isFree = (day: number, meal: string) => day <= 6 && !blocked.has(keyOf(day, meal)) && !assigned.has(keyOf(day, meal));
   let done = 0;
@@ -131,9 +150,12 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
       const ings = (opts.ingredients?.get(r.id) ?? []).filter((i) => !BACKGROUND.has(i));
       const shared = ings.filter((i) => bought.has(i)).length;
       const missing = opts.pantry ? ings.length - shared : 0;
+      // Variedad: que no se repita el ingrediente principal (el primero de la receta) toda la semana
+      const repeats = mainOf(ings).reduce((n, m) => n + (mains.get(m) ?? 0), 0) + dishWords(r.name).filter((w) => dishes.has(w)).length * 2;
       return (
         shared * 2 -
-        missing * 1.5 +
+        missing * 1.5 -
+        repeats * 3 +
         (opts.thrifty && r.tags.includes("económico") ? 3 : 0) +
         (opts.quick && r.tags.includes("rápido") ? 2 : 0) +
         (opts.healthy && r.tags.some((t) => ["verdura", "legumbre", "pescado", "ensalada"].includes(t)) ? 2 : 0)
@@ -142,7 +164,9 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
     const recipe = shortlist.slice().sort((a, b) => score(b) - score(a))[0];
     if (!recipe) continue;
     for (const i of opts.ingredients?.get(recipe.id) ?? []) bought.add(i);
+    for (const m of mainOf((opts.ingredients?.get(recipe.id) ?? []).filter((i) => !BACKGROUND.has(i)))) mains.set(m, (mains.get(m) ?? 0) + 1);
     used.add(recipe.id);
+    for (const w of dishWords(recipe.name)) dishes.add(w);
     tagCount.set(recipe.tags[0] ?? "", (tagCount.get(recipe.tags[0] ?? "") ?? 0) + 1);
     assigned.set(keyOf(slot.day, slot.meal), recipe.id);
     let count = 1;

@@ -98,3 +98,32 @@ test("evitar 'tomate natural' quita las recetas con tomate fresco pero no las de
   assert.equal(recipeAllowed({ ...base, name: "Macarrones con atún" }, ["macarrones", "tomate frito", "atún en lata"], prefs), true);
   assert.equal(recipeAllowed({ ...base, name: "Coliflor gratinada" }, ["coliflor", "bechamel"], prefs), false);
 });
+
+test("variedad: no repite el ingrediente principal toda la semana", () => {
+  const mk = (id: number, name: string): Recipe => ({ id, name, meal: "ambas", servings: 4, tags: ["guiso"], owner_id: null, author_name: null });
+  const recipes = [mk(1, "Patatas a lo pobre"), mk(2, "Puré de patata"), mk(3, "Tortilla de patatas"), mk(4, "Pollo al curry"), mk(5, "Lentejas"), mk(6, "Merluza")];
+  const ingredients = new Map<number, string[]>([
+    [1, ["patata", "pimiento verde", "huevo"]], [2, ["patata", "leche"]], [3, ["patata", "huevo"]],
+    [4, ["pechuga de pollo", "arroz", "nata"]], [5, ["lentejas", "zanahoria"]], [6, ["merluza", "guisantes"]],
+  ]);
+  let potatoHeavy = 0;
+  for (let i = 0; i < 30; i++) {
+    const slots = generateWeek(recipes, { sessions: 3, ingredients, pantry: new Set(["patata", "huevo", "leche"]) });
+    const ids = new Set(slots.map((s) => s.recipe_id).filter((x): x is number => x !== null));
+    const potatoes = [1, 2, 3].filter((id) => ids.has(id)).length;
+    if (potatoes >= 3) potatoHeavy++;
+  }
+  assert.ok(potatoHeavy <= 3, `no debería elegir tres platos de patata casi nunca (${potatoHeavy}/30)`);
+});
+
+test("variedad: no pone dos versiones del mismo plato la misma semana", () => {
+  const mk = (id: number, name: string): Recipe => ({ id, name, meal: "ambas", servings: 4, tags: ["verdura"], owner_id: null, author_name: null });
+  const recipes = [mk(1, "Pisto con arroz"), mk(2, "Pisto con huevo"), mk(3, "Lentejas"), mk(4, "Merluza"), mk(5, "Pollo al curry")];
+  const ingredients = new Map<number, string[]>([[1, ["calabacín", "arroz"]], [2, ["calabacín", "huevo"]], [3, ["lentejas"]], [4, ["merluza"]], [5, ["pechuga de pollo"]]]);
+  let both = 0;
+  for (let i = 0; i < 30; i++) {
+    const ids = new Set(generateWeek(recipes, { sessions: 3, ingredients, pantry: new Set(["calabacín"]) }).map((s) => s.recipe_id));
+    if (ids.has(1) && ids.has(2)) both++;
+  }
+  assert.ok(both <= 2, `dos pistos casi nunca (${both}/30)`);
+});
