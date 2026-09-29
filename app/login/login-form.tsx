@@ -30,7 +30,16 @@ export function LoginForm() {
     });
     if (error) {
       setStatus("idle");
-      setError(error.status === 429 ? "Has pedido demasiados correos seguidos. Espera unos minutos y vuelve a intentarlo." : error.message);
+      // Supabase convierte el aviso de nuestra base de datos ("solo por invitación") en un 500 genérico
+      // en inglés; lo único que puede fallar ahí al crear la cuenta es esa comprobación.
+      const notInvited = (error.status ?? 0) >= 500 || /database error|unexpected_failure/i.test(error.message);
+      setError(
+        error.status === 429
+          ? "Has pedido demasiados correos seguidos. Espera unos minutos y vuelve a intentarlo."
+          : notInvited
+            ? "Sobremesa es solo por invitación y este correo todavía no está en la lista. Pide a quien te invitó que lo añada desde Amigos y vuelve a intentarlo."
+            : error.message
+      );
     } else {
       setStatus("sent");
     }
