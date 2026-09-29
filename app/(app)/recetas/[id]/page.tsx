@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ChainLogo } from "@/components/chain-logo";
 import { CheckIcon, PiggyIcon } from "@/components/icons";
 import { BulbIcon } from "@/components/icons-extra";
+import { PhotoLightbox } from "@/components/photo-lightbox";
 import { RecipeArt } from "@/components/recipe-art";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { euro } from "@/lib/format";
@@ -163,7 +164,13 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
 
         <div className="grid gap-4 md:grid-cols-[1fr_1.1fr]">
           <div className="flex flex-col gap-3">
-            <RecipeArt tags={tags} name={recipe.name} photoUrl={recipe.photo_url as string | null} className="aspect-square rounded-2xl text-8xl shadow-sm" />
+            {recipe.photo_url ? (
+              <PhotoLightbox src={recipe.photo_url as string} alt={`Foto de ${recipe.name}`} className="overflow-hidden rounded-2xl">
+                <RecipeArt tags={tags} name={recipe.name} photoUrl={recipe.photo_url as string} className="aspect-square rounded-2xl text-8xl shadow-sm transition hover:brightness-95" />
+              </PhotoLightbox>
+            ) : (
+              <RecipeArt tags={tags} name={recipe.name} photoUrl={null} className="aspect-square rounded-2xl text-8xl shadow-sm" />
+            )}
             <div className="grid grid-cols-2 gap-2">
               <Stat emoji="⏱️" value={recipe.time_minutes ? `${recipe.time_minutes} min` : "—"} label="Tiempo total" />
               <Stat emoji="🧑‍🍳" value={recipe.difficulty ?? "—"} label="Dificultad" />

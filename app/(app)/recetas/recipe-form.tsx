@@ -8,6 +8,7 @@ import { formatUnits, parseQty } from "@/lib/qty";
 import { parseRecipeText } from "@/lib/recipe-parse";
 import { EXTRA_TAGS, MAIN_TAGS, VISIBILITY } from "@/lib/recipe-tags";
 import { PhotoCropper } from "@/components/photo-cropper";
+import { PhotoLightbox } from "@/components/photo-lightbox";
 import { decodeImage, releaseDecoded, type Decoded } from "@/lib/image";
 import { reportError } from "@/lib/report-actions";
 import { createClient } from "@/lib/supabase/client";
@@ -267,8 +268,10 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
           <h2 className="mb-3 text-lg font-bold">Foto <span className="text-sm font-normal text-muted">(opcional)</span></h2>
           {photoUrl ? (
             <div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photoUrl} alt="Foto de la receta" className="aspect-square w-full rounded-xl object-cover" />
+              <PhotoLightbox src={photoUrl} alt="Foto de la receta" className="overflow-hidden rounded-xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photoUrl} alt="Foto de la receta" className="aspect-square w-full rounded-xl object-cover" />
+              </PhotoLightbox>
               <button type="button" onClick={() => setPhotoUrl(null)} className="mt-2 text-sm font-medium text-red-700 hover:underline">Quitar foto</button>
             </div>
           ) : (
