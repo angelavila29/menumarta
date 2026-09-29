@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { BottomNav, SideNav, TopBar } from "@/components/bottom-nav";
-import { hasFeature } from "@/lib/access";
+import { backgroundFor, hasFeature } from "@/lib/access";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const { supabase, user } = await requireUser();
-  const [supers, { data: profile }, canCook, madrid] = await Promise.all([
+  const [supers, { data: profile }, canCook, background] = await Promise.all([
     userSupermarketIds(supabase, user.id),
     supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
     hasFeature(supabase, user, "cocinar"),
-    hasFeature(supabase, user, "fondo_madrid"),
+    backgroundFor(supabase, user),
   ]);
   if (supers.length === 0) redirect("/onboarding");
   const name = profile?.display_name?.trim() || capitalize(user.email?.split("@")[0] ?? "");
@@ -17,11 +17,11 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex min-h-screen">
       {/* Guiño personal: un escudo de fondo, muy suave, solo para quien esté en feature_access */}
-      {madrid && (
+      {background && (
         <div
           aria-hidden
           className="pointer-events-none fixed inset-0 -z-10 bg-center bg-no-repeat opacity-[0.09]"
-          style={{ backgroundImage: "url(/fondos/madrid.jpg)", backgroundSize: "min(70vw, 520px)" }}
+          style={{ backgroundImage: `url(${background})`, backgroundSize: "min(70vw, 520px)" }}
         />
       )}
       <SideNav canCook={canCook} />
