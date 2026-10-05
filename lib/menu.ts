@@ -1,6 +1,7 @@
 import type { createClient } from "@/lib/supabase/server";
 import { freshSince, keywords, NON_FOOD_CATEGORY, stem, unaccent, wordRegex } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
+import { toBase } from "@/lib/units";
 
 type Supa = Awaited<ReturnType<typeof createClient>>;
 
@@ -233,19 +234,22 @@ export async function aggregateIngredients(supabase: Supa, slots: Slot[], servin
   for (const i of ings ?? []) {
     const rid = i.recipe_id as number;
     const factor = (servings / (baseServings.get(rid) ?? 4)) * (times.get(rid) ?? 1);
-    const key = `${i.ingredient_name}|${i.unit}`;
-    const cur = acc.get(key) ?? { ingredient: i.ingredient_name as string, qty: 0, unit: i.unit as string };
-    cur.qty += Number(i.qty) * factor;
+    // "2 cucharadas" y "30 ml" del mismo ingrediente se suman en ml
+    const b = toBase(Number(i.qty), i.unit as string, i.ingredient_name as string);
+    const key = `${i.ingredient_name}|${b.unit}`;
+    const cur = acc.get(key) ?? { ingredient: i.ingredient_name as string, qty: 0, unit: b.unit };
+    cur.qty += b.qty * factor;
     acc.set(key, cur);
   }
   return Array.from(acc.values()).sort((a, b) => a.ingredient.localeCompare(b.ingredient, "es"));
 }
 
 /** Unidad de producto equivalente a la unidad de receta y la cantidad convertida. */
-export function toProductUnit(qty: number, unit: string): { qty: number; unit: string } {
-  if (unit === "g") return { qty: qty / 1000, unit: "kg" };
-  if (unit === "ml") return { qty: qty / 1000, unit: "l" };
-  return { qty, unit: "ud" };
+export function toProductUnit(qty: number, unit: string, ingredient = ""): { qty: number; unit: string } {
+  const b = toBase(qty, unit, ingredient);
+  if (b.unit === "g") return { qty: b.qty / 1000, unit: "kg" };
+  if (b.unit === "ml") return { qty: b.qty / 1000, unit: "l" };
+  return { qty: b.qty, unit: "ud" };
 }
 
 /** '500 g' → {amount: 0.5, unit: 'kg'}; '6 ud' → {6,'ud'}; '1.5 l' → {1.5,'l'} */
@@ -263,7 +267,7 @@ export function parsePackSize(s: string | null | undefined): { amount: number; u
 
 /** Cuántos envases hacen falta; 1 si no se puede calcular. */
 export function packsNeeded(need: Need, product: Product): number {
-  const want = toProductUnit(need.qty, need.unit);
+  const want = toProductUnit(need.qty, need.unit, need.ingredient);
   const pack = parsePackSize(product.pack_size);
   if (!pack || pack.unit !== want.unit || pack.amount <= 0) return 1;
   return Math.max(1, Math.ceil(want.qty / pack.amount - 1e-9));
@@ -284,7 +288,7 @@ const SEARCH_AS: Record<string, string> = { pan: "barra pan", vinagre: "vinagre 
 export async function cheapestProductFor(supabase: Supa, need: Need, supers: string[]): Promise<Product | null> {
   if (supers.length === 0) return null;
   const words = keywords(SEARCH_AS[need.ingredient.trim().toLowerCase()] ?? need.ingredient);
-  const want = toProductUnit(need.qty, need.unit);
+  const want = toProductUnit(need.qty, need.unit, need.ingredient);
   const wantUnit = want.unit;
 
   for (let n = words.length; n >= 1; n--) {

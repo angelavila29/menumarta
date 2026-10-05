@@ -8,9 +8,11 @@ export type ParsedRecipe = {
   name: string;
   servings: number | null;
   timeMinutes: number | null;
-  ingredients: { name: string; qty: number; unit: "g" | "ml" | "ud" }[];
+  ingredients: { name: string; qty: number; unit: string }[];
   steps: string[];
 };
+
+import { unitDef } from "@/lib/units";
 
 const UNITS: Record<string, { unit: "g" | "ml" | "ud"; factor: number }> = {
   kg: { unit: "g", factor: 1000 }, kilo: { unit: "g", factor: 1000 }, kilos: { unit: "g", factor: 1000 },
@@ -85,7 +87,14 @@ export function parseRecipeText(text: string, known: string[]): ParsedRecipe {
       // si la "unidad" no lo es ("2 huevos"), forma parte del nombre
       const rest = u ? m[3] : `${m[2] ?? ""} ${m[3]}`.trim();
       if (rest && Number.isFinite(qtyRaw)) {
-        out.ingredients.push({ name: canonical(rest, known), qty: Math.round(qtyRaw * (u?.factor ?? 1) * 100) / 100, unit: u?.unit ?? "ud" });
+        // Medidas de casa se guardan tal cual ("2 cucharadas"); kg, l, cl, dl se pasan a g/ml
+        const kept = unitDef(unitWord);
+        const keepAsIs = kept && (kept.group === "casa" || kept.group === "piezas");
+        out.ingredients.push(
+          keepAsIs
+            ? { name: canonical(rest, known), qty: Math.round(qtyRaw * 100) / 100, unit: kept.id }
+            : { name: canonical(rest, known), qty: Math.round(qtyRaw * (u?.factor ?? 1) * 100) / 100, unit: u?.unit ?? "ud" }
+        );
         if (section === "none") section = "ingredients";
         continue;
       }

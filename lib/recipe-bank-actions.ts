@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { UNITS as UNIT_DEFS } from "@/lib/units";
 import { currentWeekStart, getOrCreateMenu } from "@/lib/menu";
 import { EXTRA_TAGS, MAIN_TAGS } from "@/lib/recipe-tags";
 
@@ -25,7 +26,7 @@ export type RecipeInput = {
 const MEALS = ["comida", "cena", "ambas"];
 const DIFFICULTIES = ["Fácil", "Media", "Difícil"];
 const VISIBILITIES = ["private", "friends", "public"];
-const UNITS = ["g", "ml", "ud"];
+const UNITS = new Set(UNIT_DEFS.map((u) => u.id));
 
 export type SaveResult = { ok: false; error: string } | { ok: true };
 
@@ -36,7 +37,7 @@ export async function saveRecipe(input: RecipeInput): Promise<SaveResult> {
   const name = input.name.trim().slice(0, 80);
   if (name.length < 3) return { ok: false, error: "Ponle un nombre a la receta (mínimo 3 letras)." };
   const ingredients = input.ingredients
-    .map((i) => ({ name: i.name.trim().toLowerCase().slice(0, 60), qty: Number(i.qty), unit: UNITS.includes(i.unit) ? i.unit : "g" }))
+    .map((i) => ({ name: i.name.trim().toLowerCase().slice(0, 60), qty: Number(i.qty), unit: UNITS.has(i.unit) ? i.unit : "g" }))
     .filter((i) => i.name.length > 0 && Number.isFinite(i.qty) && i.qty > 0)
     .slice(0, 30);
   if (ingredients.length === 0) return { ok: false, error: "Añade al menos un ingrediente con su cantidad." };

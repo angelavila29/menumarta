@@ -3,6 +3,8 @@
  * Valores por 100 g (o 100 ml) redondeados de tablas de composición habituales, y el peso
  * típico de una unidad cuando el ingrediente se cuenta por unidades. Es una estimación.
  */
+import { toBase } from "@/lib/units";
+
 type Row = { kcal: number; protein: number; carbs: number; unitGrams?: number; veg?: boolean; density?: number };
 
 const T: Record<string, Row> = {
@@ -110,10 +112,10 @@ export function unitGramsOf(ingredient: string): number | null {
 
 function gramsOf(ingredient: string, qty: number, unit: string): number | null {
   const row = T[ingredient];
-  if (unit === "g") return qty;
-  if (unit === "ml") return qty * (row?.density ?? 1);
-  if (unit === "ud") return row?.unitGrams != null ? qty * row.unitGrams : null;
-  return null;
+  const b = toBase(qty, unit, ingredient);
+  if (b.unit === "g") return b.qty;
+  if (b.unit === "ml") return b.qty * (row?.density ?? 1);
+  return row?.unitGrams != null ? b.qty * row.unitGrams : null;
 }
 
 export type Nutrition = { kcal: number; protein: number; carbs: number; veg: number; covered: number; total: number };

@@ -30,8 +30,8 @@ Preparación
   const arroz = r.ingredients.find((i) => i.name === "arroz");
   assert.deepEqual(arroz, { name: "arroz", qty: 300, unit: "g" });
   assert.equal(r.ingredients.find((i) => i.name === "pechuga de pollo")?.qty, 2);
-  assert.equal(r.ingredients.find((i) => i.name === "aceite de oliva")?.qty, 45); // 3 cucharadas
-  assert.equal(r.ingredients.find((i) => i.name === "tomate frito")?.qty, 100); // medio vaso
+  assert.deepEqual([r.ingredients.find((i) => i.name === "aceite de oliva")?.qty, r.ingredients.find((i) => i.name === "aceite de oliva")?.unit], [3, "cucharada"]);
+  assert.deepEqual([r.ingredients.find((i) => i.name === "tomate frito")?.qty, r.ingredients.find((i) => i.name === "tomate frito")?.unit], [0.5, "vaso"]);
   assert.ok(!r.ingredients.some((i) => i.name === "sal"), "los ingredientes sin cantidad se omiten");
 });
 

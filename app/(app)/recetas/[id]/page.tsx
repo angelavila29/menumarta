@@ -11,6 +11,7 @@ import { getOrCreateActiveList } from "@/lib/lists";
 import { cheapestProductFor, currentWeekStart, DAYS, toProductUnit, type Need } from "@/lib/menu";
 import { nutritionPerServing, unitGramsOf } from "@/lib/nutrition";
 import { formatUnits } from "@/lib/qty";
+import { formatMeasure } from "@/lib/units";
 import { keywords, stem, unaccent } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { AddAllButton, AddToMenuControl, DeleteRecipeButton, FavoriteRecipeButton, IngredientAddButton } from "./recipe-client";
@@ -360,8 +361,9 @@ function fmtQty(qty: number, unit: string): string {
     if (v >= 1000) return `${(v / 1000).toLocaleString("es-ES", { maximumFractionDigits: 2 })} ${unit === "g" ? "kg" : "L"}`;
     return `${v} ${unit}`;
   }
+  // unidades y medidas de casa: "1 ½ cucharadas", "2 dientes", "½ vaso"
   const u = Math.max(0.25, Math.round(qty * 4) / 4);
-  return `${formatUnits(u)} ${u === 1 ? "unidad" : "unidades"}`;
+  return formatMeasure(u, unit, formatUnits);
 }
 
 function capitalize(s: string) {

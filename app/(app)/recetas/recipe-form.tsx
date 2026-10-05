@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { CheckIcon, PlusIcon } from "@/components/icons";
 import { saveRecipe, type RecipeInput } from "@/lib/recipe-bank-actions";
 import { formatUnits, parseQty } from "@/lib/qty";
+import { UNITS } from "@/lib/units";
 import { parseRecipeText } from "@/lib/recipe-parse";
 import { EXTRA_TAGS, MAIN_TAGS, VISIBILITY } from "@/lib/recipe-tags";
 import { PhotoCropper } from "@/components/photo-cropper";
@@ -14,6 +15,7 @@ import { reportError } from "@/lib/report-actions";
 import { createClient } from "@/lib/supabase/client";
 
 type IngRow = { name: string; qty: string; unit: string };
+const UNIT_GROUPS: [string, string][] = [["peso", "Peso"], ["volumen", "Volumen"], ["casa", "Medidas de casa"], ["piezas", "Piezas"]];
 
 const fieldCls = "rounded-xl border border-cream-dark bg-white px-3 py-2.5 outline-none focus:border-brand";
 const inputCls = `w-full ${fieldCls}`;
@@ -29,7 +31,7 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
   const [extraTags, setExtraTags] = useState<string[]>(initial?.extraTags ?? []);
   const [visibility, setVisibility] = useState(initial?.visibility ?? "friends");
   const [ings, setIngs] = useState<IngRow[]>(
-    initial?.ingredients.map((i) => ({ name: i.name, qty: i.unit === "ud" ? formatUnits(i.qty) : String(i.qty), unit: i.unit })) ?? [
+    initial?.ingredients.map((i) => ({ name: i.name, qty: ["g", "ml"].includes(i.unit) ? String(i.qty) : formatUnits(i.qty), unit: i.unit })) ?? [
       { name: "", qty: "", unit: "g" },
       { name: "", qty: "", unit: "g" },
       { name: "", qty: "", unit: "g" },
@@ -231,16 +233,20 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
               <li key={i} className="flex items-center gap-2">
                 <input value={row.name} onChange={(e) => setIng(i, { name: e.target.value })} list="ingredientes-conocidos" placeholder="Ingrediente" aria-label={`Ingrediente ${i + 1}`} maxLength={60} className={`${fieldCls} min-w-0 flex-1`} />
                 <input value={row.qty} onChange={(e) => setIng(i, { qty: e.target.value })} inputMode="decimal" placeholder="Cant." title="Vale 1/2, 1/4, 1 1/2, ½… o 0,5" aria-label={`Cantidad del ingrediente ${i + 1}`} className={`${fieldCls} w-16 shrink-0 sm:w-20`} />
-                <select value={row.unit} onChange={(e) => setIng(i, { unit: e.target.value })} aria-label={`Unidad del ingrediente ${i + 1}`} className={`${fieldCls} w-[5.5rem] shrink-0 px-2 sm:w-28`}>
-                  <option value="g">g</option>
-                  <option value="ml">ml</option>
-                  <option value="ud">uds</option>
+                <select value={row.unit} onChange={(e) => setIng(i, { unit: e.target.value })} aria-label={`Unidad del ingrediente ${i + 1}`} className={`${fieldCls} w-[6.5rem] shrink-0 px-2 sm:w-32`}>
+                  {UNIT_GROUPS.map(([group, label]) => (
+                    <optgroup key={group} label={label}>
+                      {UNITS.filter((u) => u.group === group).map((u) => (
+                        <option key={u.id} value={u.id}>{u.plural}</option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
                 <button type="button" onClick={() => setIngs((xs) => (xs.length > 1 ? xs.filter((_, j) => j !== i) : xs))} aria-label={`Quitar ingrediente ${i + 1}`} className="h-10 w-8 shrink-0 text-muted hover:text-ink">✕</button>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-muted">En la cantidad valen fracciones: 1/2, 1/4, 1 1/2.</p>
+          <p className="mt-2 text-xs text-muted">Valen fracciones (1/2, 1 1/2) y medidas de casa: cucharadas, vasos, puñados, dientes, lonchas…</p>
           <button type="button" onClick={() => setIngs((xs) => [...xs, { name: "", qty: "", unit: "g" }])} className="mt-3 flex items-center gap-1 text-sm font-semibold text-brand hover:underline">
             <PlusIcon className="h-4 w-4" /> Añadir ingrediente
           </button>

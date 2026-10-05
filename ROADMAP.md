@@ -149,6 +149,13 @@ mejor encaja.
       perder peso. Es orientativo (las recetas no cuentan pan, postre ni bebidas) y así se dice.
 - [ ] Siguiente: raciones por persona (ración y media para quien necesita más) y desayunos.
 
+## K. Medidas de casa (5 oct)
+- [x] Los ingredientes admiten cucharadas, cucharaditas, vasos, tazas, chorritos, puñados, pizcas,
+      dientes, lonchas, rebanadas, latas, botes, hojas y ramitas, además de g, kg, ml, L y unidades.
+      Se guardan como se escriben y `lib/units.ts` las pasa a g/ml/ud para la compra y la nutrición
+      (un puñado de arroz son 40 g, de espinacas 20 g). La ficha las muestra tal cual ("2 cucharadas").
+      El texto pegado también las conserva. Con tests.
+
 ## Pendiente, decidido a propósito
 - Las extensiones `pg_trgm` y `unaccent` siguen en el esquema `public`. Moverlas rompería la columna
   generada `products.name_norm`, que es de lo que vive el buscador.
