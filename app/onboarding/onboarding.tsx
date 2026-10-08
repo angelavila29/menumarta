@@ -146,7 +146,6 @@ export function Onboarding({ initial }: { initial: Initial }) {
           <Image src="/logo.png" alt="" width={52} height={52} priority />
           <span className="text-2xl font-bold tracking-tight">Sobremesa</span>
         </div>
-        <p className="font-hand mt-8 -rotate-2 text-3xl leading-tight text-brand">Buenas comidas,<br />mejores días.</p>
         <ol className="mt-10 flex flex-col gap-1">
           {STEP_NAMES.map((label, i) => {
             const n = i + 1;

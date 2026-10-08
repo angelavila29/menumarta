@@ -75,9 +75,6 @@ export default async function HomePage() {
           <p className="mt-1 text-lg text-muted">Tu semana {formatWeekRange(weekStart)}</p>
           <p className="hidden text-muted md:block">Comidas sanas, sencillas y a buen precio.</p>
         </div>
-        <p className="font-hand hidden -rotate-6 pr-10 pt-4 text-3xl leading-tight text-brand lg:block">
-          &ldquo;Buenas comidas,<br />mejores días.&rdquo;
-        </p>
       </div>
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[2fr_1fr_1fr]">
@@ -331,7 +328,6 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
-          <p className="font-hand mt-4 -rotate-3 text-2xl leading-tight text-brand">Más tiempo<br />para lo importante ♥</p>
         </div>
       </section>
     </main>
