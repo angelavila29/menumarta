@@ -59,13 +59,19 @@ export default async function SettingsPage() {
         chains={chains}
         foods={mergeFoods(FOODS, (ings ?? []).map((i) => i.ingredient_name as string))}
         location={{ label: p?.address ?? p?.postal_code ?? null, lat: p?.lat ?? null, lng: p?.lng ?? null }}
+        account={
+          <>
+            <AccountSection />
+            <form action={signOut} className="rounded-2xl bg-white p-5 shadow-sm">
+              <p className="font-bold">Sesión</p>
+              <p className="mb-3 text-sm text-muted">Sales de Sobremesa en este dispositivo.</p>
+              <button type="submit" className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                Cerrar sesión
+              </button>
+            </form>
+          </>
+        }
       />
-      <AccountSection />
-      <form action={signOut} className="mt-8 border-t border-cream-dark pt-4">
-        <button type="submit" className="text-sm font-medium text-red-700 hover:underline">
-          Cerrar sesión
-        </button>
-      </form>
     </main>
   );
 }

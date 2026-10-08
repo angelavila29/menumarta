@@ -43,7 +43,7 @@ export function AccountSection() {
   }
 
   return (
-    <section id="datos" className="mt-8 scroll-mt-6 rounded-2xl bg-white p-5 shadow-sm">
+    <section id="datos" className="scroll-mt-6 rounded-2xl bg-white p-5 shadow-sm">
       <h2 className="text-lg font-bold leading-tight">Tus datos</h2>
       <p className="text-sm text-muted">Lo que guardamos es tuyo: puedes llevártelo o borrarlo cuando quieras.</p>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useEffect, useState, useTransition } from "react";
 import { StoreMap } from "@/app/onboarding/store-map";
 import { ChainLogo } from "@/components/chain-logo";
 import { CartIcon, CheckIcon, HomeIcon, LeafIcon, PlusIcon, StarIcon, StoreIcon } from "@/components/icons";
@@ -13,7 +13,7 @@ import { hasBodyData, targetsFor, type Body } from "@/lib/goal";
 import { saveSettings, type SettingsInput } from "@/lib/settings-actions";
 
 export type Chain = { id: string; name: string; has_prices: boolean };
-type Props = { initial: SettingsInput; email: string; chains: Chain[]; location: { label: string | null; lat: number | null; lng: number | null }; foods: string[] };
+type Props = { initial: SettingsInput; email: string; chains: Chain[]; location: { label: string | null; lat: number | null; lng: number | null }; foods: string[]; account?: React.ReactNode };
 
 const svg = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, viewBox: "0 0 24 24" };
 const UserIcon = ({ className }: { className?: string }) => (
@@ -30,14 +30,24 @@ const TargetIcon = ({ className }: { className?: string }) => (
   <svg {...svg} className={className}><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /></svg>
 );
 
+const KeyIcon = ({ className }: { className?: string }) => (
+  <svg {...svg} className={className}><circle cx="8" cy="15" r="4" /><path d="m11 12 9-9M17 6l3 3M14 9l2 2" /></svg>
+);
+
 const TABS = [
-  { id: "perfil", label: "Perfil", Icon: UserIcon },
-  { id: "hogar", label: "Hogar", Icon: HomeIcon },
+  { id: "perfil", label: "Perfil y hogar", Icon: UserIcon },
   { id: "alimentacion", label: "Alimentación", Icon: LeafIcon },
   { id: "objetivo", label: "Objetivo", Icon: TargetIcon },
-  { id: "supermercados", label: "Supermercados", Icon: StoreIcon },
-  { id: "notificaciones", label: "Notificaciones", Icon: BellIcon },
+  { id: "cocina", label: "Cocina", Icon: ForkIcon },
+  { id: "compra", label: "Compra", Icon: StoreIcon },
+  { id: "notificaciones", label: "Avisos", Icon: BellIcon },
+  { id: "cuenta", label: "Cuenta", Icon: KeyIcon },
 ];
+// Enlaces antiguos (#supermercados, #datos…) llevan a su pestaña
+const HASH_TO_TAB: Record<string, string> = {
+  perfil: "perfil", hogar: "perfil", alimentacion: "alimentacion", objetivo: "objetivo", cocina: "cocina",
+  supermercados: "compra", estrategia: "compra", compra: "compra", notificaciones: "notificaciones", datos: "cuenta", cuenta: "cuenta",
+};
 const MEALS = [["comida", "Comidas"], ["cena", "Cenas"], ["desayuno", "Desayunos"], ["merienda", "Meriendas"]];
 const DIETS = [["todo", "De todo"], ["vegetariano", "Vegetariana"], ["vegano", "Vegana"], ["pescetariano", "Pescetariana"], ["otro", "Otra"]];
 const ALLERGIES = ["gluten", "lactosa", "frutos secos", "huevo", "marisco", "soja"];
@@ -58,10 +68,26 @@ const NOTIFS: [keyof SettingsInput, string, string][] = [
   ["notifySummary", "Resumen semanal", "Recibe un resumen de tu semana cada domingo."],
 ];
 
-export function SettingsForm({ initial, email, chains, location, foods }: Props) {
+export function SettingsForm({ initial, email, chains, location, foods, account }: Props) {
   const [v, setV] = useState<SettingsInput>(initial);
   const [saved, setSaved] = useState<SettingsInput>(initial);
   const [tab, setTab] = useState("perfil");
+  // Abrir la pestaña que pide el enlace (/ajustes#objetivo, #supermercados…)
+  useEffect(() => {
+    const fromHash = () => {
+      const t = HASH_TO_TAB[window.location.hash.slice(1)];
+      if (t) setTab(t);
+    };
+    fromHash();
+    window.addEventListener("hashchange", fromHash);
+    return () => window.removeEventListener("hashchange", fromHash);
+  }, []);
+  function goTo(id: string) {
+    setTab(id);
+    history.replaceState(null, "", `#${id}`);
+    // En el móvil la barra de pestañas se desplaza: que la elegida quede a la vista
+    requestAnimationFrame(() => document.querySelector(`[data-tab="${id}"]`)?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" }));
+  }
   const [status, setStatus] = useState<"" | "ok" | "error">("");
   const [pending, start] = useTransition();
   const noStores = useMemo(() => [], []);
@@ -108,253 +134,278 @@ export function SettingsForm({ initial, email, chains, location, foods }: Props)
         <p className="font-hand hidden -rotate-6 pr-6 text-2xl leading-tight text-olive-dark xl:block">Pequeñas decisiones,<br />grandes comidas</p>
       </div>
 
-      <nav aria-label="Secciones" className="no-scrollbar -mx-4 mt-5 flex gap-1 overflow-x-auto px-4 md:mx-0 md:inline-flex md:rounded-2xl md:bg-white md:p-1 md:shadow-sm">
+      <nav aria-label="Secciones" role="tablist" className="no-scrollbar -mx-4 mt-5 flex gap-1 overflow-x-auto px-4 md:mx-0 md:inline-flex md:rounded-2xl md:bg-white md:p-1 md:shadow-sm">
         {TABS.map(({ id, label, Icon }) => (
-          <a
+          <button
             key={id}
-            href={`#${id}`}
-            onClick={() => setTab(id)}
+            type="button"
+            role="tab"
+            data-tab={id}
+            aria-selected={tab === id}
+            onClick={() => goTo(id)}
             className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm ${tab === id ? "bg-brand-soft font-semibold text-brand-dark" : "text-ink hover:bg-cream"}`}
           >
             <Icon className="h-5 w-5" /> {label}
-          </a>
+          </button>
         ))}
       </nav>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_380px] lg:items-start">
-        {/* Columna principal */}
-        <div className="flex flex-col gap-4">
-          <Card id="perfil" icon={<UserIcon className="h-7 w-7" />} title="Tu perfil" subtitle="Tu información personal en Sobremesa.">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-              <span aria-hidden className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-olive text-3xl font-semibold text-white">
-                {name.charAt(0).toUpperCase()}
-              </span>
-              <div className="grid flex-1 gap-3 sm:grid-cols-3">
-                <Field label="Nombre">
-                  <input value={v.displayName} onChange={(e) => set("displayName", e.target.value)} maxLength={40} autoComplete="given-name" className={inputCls} />
-                </Field>
-                <Field label="Email">
-                  <input value={email} readOnly aria-readonly className={`${inputCls} bg-cream text-muted`} title="El email es el de tu acceso y no se puede cambiar aquí" />
-                </Field>
-                <Field label="Teléfono">
-                  <input value={v.phone} onChange={(e) => set("phone", e.target.value)} inputMode="tel" autoComplete="tel" maxLength={20} placeholder="+34 600 000 000" className={inputCls} />
-                </Field>
-              </div>
-            </div>
-          </Card>
-
-          <Card id="hogar" icon={<HomeIcon className="h-7 w-7" />} title="Tu hogar" subtitle="Cuéntanos sobre tu hogar para personalizar mejor tus menús.">
-            <div className="flex flex-col gap-5 sm:flex-row sm:gap-8">
-              <div>
-                <p className="mb-2 text-sm font-semibold">Personas en casa</p>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center rounded-xl border border-cream-dark bg-white">
-                    <button type="button" aria-label="Menos personas" onClick={() => set("householdSize", Math.max(1, v.householdSize - 1))} className="h-11 w-11 text-xl text-brand">−</button>
-                    <span className="w-10 text-center text-lg font-semibold" aria-live="polite">{v.householdSize}</span>
-                    <button type="button" aria-label="Más personas" onClick={() => set("householdSize", Math.min(12, v.householdSize + 1))} className="h-11 w-11 text-xl text-brand">+</button>
+      <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_320px] lg:items-start">
+        <div role="tabpanel" className="flex flex-col gap-4">
+          {tab === "perfil" && (
+            <>
+              <Card id="perfil" icon={<UserIcon className="h-7 w-7" />} title="Tu perfil" subtitle="Tu información personal en Sobremesa.">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                  <span aria-hidden className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-olive text-3xl font-semibold text-white">
+                    {name.charAt(0).toUpperCase()}
+                  </span>
+                  <div className="grid flex-1 gap-3 sm:grid-cols-3">
+                    <Field label="Nombre">
+                      <input value={v.displayName} onChange={(e) => set("displayName", e.target.value)} maxLength={40} autoComplete="given-name" className={inputCls} />
+                    </Field>
+                    <Field label="Email">
+                      <input value={email} readOnly aria-readonly className={`${inputCls} bg-cream text-muted`} title="El email es el de tu acceso y no se puede cambiar aquí" />
+                    </Field>
+                    <Field label="Teléfono">
+                      <input value={v.phone} onChange={(e) => set("phone", e.target.value)} inputMode="tel" autoComplete="tel" maxLength={20} placeholder="+34 600 000 000" className={inputCls} />
+                    </Field>
                   </div>
-                  <span className="text-sm text-muted">{v.householdSize === 1 ? "persona" : "personas"}</span>
                 </div>
-              </div>
-              <div className="sm:border-l sm:border-cream-dark sm:pl-8">
-                <p className="mb-2 text-sm font-semibold">Planificas</p>
-                <p className="mb-2 text-xs text-muted">De momento el menú semanal solo organiza comidas y cenas.</p>
-                <div className="flex flex-wrap gap-2">
-                  {MEALS.map(([id, label]) => (
-                    <Chip key={id} on={v.planningMeals.includes(id)} onClick={() => toggleIn("planningMeals", id)}>{label}</Chip>
+              </Card>
+
+              <Card id="hogar" icon={<HomeIcon className="h-7 w-7" />} title="Tu hogar" subtitle="Cuéntanos sobre tu hogar para personalizar mejor tus menús.">
+                <div className="flex flex-col gap-5 sm:flex-row sm:gap-8">
+                  <div>
+                    <p className="mb-2 text-sm font-semibold">Personas en casa</p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center rounded-xl border border-cream-dark bg-white">
+                        <button type="button" aria-label="Menos personas" onClick={() => set("householdSize", Math.max(1, v.householdSize - 1))} className="h-11 w-11 text-xl text-brand">−</button>
+                        <span className="w-10 text-center text-lg font-semibold" aria-live="polite">{v.householdSize}</span>
+                        <button type="button" aria-label="Más personas" onClick={() => set("householdSize", Math.min(12, v.householdSize + 1))} className="h-11 w-11 text-xl text-brand">+</button>
+                      </div>
+                      <span className="text-sm text-muted">{v.householdSize === 1 ? "persona" : "personas"}</span>
+                    </div>
+                  </div>
+                  <div className="sm:border-l sm:border-cream-dark sm:pl-8">
+                    <p className="mb-2 text-sm font-semibold">Planificas</p>
+                    <p className="mb-2 text-xs text-muted">De momento el menú semanal solo organiza comidas y cenas.</p>
+                    <div className="flex flex-wrap gap-2">
+                      {MEALS.map(([id, label]) => (
+                        <Chip key={id} on={v.planningMeals.includes(id)} onClick={() => toggleIn("planningMeals", id)}>{label}</Chip>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
+          {tab === "alimentacion" && (
+            <>
+              <Card id="alimentacion" icon={<LeafIcon className="h-7 w-7" />} title="Tu alimentación" subtitle="Indica tus preferencias alimentarias y qué alimentos prefieres evitar.">
+                <p className="mb-2 text-sm font-semibold">Tipo de alimentación</p>
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {DIETS.map(([id, label]) => (
+                    <Chip key={id} on={v.diet === id} onClick={() => set("diet", id)}>{label}</Chip>
                   ))}
                 </div>
-              </div>
-            </div>
-          </Card>
-
-          <Card id="alimentacion" icon={<LeafIcon className="h-7 w-7" />} title="Tu alimentación" subtitle="Indica tus preferencias alimentarias y qué alimentos prefieres evitar.">
-            <p className="mb-2 text-sm font-semibold">Tipo de alimentación</p>
-            <div className="mb-4 flex flex-wrap gap-2">
-              {DIETS.map(([id, label]) => (
-                <Chip key={id} on={v.diet === id} onClick={() => set("diet", id)}>{label}</Chip>
-              ))}
-            </div>
-            <p className="mb-2 text-sm font-semibold">Alergias o intolerancias</p>
-            <div className="mb-4 flex flex-wrap gap-2">
-              <Chip on={v.allergies.length === 0} onClick={() => set("allergies", [])}>Ninguna</Chip>
-              {ALLERGIES.map((a) => (
-                <Chip key={a} on={v.allergies.includes(a)} onClick={() => toggleIn("allergies", a)}>{cap(a)}</Chip>
-              ))}
-            </div>
-            <p className="mb-2 text-sm font-semibold">Alimentos que no te gustan</p>
-            <FoodInput
-              label="Añadir alimento que no te gusta"
-              placeholder="Escribe un alimento: coliflor, atún…"
-              value={v.avoidFoods}
-              onChange={(next) => set("avoidFoods", next)}
-              suggestions={foods}
-            />
-          </Card>
-
-          <Card id="objetivo" icon={<TargetIcon className="h-7 w-7" />} title="Tu cuerpo y tu objetivo" subtitle="Con esto valoramos si el menú semanal te cuadra y lo ajustamos. Es orientativo, no consejo médico.">
-            <p className="mb-2 text-sm font-semibold">¿Qué buscas?</p>
-            <div className="mb-4 flex flex-wrap gap-2">
-              <Chip on={v.bodyGoal === null} onClick={() => set("bodyGoal", null)}>Sin objetivo</Chip>
-              {BODY_GOALS.map(([id, label]) => (
-                <Chip key={id} on={v.bodyGoal === id} onClick={() => set("bodyGoal", id)}>{label}</Chip>
-              ))}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Field label="Sexo" hint="Para la fórmula del gasto diario.">
-                <select value={v.sex ?? ""} onChange={(e) => set("sex", e.target.value || null)} className={inputCls}>
-                  <option value="">Prefiero no decirlo</option>
-                  <option value="mujer">Mujer</option>
-                  <option value="hombre">Hombre</option>
-                </select>
-              </Field>
-              <Field label="Edad">
-                <input inputMode="numeric" value={v.age ?? ""} onChange={(e) => set("age", e.target.value ? Number(e.target.value) : null)} placeholder="22" className={inputCls} />
-              </Field>
-              <Field label="Peso (kg)">
-                <input inputMode="decimal" value={v.weightKg ?? ""} onChange={(e) => set("weightKg", e.target.value ? Number(e.target.value.replace(",", ".")) : null)} placeholder="65" className={inputCls} />
-              </Field>
-              <Field label="Altura (cm)">
-                <input inputMode="numeric" value={v.heightCm ?? ""} onChange={(e) => set("heightCm", e.target.value ? Number(e.target.value) : null)} placeholder="170" className={inputCls} />
-              </Field>
-            </div>
-            <p className="mb-2 mt-4 text-sm font-semibold">Actividad</p>
-            <div className="flex flex-wrap gap-2">
-              {ACTIVITIES.map(([id, label]) => (
-                <Chip key={id} small on={v.activity === id} onClick={() => set("activity", id)}>{label}</Chip>
-              ))}
-            </div>
-            <GoalSummary v={v} />
-          </Card>
-
-          <Card id="cocina" icon={<ForkIcon className="h-7 w-7" />} title="Presupuesto y cocina" subtitle="Ajusta tus preferencias para que las recetas se adapten a tu día a día.">
-            <p className="mb-1 text-sm font-semibold">Tu cocina</p>
-            <p className="mb-2 text-xs text-muted">Solo te proponemos recetas que puedas hacer con lo que tienes.</p>
-            <div className="mb-5">
-              <KitchenPicker value={(v.appliances ?? ["fuego", "horno", "microondas"]) as ApplianceId[]} onChange={(next) => set("appliances", next)} />
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <Field label="Presupuesto semanal" hint="Referencia para tu compra semanal.">
-                <select value={v.weeklyBudget ?? ""} onChange={(e) => set("weeklyBudget", e.target.value ? Number(e.target.value) : null)} className={inputCls}>
-                  <option value="">Sin definir</option>
-                  {BUDGETS.map((b) => <option key={b} value={b}>{b} €</option>)}
-                </select>
-              </Field>
-              <Field label="Veces que cocinas a la semana" hint="El resto de comidas salen de sobras. También lo puedes ajustar desde el menú.">
-                <select value={cookRangeOf(v.cookSessions)} onChange={(e) => set("cookSessions", COOK_RANGES.find((r) => r.id === e.target.value)?.value ?? null)} className={inputCls}>
-                  {COOK_RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
-                </select>
-              </Field>
-              <Field label="Tiempo máximo por receta" hint="El menú solo elegirá recetas que quepan en ese tiempo.">
-                <select value={v.maxRecipeMinutes ?? ""} onChange={(e) => set("maxRecipeMinutes", e.target.value ? Number(e.target.value) : null)} className={inputCls}>
-                  <option value="">Sin límite</option>
-                  {MINUTES.map((m) => <option key={m} value={m}>{m} min</option>)}
-                </select>
-              </Field>
-              <div>
-                <p className="mb-1 text-sm font-semibold">Objetivo principal <span className="font-normal text-muted">(hasta 2)</span></p>
-                <div className="flex flex-wrap gap-2">
-                  {GOALS.map(([id, label]) => (
-                    <Chip key={id} small on={v.goals.includes(id)} onClick={() => toggleIn("goals", id, 2)}>{label}</Chip>
+                <p className="mb-2 text-sm font-semibold">Alergias o intolerancias</p>
+                <div className="mb-4 flex flex-wrap gap-2">
+                  <Chip on={v.allergies.length === 0} onClick={() => set("allergies", [])}>Ninguna</Chip>
+                  {ALLERGIES.map((a) => (
+                    <Chip key={a} on={v.allergies.includes(a)} onClick={() => toggleIn("allergies", a)}>{cap(a)}</Chip>
                   ))}
                 </div>
+                <p className="mb-2 text-sm font-semibold">Alimentos que no te gustan</p>
+                <FoodInput
+                  label="Añadir alimento que no te gusta"
+                  placeholder="Escribe un alimento: coliflor, atún…"
+                  value={v.avoidFoods}
+                  onChange={(next) => set("avoidFoods", next)}
+                  suggestions={foods}
+                />
+              </Card>
+            </>
+          )}
+          {tab === "objetivo" && (
+            <>
+              <Card id="objetivo" icon={<TargetIcon className="h-7 w-7" />} title="Tu cuerpo y tu objetivo" subtitle="Con esto valoramos si el menú semanal te cuadra y lo ajustamos. Es orientativo, no consejo médico.">
+                <p className="mb-2 text-sm font-semibold">¿Qué buscas?</p>
+                <div className="mb-4 flex flex-wrap gap-2">
+                  <Chip on={v.bodyGoal === null} onClick={() => set("bodyGoal", null)}>Sin objetivo</Chip>
+                  {BODY_GOALS.map(([id, label]) => (
+                    <Chip key={id} on={v.bodyGoal === id} onClick={() => set("bodyGoal", id)}>{label}</Chip>
+                  ))}
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field label="Sexo" hint="Para la fórmula del gasto diario.">
+                    <select value={v.sex ?? ""} onChange={(e) => set("sex", e.target.value || null)} className={inputCls}>
+                      <option value="">Prefiero no decirlo</option>
+                      <option value="mujer">Mujer</option>
+                      <option value="hombre">Hombre</option>
+                    </select>
+                  </Field>
+                  <Field label="Edad">
+                    <input inputMode="numeric" value={v.age ?? ""} onChange={(e) => set("age", e.target.value ? Number(e.target.value) : null)} placeholder="22" className={inputCls} />
+                  </Field>
+                  <Field label="Peso (kg)">
+                    <input inputMode="decimal" value={v.weightKg ?? ""} onChange={(e) => set("weightKg", e.target.value ? Number(e.target.value.replace(",", ".")) : null)} placeholder="65" className={inputCls} />
+                  </Field>
+                  <Field label="Altura (cm)">
+                    <input inputMode="numeric" value={v.heightCm ?? ""} onChange={(e) => set("heightCm", e.target.value ? Number(e.target.value) : null)} placeholder="170" className={inputCls} />
+                  </Field>
+                </div>
+                <p className="mb-2 mt-4 text-sm font-semibold">Actividad</p>
+                <div className="flex flex-wrap gap-2">
+                  {ACTIVITIES.map(([id, label]) => (
+                    <Chip key={id} small on={v.activity === id} onClick={() => set("activity", id)}>{label}</Chip>
+                  ))}
+                </div>
+                <GoalSummary v={v} />
+              </Card>
+            </>
+          )}
+          {tab === "cocina" && (
+            <>
+              <Card id="cocina" icon={<ForkIcon className="h-7 w-7" />} title="Presupuesto y cocina" subtitle="Ajusta tus preferencias para que las recetas se adapten a tu día a día.">
+                <p className="mb-1 text-sm font-semibold">Tu cocina</p>
+                <p className="mb-2 text-xs text-muted">Solo te proponemos recetas que puedas hacer con lo que tienes.</p>
+                <div className="mb-5">
+                  <KitchenPicker value={(v.appliances ?? ["fuego", "horno", "microondas"]) as ApplianceId[]} onChange={(next) => set("appliances", next)} />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <Field label="Presupuesto semanal" hint="Referencia para tu compra semanal.">
+                    <select value={v.weeklyBudget ?? ""} onChange={(e) => set("weeklyBudget", e.target.value ? Number(e.target.value) : null)} className={inputCls}>
+                      <option value="">Sin definir</option>
+                      {BUDGETS.map((b) => <option key={b} value={b}>{b} €</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Veces que cocinas a la semana" hint="El resto de comidas salen de sobras. También lo puedes ajustar desde el menú.">
+                    <select value={cookRangeOf(v.cookSessions)} onChange={(e) => set("cookSessions", COOK_RANGES.find((r) => r.id === e.target.value)?.value ?? null)} className={inputCls}>
+                      {COOK_RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Tiempo máximo por receta" hint="El menú solo elegirá recetas que quepan en ese tiempo.">
+                    <select value={v.maxRecipeMinutes ?? ""} onChange={(e) => set("maxRecipeMinutes", e.target.value ? Number(e.target.value) : null)} className={inputCls}>
+                      <option value="">Sin límite</option>
+                      {MINUTES.map((m) => <option key={m} value={m}>{m} min</option>)}
+                    </select>
+                  </Field>
+                  <div>
+                    <p className="mb-1 text-sm font-semibold">Objetivo principal <span className="font-normal text-muted">(hasta 2)</span></p>
+                    <div className="flex flex-wrap gap-2">
+                      {GOALS.map(([id, label]) => (
+                        <Chip key={id} small on={v.goals.includes(id)} onClick={() => toggleIn("goals", id, 2)}>{label}</Chip>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </>
+          )}
+          {tab === "compra" && (
+            <>
+              <Card id="supermercados" icon={<StoreIcon className="h-7 w-7" />} title="Tus supermercados" subtitle="Tu supermercado habitual y dónde compras." action={<Link href="/onboarding" className="text-sm font-semibold text-brand hover:underline">Editar</Link>}>
+                <ul className="flex flex-col gap-2">
+                  {chains.map((c) => (
+                    <li key={c.id} className="flex items-center gap-3 rounded-xl border border-cream-dark p-2.5">
+                      <ChainLogo id={c.id} name={c.name} size={32} />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                          {c.name}
+                          {main === c.id && <span className="rounded-md bg-olive-soft px-1.5 py-0.5 text-[11px] font-medium text-olive-dark">Habitual</span>}
+                        </span>
+                        <span className="block text-xs text-muted">{c.has_prices ? "Con precios" : "Sin precios todavía"}</span>
+                      </span>
+                      {main !== c.id && (
+                        <button type="button" onClick={() => set("mainSupermarket", c.id)} className="shrink-0 text-xs font-medium text-brand hover:underline">
+                          Hacer habitual
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                {location.lat !== null && location.lng !== null && (
+                  <div className="mt-3 overflow-hidden rounded-xl">
+                    <StoreMap center={{ lat: location.lat, lng: location.lng }} stores={noStores} selected={noSelection} />
+                  </div>
+                )}
+                {location.label && <p className="mt-2 text-xs text-muted">📍 {location.label}</p>}
+                <Link href="/onboarding" className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-brand px-4 py-2.5 text-sm font-semibold text-brand hover:bg-brand-soft">
+                  <PlusIcon className="h-4 w-4" /> Gestionar supermercados
+                </Link>
+              </Card>
+
+              <Card id="estrategia" icon={<CartIcon className="h-7 w-7" />} title="Estrategia de compra" subtitle="Cómo quieres que te ayudemos a elegir dónde comprar.">
+                <ul className="flex flex-col gap-1">
+                  {COMPARE.map(([id, title, desc]) => (
+                    <li key={id}>
+                      <button type="button" role="radio" aria-checked={v.compareMode === id} onClick={() => set("compareMode", id)} className="flex w-full items-start gap-3 rounded-xl px-1 py-2 text-left hover:bg-cream">
+                        <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${v.compareMode === id ? "border-brand" : "border-cream-dark"}`}>
+                          {v.compareMode === id && <span className="h-2.5 w-2.5 rounded-full bg-brand" />}
+                        </span>
+                        <span>
+                          <span className="block text-sm font-semibold">{title}</span>
+                          <span className="block text-xs text-muted">{desc}</span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </>
+          )}
+          {tab === "notificaciones" && (
+            <>
+              <Card id="notificaciones" icon={<BellIcon className="h-7 w-7" />} title="Notificaciones" subtitle="Elige qué comunicaciones quieres recibir.">
+                <ul className="flex flex-col gap-3">
+                  {NOTIFS.map(([key, title, desc]) => {
+                    const on = v[key] as boolean;
+                    return (
+                      <li key={key} className="flex items-center gap-3">
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold">{title}</span>
+                          <span className="block text-xs text-muted">{desc}</span>
+                        </span>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={on}
+                          aria-label={title}
+                          onClick={() => set(key, !on as never)}
+                          className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${on ? "bg-olive" : "bg-cream-dark"}`}
+                        >
+                          <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-[left] ${on ? "left-6" : "left-1"}`} />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className="mt-3 text-xs text-muted">Guardamos tu preferencia. Los avisos llegarán en una próxima versión.</p>
+              </Card>
+            </>
+          )}
+          {tab === "cuenta" && account}
+
+          {tab !== "cuenta" && (
+            <div className={`z-10 rounded-2xl bg-white/95 p-3 shadow-sm backdrop-blur ${dirty ? "sticky bottom-20 md:bottom-4" : ""}`}>
+              <div className="flex flex-wrap items-center gap-3">
+                <button type="button" onClick={save} disabled={pending || !dirty} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 font-semibold text-white hover:bg-brand-dark disabled:opacity-50 sm:flex-none sm:px-6">
+                  <CheckIcon className="h-5 w-5" /> {pending ? "Guardando…" : "Guardar cambios"}
+                </button>
+                <button type="button" onClick={() => { setV(saved); setStatus(""); }} disabled={pending || !dirty} className="rounded-xl border border-brand bg-white px-4 py-3 font-medium text-brand hover:bg-brand-soft disabled:opacity-50 sm:px-6">
+                  Cancelar
+                </button>
+                <span role="status" className="basis-full text-sm sm:basis-auto">
+                  {status === "ok" && !dirty && <span className="text-olive-dark">Cambios guardados ✓</span>}
+                  {status === "error" && <span className="text-red-700">No se han podido guardar. Inténtalo de nuevo.</span>}
+                  {dirty && status !== "error" && <span className="text-muted">Tienes cambios sin guardar.</span>}
+                </span>
               </div>
             </div>
-          </Card>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={save} disabled={pending || !dirty} className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 font-semibold text-white hover:bg-brand-dark disabled:opacity-50">
-              <CheckIcon className="h-5 w-5" /> {pending ? "Guardando…" : "Guardar cambios"}
-            </button>
-            <button type="button" onClick={() => { setV(saved); setStatus(""); }} disabled={pending || !dirty} className="rounded-xl border border-brand bg-white px-6 py-3 font-medium text-brand hover:bg-brand-soft disabled:opacity-50">
-              Cancelar
-            </button>
-            <span role="status" className="text-sm">
-              {status === "ok" && !dirty && <span className="text-olive-dark">Cambios guardados ✓</span>}
-              {status === "error" && <span className="text-red-700">No se han podido guardar. Inténtalo de nuevo.</span>}
-              {dirty && status !== "error" && <span className="text-muted">Tienes cambios sin guardar.</span>}
-            </span>
-          </div>
+          )}
         </div>
 
-        {/* Columna lateral */}
-        <div className="flex flex-col gap-4">
-          <Card id="supermercados" icon={<StoreIcon className="h-7 w-7" />} title="Tus supermercados" subtitle="Tu supermercado habitual y dónde compras." action={<Link href="/onboarding" className="text-sm font-semibold text-brand hover:underline">Editar</Link>}>
-            <ul className="flex flex-col gap-2">
-              {chains.map((c) => (
-                <li key={c.id} className="flex items-center gap-3 rounded-xl border border-cream-dark p-2.5">
-                  <ChainLogo id={c.id} name={c.name} size={32} />
-                  <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
-                      {c.name}
-                      {main === c.id && <span className="rounded-md bg-olive-soft px-1.5 py-0.5 text-[11px] font-medium text-olive-dark">Habitual</span>}
-                    </span>
-                    <span className="block text-xs text-muted">{c.has_prices ? "Con precios" : "Sin precios todavía"}</span>
-                  </span>
-                  {main !== c.id && (
-                    <button type="button" onClick={() => set("mainSupermarket", c.id)} className="shrink-0 text-xs font-medium text-brand hover:underline">
-                      Hacer habitual
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-            {location.lat !== null && location.lng !== null && (
-              <div className="mt-3 overflow-hidden rounded-xl">
-                <StoreMap center={{ lat: location.lat, lng: location.lng }} stores={noStores} selected={noSelection} />
-              </div>
-            )}
-            {location.label && <p className="mt-2 text-xs text-muted">📍 {location.label}</p>}
-            <Link href="/onboarding" className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-brand px-4 py-2.5 text-sm font-semibold text-brand hover:bg-brand-soft">
-              <PlusIcon className="h-4 w-4" /> Gestionar supermercados
-            </Link>
-          </Card>
-
-          <Card id="estrategia" icon={<CartIcon className="h-7 w-7" />} title="Estrategia de compra" subtitle="Cómo quieres que te ayudemos a elegir dónde comprar.">
-            <ul className="flex flex-col gap-1">
-              {COMPARE.map(([id, title, desc]) => (
-                <li key={id}>
-                  <button type="button" role="radio" aria-checked={v.compareMode === id} onClick={() => set("compareMode", id)} className="flex w-full items-start gap-3 rounded-xl px-1 py-2 text-left hover:bg-cream">
-                    <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${v.compareMode === id ? "border-brand" : "border-cream-dark"}`}>
-                      {v.compareMode === id && <span className="h-2.5 w-2.5 rounded-full bg-brand" />}
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold">{title}</span>
-                      <span className="block text-xs text-muted">{desc}</span>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          <Card id="notificaciones" icon={<BellIcon className="h-7 w-7" />} title="Notificaciones" subtitle="Elige qué comunicaciones quieres recibir.">
-            <ul className="flex flex-col gap-3">
-              {NOTIFS.map(([key, title, desc]) => {
-                const on = v[key] as boolean;
-                return (
-                  <li key={key} className="flex items-center gap-3">
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold">{title}</span>
-                      <span className="block text-xs text-muted">{desc}</span>
-                    </span>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={on}
-                      aria-label={title}
-                      onClick={() => set(key, !on as never)}
-                      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${on ? "bg-olive" : "bg-cream-dark"}`}
-                    >
-                      <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-[left] ${on ? "left-6" : "left-1"}`} />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="mt-3 text-xs text-muted">Guardamos tu preferencia. Los avisos llegarán en una próxima versión.</p>
-          </Card>
-
+        <div className="hidden flex-col gap-4 lg:flex">
           <section className="rounded-2xl bg-olive-soft p-4">
             <p className="flex items-center gap-2 font-bold text-olive-dark">
               <StarIcon className="h-6 w-6" /> Tu perfil está completo al {completion} %
