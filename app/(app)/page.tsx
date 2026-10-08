@@ -82,7 +82,7 @@ export default async function HomePage() {
       {/* Fila principal: lo que toca ahora + la compra */}
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         {!hasMenu ? (
-          <section className="relative overflow-hidden rounded-2xl border border-cream-dark bg-gradient-to-r from-white via-white to-brand-soft/70 p-6 md:p-8">
+          <section className="relative overflow-hidden rounded-2xl border border-cream-dark bg-[#fbf3ea] p-6 md:p-8">
             <div className="relative z-10 flex gap-4 md:max-w-[60%]">
               <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand md:flex">
                 <CalendarIcon className="h-7 w-7" />
@@ -104,13 +104,15 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-            {/* Ilustración del plato */}
-            <div aria-hidden className="pointer-events-none absolute -right-10 top-1/2 hidden h-80 w-80 -translate-y-1/2 items-center justify-center rounded-full bg-brand-soft/80 md:flex">
-              <span className="text-[9rem] leading-none drop-shadow-sm">🍝</span>
-              <span className="absolute left-6 top-12 text-5xl">🍅</span>
-              <span className="absolute bottom-14 left-4 text-4xl">🌿</span>
-              <span className="absolute right-20 top-6 text-5xl">🫒</span>
-            </div>
+            {/* Foto del plato, fundida con el fondo por la izquierda */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/home/semana.jpg"
+              alt=""
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[55%] object-cover object-left md:block"
+              style={{ maskImage: "linear-gradient(to right, transparent, black 35%)", WebkitMaskImage: "linear-gradient(to right, transparent, black 35%)" }}
+            />
           </section>
         ) : (
           <section className="rounded-2xl border border-cream-dark bg-white p-5 md:p-6">
