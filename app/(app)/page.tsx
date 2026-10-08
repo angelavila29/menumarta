@@ -139,7 +139,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        <section className={`rounded-2xl border border-cream-dark bg-white p-5 ${shopping ? "lg:order-first" : ""}`}>
+        <section className={`flex flex-col rounded-2xl border border-cream-dark bg-white p-5 ${shopping ? "lg:order-first" : ""}`}>
           <Link href="/lista" className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-brand">
               <CartIcon className="h-6 w-6" />
@@ -148,7 +148,7 @@ export default async function HomePage() {
             <ChevronRight className="h-5 w-5 text-muted" />
           </Link>
           {items.length === 0 ? (
-            <div className="flex flex-col items-center py-4 text-center">
+            <div className="my-auto flex flex-col items-center py-4 text-center">
               <span aria-hidden className="flex h-20 w-20 items-center justify-center rounded-full bg-cream text-muted">
                 <CartIcon className="h-10 w-10" />
               </span>
@@ -168,13 +168,13 @@ export default async function HomePage() {
                   <div className="h-full rounded-full bg-olive" style={{ width: `${progress}%` }} />
                 </div>
               )}
-              <p className="mt-3 flex items-baseline justify-between">
+              <p className="mb-4 mt-3 flex items-baseline justify-between">
                 <span className="text-sm text-muted">Estimado</span>
                 <span className="text-2xl font-bold">{euro(listTotal)}</span>
               </p>
               <Link
                 href="/lista"
-                className={`mt-4 block rounded-xl px-4 py-3 text-center font-semibold ${shopping ? "bg-brand text-white hover:bg-brand-dark" : "border border-cream-dark text-ink hover:bg-cream"}`}
+                className={`mt-auto block rounded-xl px-4 py-3 text-center font-semibold ${shopping ? "bg-brand text-white hover:bg-brand-dark" : "border border-cream-dark text-ink hover:bg-cream"}`}
               >
                 {shopping ? "Seguir comprando" : "Ver lista"}
               </Link>

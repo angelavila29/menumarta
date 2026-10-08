@@ -278,7 +278,7 @@ export function TopBar({ name }: { name: string }) {
         <input
           type="search"
           name="q"
-          placeholder={onSearchPage ? "Buscar productos, marcas, ingredientes…" : "Buscar productos, recetas, marcas…"}
+          placeholder={onSearchPage ? "Buscar productos, marcas, ingredientes…" : "Buscar en Sobremesa…"}
           onChange={(e) => {
             if (onSearchPage) window.dispatchEvent(new CustomEvent(SEARCH_EVENT, { detail: e.target.value }));
           }}
