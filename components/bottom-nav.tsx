@@ -24,8 +24,52 @@ const SECONDARY = [
   { href: "/despensa", label: "Despensa", Icon: BoxIcon },
   { href: "/favoritos", label: "Favoritos", Icon: HeartIcon },
   { href: "/ajustes#supermercados", label: "Supermercados", Icon: StoreIcon },
-  { href: "/historico", label: "Histórico", Icon: ChartIcon },
+  { href: "/historico", label: "Tu ahorro", Icon: ChartIcon },
 ];
+// Barra lateral: lo de cada día a la vista; lo ocasional, dentro de "Más"
+const SIDE_DAILY = [
+  { href: "/despensa", label: "Despensa", Icon: BoxIcon },
+  { href: "/favoritos", label: "Favoritos", Icon: HeartIcon },
+];
+const SIDE_MORE = [
+  { href: "/historico", label: "Tu ahorro", Icon: ChartIcon },
+  { href: "/amigos", label: "Amigos", Icon: UsersIcon },
+  { href: "/ajustes#compra", label: "Supermercados", Icon: StoreIcon },
+  { href: "/ayuda", label: "Ayuda", Icon: HelpIcon },
+];
+
+function MoreGroup({ collapsed }: { collapsed: boolean }) {
+  const pathname = usePathname();
+  const inside = SIDE_MORE.some((t) => isActive(pathname, t.href.split("#")[0]));
+  const [open, setOpen] = useState(inside);
+  if (collapsed) {
+    return (
+      <ul className="flex flex-col gap-1">
+        {SIDE_MORE.map((t) => <li key={t.href}><NavItem {...t} collapsed /></li>)}
+      </ul>
+    );
+  }
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open || inside}
+        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-base text-muted hover:bg-cream hover:text-ink"
+      >
+        <DotsIcon className="h-5 w-5 shrink-0" />
+        Más
+        <ChevronDown className={`ml-auto h-4 w-4 transition ${open || inside ? "rotate-180" : ""}`} />
+      </button>
+      {(open || inside) && (
+        <ul className="mt-1 flex flex-col gap-1">
+          {SIDE_MORE.map((t) => <li key={t.href}><NavItem {...t} collapsed={false} /></li>)}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 const FOOTER = [
   { href: "/ajustes", label: "Configuración", Icon: SettingsIcon },
   { href: "/ayuda", label: "Ayuda", Icon: HelpIcon },
@@ -194,19 +238,15 @@ export function SideNav({ canCook = false }: { canCook?: boolean }) {
       </Link>
 
       <ul className="flex flex-col gap-1">
-        {MAIN.map((t) => (
+        {[...MAIN.slice(0, 3), ...(canCook ? [COOK] : []), ...MAIN.slice(3), ...SIDE_DAILY].map((t) => (
           <li key={t.href}><NavItem {...t} collapsed={collapsed} /></li>
         ))}
       </ul>
-      <div className="my-4 border-t border-cream-dark" />
-      <ul className="flex flex-col gap-1">
-        {[...(canCook ? [COOK] : []), ...SECONDARY].map((t) => (
-          <li key={t.href}><NavItem {...t} collapsed={collapsed} /></li>
-        ))}
-      </ul>
+      <div className="my-3 border-t border-cream-dark" />
+      <MoreGroup collapsed={collapsed} />
       <div className="mt-auto">
         <ul className="flex flex-col gap-1">
-          {FOOTER.map((t) => (
+          {FOOTER.slice(0, 1).map((t) => (
             <li key={t.href}><NavItem {...t} collapsed={collapsed} /></li>
           ))}
         </ul>

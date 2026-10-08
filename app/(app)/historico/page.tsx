@@ -35,7 +35,7 @@ export default async function HistoryPage() {
 
   return (
     <main>
-      <h1 className="text-3xl font-bold md:text-5xl">Histórico de precios</h1>
+      <h1 className="text-3xl font-bold md:text-5xl">Tu ahorro</h1>
       <p className="mt-1 text-muted md:text-lg">
         {changes.length > 0 ? `Qué ha cambiado en tus supermercados desde el ${longDate(since)}.` : "Todavía no hay cambios de precio registrados en tus supermercados."}
       </p>
