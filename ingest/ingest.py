@@ -147,6 +147,14 @@ def unit_price_from_pack(price: float, pack_size: str) -> tuple[float | None, st
     return price / (qty * factor), unit
 
 
+def image_for(chain: str, sku: str) -> str | None:
+    """opencesta no trae foto de Dia, pero Dia la publica en una ruta fija por SKU.
+    imwidth=300 pide la versión pequeña (la original es de 2400 px)."""
+    if chain == "dia" and sku.isdigit():
+        return f"https://www.dia.es/product_images/{sku}/{sku}_ISO_0_ES.jpg?imwidth=300"
+    return None
+
+
 def build_products(df: pl.DataFrame, catalog: pl.DataFrame) -> pl.DataFrame:
     df = df.filter(
         ((pl.col("chain") == "mercadona") & (pl.col("zone") == MERCADONA_ZONE))
@@ -185,7 +193,7 @@ def build_products(df: pl.DataFrame, catalog: pl.DataFrame) -> pl.DataFrame:
                 "unit_price": _num(unit_price),
                 "unit": unit,
                 "pack_size": pack_size,
-                "image_url": r.get("thumbnail"),
+                "image_url": r.get("thumbnail") or image_for(r["chain"], str(r["sku"])),
                 "product_url": r.get("url"),
                 "is_discounted": bool(r.get("is_discounted") or False),
                 "captured_at": r.get("captured_at"),
