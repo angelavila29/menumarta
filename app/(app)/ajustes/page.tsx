@@ -11,7 +11,7 @@ export default async function SettingsPage() {
     supabase
       .from("profiles")
       .select(
-        "display_name,phone,address,postal_code,lat,lng,household_size,planning_meals,diet,allergies,avoid_foods,weekly_budget,max_recipe_minutes,cook_sessions,goals,sex,age,weight_kg,height_cm,activity,body_goal,compare_mode,main_supermarket,notify_menu,notify_savings,notify_price_drops,notify_summary"
+        "display_name,phone,address,postal_code,lat,lng,household_size,planning_meals,diet,allergies,avoid_foods,weekly_budget,max_recipe_minutes,cook_sessions,goals,sex,age,weight_kg,height_cm,activity,body_goal,appliances,compare_mode,main_supermarket,notify_menu,notify_savings,notify_price_drops,notify_summary"
       )
       .eq("id", user.id)
       .maybeSingle(),
@@ -41,6 +41,7 @@ export default async function SettingsPage() {
     heightCm: p?.height_cm ?? null,
     activity: p?.activity ?? null,
     bodyGoal: p?.body_goal ?? null,
+    appliances: p?.appliances ?? null,
     goals: p?.goals ?? [],
     compareMode: p?.compare_mode ?? "avisar",
     mainSupermarket: p?.main_supermarket ?? null,

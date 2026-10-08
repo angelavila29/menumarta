@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { APPLIANCES } from "@/lib/appliances";
 import { requireUser } from "@/lib/auth";
+
+const APPLIANCE_IDS = new Set<string>(APPLIANCES.map((a) => a.id));
 import { geocode, nearbyChains, reverseGeocode, type GeoPoint, type NearbyChain, type Store } from "@/lib/geo";
 import { currentWeekStart, loadSlots, getOrCreateMenu } from "@/lib/menu";
 import { generateWeekFor } from "@/lib/menu-actions";
@@ -63,6 +66,7 @@ export type OnboardingInput = {
   weeklyBudget: number | null;
   maxRecipeMinutes: number | null;
   bodyGoal: string | null;
+  appliances: string[];
 };
 
 /** Guarda todo el onboarding y, si la semana está vacía, genera el primer menú. */
@@ -95,6 +99,7 @@ export async function saveOnboarding(input: OnboardingInput): Promise<{ to: stri
       weekly_budget: input.weeklyBudget != null && input.weeklyBudget > 0 ? Math.min(2000, Math.round(input.weeklyBudget)) : null,
       max_recipe_minutes: input.maxRecipeMinutes != null && input.maxRecipeMinutes > 0 ? Math.round(input.maxRecipeMinutes) : null,
       body_goal: ["perder", "mantener", "ganar"].includes(input.bodyGoal ?? "") ? input.bodyGoal : null,
+      appliances: input.appliances.filter((a) => APPLIANCE_IDS.has(a)),
       onboarded_at: new Date().toISOString(),
     },
     { onConflict: "id" }

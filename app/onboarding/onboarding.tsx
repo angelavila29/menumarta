@@ -7,6 +7,8 @@ import { useState, useSyncExternalStore, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
 import { ArrowRight, CalendarIcon, CartIcon, ChartIcon, CheckIcon, LeafIcon } from "@/components/icons";
 import { FoodInput } from "@/components/food-input";
+import { KitchenPicker } from "@/components/kitchen-picker";
+import type { ApplianceId } from "@/lib/appliances";
 import { COOK_RANGES, cookRangeOf } from "@/lib/cook-sessions";
 import { formatDistance, type NearbyChain } from "@/lib/geo";
 import { locateByAddress, locateByCoords, saveOnboarding, type LocateResult } from "@/lib/onboarding-actions";
@@ -29,6 +31,7 @@ export type Initial = {
   weeklyBudget: number | null;
   maxRecipeMinutes: number | null;
   bodyGoal: string | null;
+  appliances: string[] | null;
   foods: string[];
   isFirstTime: boolean;
 };
@@ -68,6 +71,8 @@ export function Onboarding({ initial }: { initial: Initial }) {
   const [budget, setBudget] = useState<number | null>(initial.weeklyBudget);
   const [maxMinutes, setMaxMinutes] = useState<number | null>(initial.maxRecipeMinutes);
   const [bodyGoal, setBodyGoal] = useState<string | null>(initial.bodyGoal);
+  // Lo más habitual viene marcado; se quita lo que no haya
+  const [appliances, setAppliances] = useState<ApplianceId[]>((initial.appliances as ApplianceId[] | null) ?? ["fuego", "horno", "microondas"]);
   const [goals, setGoals] = useState<Set<string>>(new Set(initial.goals));
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -124,6 +129,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
           weeklyBudget: budget,
           maxRecipeMinutes: maxMinutes,
           bodyGoal,
+          appliances,
         });
         router.push(to);
       } catch (e) {
@@ -225,6 +231,11 @@ export function Onboarding({ initial }: { initial: Initial }) {
 
       {step === 3 && (
         <Screen icon={<PotIcon className="h-20 w-20" />} title="¿Cómo cocinas?" subtitle="Con esto el menú te propone cocinar las veces justas y recetas que te cuadren.">
+          <p className="mb-1 text-sm font-semibold">¿Qué hay en tu cocina?</p>
+          <p className="mb-2 text-xs text-muted">Toca para marcar o quitar. No te propondremos recetas que necesiten algo que no tienes.</p>
+          <div className="mb-5">
+            <KitchenPicker value={appliances} onChange={setAppliances} />
+          </div>
           <p className="mb-2 text-sm font-semibold">¿Cuántas veces cocinas a la semana?</p>
           <div className="mb-1 grid grid-cols-2 gap-2 lg:grid-cols-5">
             {COOK_RANGES.map((r) => (

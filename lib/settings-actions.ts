@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { APPLIANCES } from "@/lib/appliances";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
+
+const APPLIANCE_IDS = new Set<string>(APPLIANCES.map((a) => a.id));
 
 export type SettingsInput = {
   displayName: string;
@@ -21,6 +24,7 @@ export type SettingsInput = {
   heightCm: number | null;
   activity: string | null;
   bodyGoal: string | null;
+  appliances: string[] | null;
   compareMode: string;
   mainSupermarket: string | null;
   notifyMenu: boolean;
@@ -70,6 +74,7 @@ export async function saveSettings(input: SettingsInput) {
       height_cm: numIn(input.heightCm, 100, 250),
       activity: ["baja", "media", "alta"].includes(input.activity ?? "") ? input.activity : null,
       body_goal: ["perder", "mantener", "ganar"].includes(input.bodyGoal ?? "") ? input.bodyGoal : null,
+      appliances: input.appliances ? input.appliances.filter((a) => APPLIANCE_IDS.has(a)) : null,
       compare_mode: COMPARE.includes(input.compareMode) ? input.compareMode : "avisar",
       main_supermarket: input.mainSupermarket && mine.includes(input.mainSupermarket) ? input.mainSupermarket : null,
       notify_menu: !!input.notifyMenu,

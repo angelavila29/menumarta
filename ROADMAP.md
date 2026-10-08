@@ -156,6 +156,15 @@ mejor encaja.
       (un puñado de arroz son 40 g, de espinacas 20 g). La ficha las muestra tal cual ("2 cucharadas").
       El texto pegado también las conserva. Con tests.
 
+## L. Tu cocina (8 oct)
+- [x] En el onboarding (paso "¿Cómo cocinas?") y en Ajustes, una cocina dibujada para marcar qué
+      electrodomésticos hay: vitro o fuegos, horno, microondas, freidora de aire, batidora y olla
+      exprés. Lo que pide cada receta se deduce de sus pasos (`lib/appliances.ts`), así que también
+      vale para las recetas que sube la gente. La freidora de aire cuenta como horno.
+- [x] El menú semanal y "¿Qué cocino hoy?" no proponen recetas que no se puedan hacer; la ficha de
+      receta avisa de qué hace falta. Con tests.
+- [x] Fotos de Dia: se construyen por SKU porque opencesta no las trae.
+
 ## Pendiente, decidido a propósito
 - Las extensiones `pg_trgm` y `unaccent` siguen en el esquema `public`. Moverlas rompería la columna
   generada `products.name_norm`, que es de lo que vive el buscador.

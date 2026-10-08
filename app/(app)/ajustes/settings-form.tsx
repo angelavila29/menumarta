@@ -6,6 +6,8 @@ import { StoreMap } from "@/app/onboarding/store-map";
 import { ChainLogo } from "@/components/chain-logo";
 import { CartIcon, CheckIcon, HomeIcon, LeafIcon, PlusIcon, StarIcon, StoreIcon } from "@/components/icons";
 import { FoodInput } from "@/components/food-input";
+import { KitchenPicker } from "@/components/kitchen-picker";
+import type { ApplianceId } from "@/lib/appliances";
 import { COOK_RANGES, cookRangeOf } from "@/lib/cook-sessions";
 import { hasBodyData, targetsFor, type Body } from "@/lib/goal";
 import { saveSettings, type SettingsInput } from "@/lib/settings-actions";
@@ -226,6 +228,11 @@ export function SettingsForm({ initial, email, chains, location, foods }: Props)
           </Card>
 
           <Card id="cocina" icon={<ForkIcon className="h-7 w-7" />} title="Presupuesto y cocina" subtitle="Ajusta tus preferencias para que las recetas se adapten a tu día a día.">
+            <p className="mb-1 text-sm font-semibold">Tu cocina</p>
+            <p className="mb-2 text-xs text-muted">Solo te proponemos recetas que puedas hacer con lo que tienes.</p>
+            <div className="mb-5">
+              <KitchenPicker value={(v.appliances ?? ["fuego", "horno", "microondas"]) as ApplianceId[]} onChange={(next) => set("appliances", next)} />
+            </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <Field label="Presupuesto semanal" hint="Referencia para tu compra semanal.">
                 <select value={v.weeklyBudget ?? ""} onChange={(e) => set("weeklyBudget", e.target.value ? Number(e.target.value) : null)} className={inputCls}>

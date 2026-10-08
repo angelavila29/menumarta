@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { hasFeature } from "@/lib/access";
+import { canCook } from "@/lib/appliances";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { normIngredient, type CookRecipe } from "@/lib/cook";
 import { cheapestProductFor, type Need, type Recipe } from "@/lib/menu";
@@ -24,10 +25,10 @@ export default async function CookPage() {
     );
   }
   const [{ data: recipeRows }, { data: ingRows }, { data: pantry }, { data: profile }, supers, { data: chainRows }, { data: mapRows }] = await Promise.all([
-    supabase.from("recipes").select("id,name,meal,servings,tags,owner_id,author_name,photo_url,time_minutes").order("name"),
+    supabase.from("recipes").select("id,name,meal,servings,tags,owner_id,author_name,photo_url,time_minutes,steps").order("name"),
     supabase.from("recipe_ingredients").select("recipe_id,ingredient_name,qty,unit").order("id"),
     supabase.from("pantry_items").select("ingredient_name").eq("user_id", user.id),
-    supabase.from("profiles").select("household_size,diet,allergies,avoid_foods,weekly_budget").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("household_size,diet,allergies,avoid_foods,weekly_budget,appliances").eq("id", user.id).maybeSingle(),
     userSupermarketIds(supabase, user.id),
     supabase.from("supermarkets").select("id,has_prices"),
     supabase.from("ingredient_product_map").select(`ingredient_name,product:products(${PRODUCT_COLUMNS})`).eq("user_id", user.id),
@@ -44,6 +45,7 @@ export default async function CookPage() {
 
   const recipes: CookRecipe[] = (recipeRows ?? [])
     .filter((r) => recipeAllowed(r as unknown as Recipe, (byRecipe.get(r.id as number) ?? []).map((i) => i.ingredient_name), prefs))
+    .filter((r) => canCook(r.steps as string[] | null, (profile?.appliances as string[] | null) ?? null))
     .map((r) => {
       const base = Number(r.servings) || 4;
       return {

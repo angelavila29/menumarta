@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { canCook } from "@/lib/appliances";
 import { requireUser } from "@/lib/auth";
 import { nutritionByRecipe } from "@/lib/menu-nutrition";
 import { getOrCreateActiveList } from "@/lib/lists";
@@ -18,14 +19,14 @@ export async function generateWeekAction(weekStart: string) {
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal,appliances")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
   const [recipes, ingredients, { data: times }, { data: ingRows }] = await Promise.all([
     loadRecipes(supabase),
     loadIngredientNames(supabase),
-    supabase.from("recipes").select("id,time_minutes"),
+    supabase.from("recipes").select("id,time_minutes,steps"),
     supabase.from("recipe_ingredients").select("recipe_id,ingredient_name,qty,unit"),
   ]);
   const bodyGoal = (profile?.body_goal as "perder" | "mantener" | "ganar" | null) ?? null;
@@ -52,12 +53,15 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     (r) => r.owner_id === null || r.owner_id === userId || saved.has(r.id) || (r.owner_id !== null && friendIds.has(r.owner_id))
   );
   const minutes = new Map((times ?? []).map((t) => [t.id as number, t.time_minutes as number | null]));
+  const stepsById = new Map((times ?? []).map((t) => [t.id as number, (t.steps ?? []) as string[]]));
+  const kitchen = (profile?.appliances as string[] | null) ?? null;
   const maxMinutes = profile?.max_recipe_minutes ?? null;
   const prefs = { diet: profile?.diet ?? null, allergies: profile?.allergies ?? [], avoid: profile?.avoid_foods ?? [] };
   let allowed = pool.filter(
     (r) =>
       recipeAllowed(r, ingredients.get(r.id) ?? [], prefs) &&
-      (maxMinutes === null || (minutes.get(r.id) ?? 0) <= maxMinutes)
+      (maxMinutes === null || (minutes.get(r.id) ?? 0) <= maxMinutes) &&
+      canCook(stepsById.get(r.id), kitchen)
   );
   if (allowed.length < 6) allowed = pool; // demasiado restrictivo: mejor un menú que ninguno
   // Los huecos "como fuera" se respetan; se cocina las veces que diga el perfil

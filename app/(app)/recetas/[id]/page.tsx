@@ -10,6 +10,7 @@ import { euro } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { cheapestProductFor, currentWeekStart, DAYS, toProductUnit, type Need } from "@/lib/menu";
 import { nutritionPerServing, unitGramsOf } from "@/lib/nutrition";
+import { APPLIANCES, requiredAppliances } from "@/lib/appliances";
 import { formatUnits } from "@/lib/qty";
 import { formatMeasure } from "@/lib/units";
 import { keywords, stem, unaccent } from "@/lib/search";
@@ -42,7 +43,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
     await Promise.all([
       supabase.from("recipes").select("id,name,meal,servings,tags,description,time_minutes,difficulty,steps,owner_id,author_name,visibility,photo_url").eq("id", recipeId).maybeSingle(),
       supabase.from("recipe_ingredients").select("ingredient_name,qty,unit").eq("recipe_id", recipeId).order("id"),
-      supabase.from("profiles").select("household_size").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles").select("household_size,appliances").eq("id", user.id).maybeSingle(),
       userSupermarketIds(supabase, user.id),
       supabase.from("supermarkets").select("id,name,has_prices"),
       getOrCreateActiveList(supabase, user.id),
@@ -110,6 +111,9 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
   const comparable = ranked.length > 1 && ranked.every((c) => c.missing === 0);
 
   const nutri = nutritionPerServing(ings, base);
+  const needsTools = requiredAppliances(recipe.steps as string[] | null).filter((a) => a !== "fuego");
+  const kitchen = (profile?.appliances as string[] | null) ?? null;
+  const missingTools = kitchen ? needsTools.filter((a) => !kitchen.includes(a) && !(a === "horno" && kitchen.includes("freidora"))) : [];
   const steps: string[] = recipe.steps ?? [];
   const missingNeeds = needs.filter((n) => !inList(n.ingredient));
   const dayParam = typeof sp.dia === "string" ? Number(sp.dia) : NaN;
@@ -178,6 +182,13 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
               <Stat emoji="👥" value={`${people} ${people === 1 ? "persona" : "personas"}`} label="Raciones" />
               <Stat emoji="💶" value={perPerson !== null ? euro(perPerson) : "—"} label="por persona" />
             </div>
+            {needsTools.length > 0 && (
+              <p className={`rounded-xl px-3 py-2 text-sm ${missingTools.length > 0 ? "bg-amber-50 text-amber-900" : "bg-white text-muted shadow-sm"}`}>
+                {missingTools.length > 0
+                  ? `Necesita ${joinTools(missingTools)} y en tu cocina no lo tienes marcado.`
+                  : `Necesita ${joinTools(needsTools)}${needsTools.includes("horno") && kitchen?.includes("freidora") && !kitchen?.includes("horno") ? " (vale la freidora de aire)" : ""}.`}
+              </p>
+            )}
           </div>
 
           <section className="rounded-2xl bg-white p-4 shadow-sm">
@@ -387,4 +398,9 @@ const EMOJI: [RegExp, string][] = [
 function ingredientEmoji(name: string) {
   const n = unaccent(name);
   return EMOJI.find(([re]) => re.test(n))?.[1] ?? "🧂";
+}
+
+function joinTools(ids: string[]): string {
+  const names = ids.map((id) => (APPLIANCES.find((a) => a.id === id)?.label ?? id).toLowerCase());
+  return names.length > 1 ? `${names.slice(0, -1).join(", ")} y ${names[names.length - 1]}` : names[0];
 }

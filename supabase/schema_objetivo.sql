@@ -9,3 +9,6 @@ alter table profiles
   add column if not exists height_cm integer check (height_cm between 100 and 250),
   add column if not exists activity text check (activity in ('baja','media','alta')),
   add column if not exists body_goal text check (body_goal in ('perder','mantener','ganar'));
+
+-- Electrodomésticos que hay en casa (null = no lo ha dicho, no se filtra).
+alter table profiles add column if not exists appliances text[];
