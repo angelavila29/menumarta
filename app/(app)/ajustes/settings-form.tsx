@@ -1,9 +1,9 @@
 "use client";
-
 import Link from "next/link";
 import { useMemo, useEffect, useState, useTransition } from "react";
 import { StoreMap } from "@/app/onboarding/store-map";
 import { ChainLogo } from "@/components/chain-logo";
+import { DayBreakdown } from "@/components/day-breakdown";
 import { CartIcon, CheckIcon, HomeIcon, LeafIcon, PlusIcon, StarIcon, StoreIcon } from "@/components/icons";
 import { FoodInput } from "@/components/food-input";
 import { KitchenPicker } from "@/components/kitchen-picker";
@@ -481,12 +481,9 @@ function GoalSummary({ v }: { v: SettingsInput }) {
   if (!v.bodyGoal) return <p className="mt-4 text-sm text-muted">Sin objetivo, el menú solo mira tus gustos, tu despensa y tu presupuesto.</p>;
   const t = targetsFor(body);
   return (
-    <div className="mt-4 rounded-xl bg-olive-soft p-3 text-sm text-olive-dark">
-      <p>
-        Tu día completo: unas <b>{t.kcalDay.toLocaleString("es-ES")} kcal</b> y <b>{t.proteinDay} g de proteína</b>. De eso, comida y cena (lo que planifica el menú) son unas{" "}
-        <b>{t.kcalMeals.toLocaleString("es-ES")} kcal</b> y <b>{t.proteinMeals} g</b>; el resto es desayuno, merienda, pan y postre.
-      </p>
-      {!hasBodyData(body) && <p className="mt-1 text-xs">Faltan datos (sexo, edad, peso o altura), así que es una estimación media. Rellénalos y afinará.</p>}
+    <div className="mt-4">
+      <DayBreakdown kcalDay={t.kcalDay} proteinDay={t.proteinDay} />
+      {!hasBodyData(body) && <p className="mt-1 text-xs text-muted">Faltan datos (sexo, edad, peso o altura), así que es una estimación media. Rellénalos y afinará.</p>}
     </div>
   );
 }

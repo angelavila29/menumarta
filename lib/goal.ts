@@ -31,6 +31,18 @@ const ACTIVITY_FACTOR = { baja: 1.35, media: 1.55, alta: 1.75 };
 // Reparto habitual en España: desayuno ~20-25 %, media mañana y merienda ~10-15 %, comida ~35 % y
 // cena ~30 %. Comida + cena ≈ 65 % del día; el resto lo pone lo que el menú no planifica.
 const MEALS_SHARE_KCAL = 0.65;
+
+/** Cómo se reparte el objetivo diario. `menu` = lo planifica el menú semanal. */
+export const DAY_PARTS = [
+  { key: "desayuno", label: "Desayuno", emoji: "☕", share: 0.22, menu: false },
+  { key: "picoteo", label: "Media mañana y merienda", emoji: "🍎", share: 0.13, menu: false },
+  { key: "comida", label: "Comida", emoji: "🍲", share: 0.35, menu: true },
+  { key: "cena", label: "Cena", emoji: "🌙", share: 0.3, menu: true },
+] as const;
+
+export function dayBreakdown(kcalDay: number) {
+  return DAY_PARTS.map((p) => ({ ...p, kcal: Math.round((kcalDay * p.share) / 10) * 10 }));
+}
 const MEALS_SHARE_PROTEIN = 0.6; // el desayuno (leche, yogur, huevos) también aporta proteína
 
 export function hasBodyData(b: Body): boolean {

@@ -1,7 +1,7 @@
 "use client";
-
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { DayBreakdown } from "@/components/day-breakdown";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
 import { euro } from "@/lib/format";
 import { DAYS, MEALS, type Menu, type Recipe, type Slot } from "@/lib/menu";
@@ -260,9 +260,9 @@ export function MenuGrid(p: Props) {
                 <span className="text-xs text-muted">Media al día entre comida y cena</span>
               </div>
               {p.goal.bodyGoal && (
-                <p className="mt-1 text-xs text-muted">
-                  Tu día completo: unas {p.goal.kcalDay.toLocaleString("es-ES")} kcal. Aquí se mide solo comida y cena; el resto es desayuno, merienda, pan y postre.
-                </p>
+                <div className="mt-3">
+                  <DayBreakdown kcalDay={p.goal.kcalDay} />
+                </div>
               )}
               <ul className="mt-3 flex flex-col gap-2.5">
                 <MeterRow label="Calorías (comida + cena)" unit="kcal" m={p.goal.kcal} />
@@ -474,7 +474,7 @@ function MeterRow({ label, unit, m }: { label: string; unit: string; m: { value:
   const pct = m.target > 0 ? Math.min(130, (m.value / m.target) * 100) : 0;
   const tone = m.verdict === "ok" ? "bg-olive" : m.verdict === "bajo" ? "bg-amber-400" : "bg-brand";
   const word = m.verdict === "ok" ? "bien" : m.verdict === "bajo" ? "poco" : "mucho";
-  const fmt = (n: number) => n.toLocaleString("es-ES", { maximumFractionDigits: unit === "raciones" ? 1 : 0 });
+  const fmt = (n: number) => n.toLocaleString("es-ES", { maximumFractionDigits: unit === "raciones" ? 1 : 0, useGrouping: "always" } as Intl.NumberFormatOptions);
   return (
     <li>
       <div className="flex items-baseline justify-between text-sm">
