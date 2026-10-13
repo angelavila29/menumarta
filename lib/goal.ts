@@ -1,6 +1,7 @@
 /**
  * Objetivo corporal y necesidades diarias aproximadas. Es orientativo, no consejo médico:
- * fórmula de Mifflin-St Jeor para el gasto en reposo, factor de actividad y un ajuste por objetivo.
+ * gasto diario con las ecuaciones de las Dietary Reference Intakes for Energy (National Academies,
+ * 2023), ajustadas con mediciones reales de agua doblemente marcada, y un ajuste por objetivo.
  */
 export type Body = {
   sex: "mujer" | "hombre" | null;
@@ -27,7 +28,12 @@ export type Targets = {
 export const GOAL_LABEL: Record<NonNullable<Body["bodyGoal"]>, string> = { perder: "Perder peso", mantener: "Mantenerme", ganar: "Ganar músculo" };
 export const ACTIVITY_LABEL: Record<NonNullable<Body["activity"]>, string> = { baja: "Poca (sentado casi todo el día)", media: "Media (ando bastante o deporte 2-3 días)", alta: "Alta (deporte 4+ días o trabajo físico)" };
 
-const ACTIVITY_FACTOR = { baja: 1.35, media: 1.55, alta: 1.75 };
+// Gasto total diario (kcal) = a − b·edad + c·altura(cm) + d·peso(kg). Tabla 5-5 del informe DRI 2023.
+// "baja" = inactive (PAL < 1.53), "media" = low active (1.53-1.68), "alta" = active (1.68-1.85).
+const TEE: Record<"hombre" | "mujer", Record<"baja" | "media" | "alta", [number, number, number, number]>> = {
+  hombre: { baja: [753.07, 10.83, 6.5, 14.1], media: [581.47, 10.83, 8.3, 14.94], alta: [1004.82, 10.83, 6.52, 15.91] },
+  mujer: { baja: [584.9, 7.01, 5.72, 11.71], media: [575.77, 7.01, 6.6, 12.14], alta: [710.25, 7.01, 6.54, 12.34] },
+};
 // Reparto habitual en España: desayuno ~20-25 %, media mañana y merienda ~10-15 %, comida ~35 % y
 // cena ~30 %. Comida + cena ≈ 65 % del día; el resto lo pone lo que el menú no planifica.
 const MEALS_SHARE_KCAL = 0.65;
@@ -56,13 +62,16 @@ export function targetsFor(b: Body): Targets {
   const w = b.weightKg ?? (sex === "hombre" ? 72 : 62);
   const h = b.heightCm ?? (sex === "hombre" ? 176 : 164);
   const goal = b.bodyGoal ?? "mantener";
-  // Mifflin-St Jeor
-  const bmr = 10 * w + 6.25 * h - 5 * age + (sex === "hombre" ? 5 : -161);
-  const tdee = bmr * ACTIVITY_FACTOR[b.activity ?? "media"];
-  // Para perder, un 15 % menos del gasto (no una cifra fija, que en personas pequeñas y
-  // sedentarias deja objetivos imposibles); para ganar, un pequeño superávit.
-  const kcalDay = Math.round(Math.max(1200, goal === "perder" ? tdee * 0.85 : goal === "ganar" ? tdee + 250 : tdee));
-  const gPerKg = goal === "ganar" ? 1.7 : goal === "perder" ? 1.4 : 1.2;
+  const [a, bAge, cH, dW] = TEE[sex][b.activity ?? "media"];
+  const tee = a - bAge * age + cH * h + dW * w;
+  // Perder: déficit del 20 % sin pasar de 500 kcal (pauta habitual de 500-750; así nadie baja de golpe)
+  // y nunca por debajo de 1.200 (mujer) / 1.500 (hombre). Ganar: superávit pequeño, +10 %, para
+  // que lo ganado sea sobre todo músculo. Proteína: 1,6 g/kg ganando (meta-análisis de Morton 2018),
+  // 1,4 perdiendo para conservar músculo y 1,2 manteniendo.
+  const deficit = Math.min(500, tee * 0.2);
+  const floor = sex === "hombre" ? 1500 : 1200;
+  const kcalDay = Math.round(goal === "perder" ? Math.max(floor, tee - deficit) : goal === "ganar" ? tee * 1.1 : tee);
+  const gPerKg = goal === "ganar" ? 1.6 : goal === "perder" ? 1.4 : 1.2;
   const proteinDay = Math.round(w * gPerKg);
   return {
     kcalDay,

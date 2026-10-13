@@ -4,8 +4,8 @@ import { judge, targetsFor } from "../lib/goal";
 
 test("objetivos diarios: hombre 22 años, 72 kg, 176 cm, actividad media, mantener", () => {
   const t = targetsFor({ sex: "hombre", age: 22, weightKg: 72, heightCm: 176, activity: "media", bodyGoal: "mantener" });
-  // BMR ≈ 1715 · 1.55 ≈ 2658
-  assert.ok(t.kcalDay > 2550 && t.kcalDay < 2750, String(t.kcalDay));
+  // DRI 2023, low active: 581.47 − 10.83·22 + 8.30·176 + 14.94·72 ≈ 2880
+  assert.ok(t.kcalDay > 2830 && t.kcalDay < 2930, String(t.kcalDay));
   assert.equal(t.proteinDay, 86);
   assert.equal(t.estimated, false);
 });
@@ -33,8 +33,16 @@ test("veredicto con margen del 12 %", () => {
 });
 
 test("mujer pequeña y sedentaria que quiere perder: objetivo diario realista", () => {
-  // 22 años, 55 kg, 155 cm, actividad baja: gasto ≈ 1685, perder ≈ 1430
+  // 22 años, 55 kg, 155 cm, inactiva: gasto ≈ 1960, perder (−20 %) ≈ 1570
   const t = targetsFor({ sex: "mujer", age: 22, weightKg: 55, heightCm: 155, activity: "baja", bodyGoal: "perder" });
-  assert.ok(t.kcalDay > 1380 && t.kcalDay < 1480, String(t.kcalDay));
-  assert.ok(t.kcalMeals > 850 && t.kcalMeals < 1000, String(t.kcalMeals));
+  assert.ok(t.kcalDay > 1520 && t.kcalDay < 1620, String(t.kcalDay));
+  assert.ok(t.kcalMeals > 980 && t.kcalMeals < 1060, String(t.kcalMeals));
+});
+
+test("perder nunca baja del mínimo ni quita más de 500 kcal", () => {
+  const big = targetsFor({ sex: "hombre", age: 24, weightKg: 86, heightCm: 170, activity: "media", bodyGoal: "perder" });
+  const keep = targetsFor({ sex: "hombre", age: 24, weightKg: 86, heightCm: 170, activity: "media", bodyGoal: "mantener" });
+  assert.equal(keep.kcalDay - big.kcalDay, 500);
+  const tiny = targetsFor({ sex: "mujer", age: 70, weightKg: 40, heightCm: 145, activity: "baja", bodyGoal: "perder" });
+  assert.ok(tiny.kcalDay >= 1200);
 });
