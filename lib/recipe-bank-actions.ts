@@ -114,3 +114,54 @@ export async function addRecipeToMenu(recipeId: number, day: number, meal: "comi
   revalidatePath("/menu");
   revalidatePath(`/recetas/${recipeId}`);
 }
+
+/**
+ * Copia una receta (de Sobremesa o de un amigo) como receta tuya para editarla a tu gusto.
+ * La original no cambia. La copia empieza privada y recuerda de qué receta viene.
+ */
+export async function copyRecipe(recipeId: number): Promise<{ to: string }> {
+  const { supabase, user } = await requireUser();
+  const [{ data: src }, { data: ings }, { data: profile }, { data: mine }] = await Promise.all([
+    supabase.from("recipes").select("id,name,description,meal,servings,time_minutes,difficulty,tags,steps,photo_url").eq("id", recipeId).maybeSingle(),
+    supabase.from("recipe_ingredients").select("ingredient_name,qty,unit").eq("recipe_id", recipeId).order("id"),
+    supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
+    supabase.from("recipes").select("name").eq("owner_id", user.id),
+  ]);
+  if (!src) throw new Error("No encuentro esa receta.");
+
+  // Nombre libre: "Lentejas (mi versión)", "Lentejas (mi versión 2)"…
+  const taken = new Set((mine ?? []).map((r) => (r.name as string).toLowerCase()));
+  const base = `${src.name} (mi versión)`.slice(0, 80);
+  let name = base;
+  for (let n = 2; taken.has(name.toLowerCase()); n++) name = `${src.name} (mi versión ${n})`.slice(0, 80);
+
+  const { data: created, error } = await supabase
+    .from("recipes")
+    .insert({
+      owner_id: user.id,
+      author_name: profile?.display_name?.trim() || null,
+      name,
+      description: src.description,
+      meal: src.meal,
+      servings: src.servings,
+      time_minutes: src.time_minutes,
+      difficulty: src.difficulty,
+      tags: src.tags,
+      steps: src.steps ?? [],
+      photo_url: src.photo_url,
+      visibility: "private",
+      based_on: src.id,
+    })
+    .select("id")
+    .single();
+  if (error || !created) throw new Error(error?.message ?? "No se ha podido copiar la receta.");
+
+  if ((ings ?? []).length > 0) {
+    const { error: iErr } = await supabase
+      .from("recipe_ingredients")
+      .insert((ings ?? []).map((i) => ({ recipe_id: created.id, ingredient_name: i.ingredient_name, qty: i.qty, unit: i.unit })));
+    if (iErr) throw new Error(iErr.message);
+  }
+  revalidatePath("/recetas");
+  return { to: `/recetas/${created.id}/editar` };
+}

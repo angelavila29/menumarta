@@ -12,3 +12,6 @@ alter table profiles
 
 -- Electrodomésticos que hay en casa (null = no lo ha dicho, no se filtra).
 alter table profiles add column if not exists appliances text[];
+
+-- Recetas copiadas: de cuál vienen ("Hacer mi versión").
+alter table recipes add column if not exists based_on bigint references recipes(id) on delete set null;

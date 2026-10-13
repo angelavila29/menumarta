@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { CartIcon, HeartIcon, PlusIcon } from "@/components/icons";
 import type { Need } from "@/lib/menu";
 import { addIngredientToList, addRecipeToList, toggleRecipeFavorite } from "@/lib/recipe-actions";
-import { addRecipeToMenu, deleteRecipe } from "@/lib/recipe-bank-actions";
+import { addRecipeToMenu, copyRecipe, deleteRecipe } from "@/lib/recipe-bank-actions";
 
 export function IngredientAddButton({ recipeId, need }: { recipeId: number; need: Need }) {
   const [failed, setFailed] = useState(false);
@@ -165,5 +165,35 @@ export function DeleteRecipeButton({ recipeId }: { recipeId: number }) {
     >
       {pending ? "Borrando…" : "Borrar"}
     </button>
+  );
+}
+
+/** "Hacer mi versión": copia la receta como tuya y abre el editor. La original no se toca. */
+export function CopyRecipeButton({ recipeId }: { recipeId: number }) {
+  const [pending, start] = useTransition();
+  const [error, setError] = useState("");
+  const router = useRouter();
+  return (
+    <>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() =>
+          start(async () => {
+            try {
+              const { to } = await copyRecipe(recipeId);
+              router.push(to);
+            } catch {
+              setError("No se ha podido copiar la receta.");
+            }
+          })
+        }
+        className="rounded-xl border border-cream-dark bg-white px-4 py-2 font-medium hover:bg-cream disabled:opacity-60"
+        title="Se guarda una copia en tus recetas para cambiarla a tu gusto. La original no cambia."
+      >
+        {pending ? "Copiando…" : "Hacer mi versión"}
+      </button>
+      {error && <span className="text-xs text-red-700">{error}</span>}
+    </>
   );
 }
