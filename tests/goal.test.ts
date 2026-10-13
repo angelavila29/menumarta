@@ -31,3 +31,10 @@ test("veredicto con margen del 12 %", () => {
   assert.equal(judge(850, 1000), "bajo");
   assert.equal(judge(1150, 1000), "alto");
 });
+
+test("mujer pequeña y sedentaria que quiere perder: objetivo diario realista", () => {
+  // 22 años, 55 kg, 155 cm, actividad baja: gasto ≈ 1685, perder ≈ 1430
+  const t = targetsFor({ sex: "mujer", age: 22, weightKg: 55, heightCm: 155, activity: "baja", bodyGoal: "perder" });
+  assert.ok(t.kcalDay > 1380 && t.kcalDay < 1480, String(t.kcalDay));
+  assert.ok(t.kcalMeals > 850 && t.kcalMeals < 1000, String(t.kcalMeals));
+});

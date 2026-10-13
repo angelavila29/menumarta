@@ -14,6 +14,7 @@ type Meter = { value: number; target: number; verdict: "ok" | "bajo" | "alto" };
 export type GoalPanel = {
   bodyGoal: "perder" | "mantener" | "ganar" | null;
   estimated: boolean;
+  kcalDay: number;
   kcal: Meter;
   protein: Meter;
   veg: Meter;
@@ -258,8 +259,13 @@ export function MenuGrid(p: Props) {
                 </p>
                 <span className="text-xs text-muted">Media al día entre comida y cena</span>
               </div>
+              {p.goal.bodyGoal && (
+                <p className="mt-1 text-xs text-muted">
+                  Tu día completo: unas {p.goal.kcalDay.toLocaleString("es-ES")} kcal. Aquí se mide solo comida y cena; el resto es desayuno, merienda, pan y postre.
+                </p>
+              )}
               <ul className="mt-3 flex flex-col gap-2.5">
-                <MeterRow label="Calorías" unit="kcal" m={p.goal.kcal} />
+                <MeterRow label="Calorías (comida + cena)" unit="kcal" m={p.goal.kcal} />
                 <MeterRow label="Proteína" unit="g" m={p.goal.protein} />
                 <MeterRow label="Verdura" unit="raciones" m={p.goal.veg} />
               </ul>

@@ -28,9 +28,9 @@ export const GOAL_LABEL: Record<NonNullable<Body["bodyGoal"]>, string> = { perde
 export const ACTIVITY_LABEL: Record<NonNullable<Body["activity"]>, string> = { baja: "Poca (sentado casi todo el día)", media: "Media (ando bastante o deporte 2-3 días)", alta: "Alta (deporte 4+ días o trabajo físico)" };
 
 const ACTIVITY_FACTOR = { baja: 1.35, media: 1.55, alta: 1.75 };
-// Comida + cena ≈ 55 % del día: el resto es desayuno, fruta, pan, picoteo y bebidas, que el menú no
-// cuenta. Las recetas solo suman lo que llevan escrito, sin pan ni postre.
-const MEALS_SHARE_KCAL = 0.55;
+// Reparto habitual en España: desayuno ~20-25 %, media mañana y merienda ~10-15 %, comida ~35 % y
+// cena ~30 %. Comida + cena ≈ 65 % del día; el resto lo pone lo que el menú no planifica.
+const MEALS_SHARE_KCAL = 0.65;
 const MEALS_SHARE_PROTEIN = 0.6; // el desayuno (leche, yogur, huevos) también aporta proteína
 
 export function hasBodyData(b: Body): boolean {

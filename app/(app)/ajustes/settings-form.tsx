@@ -483,8 +483,8 @@ function GoalSummary({ v }: { v: SettingsInput }) {
   return (
     <div className="mt-4 rounded-xl bg-olive-soft p-3 text-sm text-olive-dark">
       <p>
-        Orientación: unas <b>{t.kcalDay.toLocaleString("es-ES")} kcal</b> y <b>{t.proteinDay} g de proteína</b> al día. Entre comida y cena, que es lo que planifica el menú, unas{" "}
-        <b>{t.kcalMeals.toLocaleString("es-ES")} kcal</b> y <b>{t.proteinMeals} g</b>. Las recetas solo cuentan lo que llevan escrito, sin pan, postre ni bebidas.
+        Tu día completo: unas <b>{t.kcalDay.toLocaleString("es-ES")} kcal</b> y <b>{t.proteinDay} g de proteína</b>. De eso, comida y cena (lo que planifica el menú) son unas{" "}
+        <b>{t.kcalMeals.toLocaleString("es-ES")} kcal</b> y <b>{t.proteinMeals} g</b>; el resto es desayuno, merienda, pan y postre.
       </p>
       {!hasBodyData(body) && <p className="mt-1 text-xs">Faltan datos (sexo, edad, peso o altura), así que es una estimación media. Rellénalos y afinará.</p>}
     </div>

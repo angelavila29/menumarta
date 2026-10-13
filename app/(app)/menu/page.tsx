@@ -100,6 +100,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
   const goal: GoalPanel = {
     bodyGoal: body.bodyGoal,
     estimated: targets.estimated,
+    kcalDay: targets.kcalDay,
     kcal: { value: wb.avgKcal, target: targets.kcalMeals, verdict: verdict.kcal },
     protein: { value: wb.avgProtein, target: targets.proteinMeals, verdict: verdict.protein },
     veg: { value: wb.avgVeg, target: targets.vegMeals, verdict: verdict.veg },
