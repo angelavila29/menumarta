@@ -6,7 +6,8 @@ import { Pantry } from "./pantry";
 // Lo que casi todo el mundo tiene siempre en casa: se ofrece primero
 const COMMON = ["aceite de oliva", "ajo", "cebolla", "harina", "pimentón", "laurel", "arroz", "huevo", "pan rallado", "caldo de pollo", "tomate frito", "patata"];
 
-export default async function PantryPage() {
+export default async function PantryPage(props: PageProps<"/despensa">) {
+  const sp = await props.searchParams;
   const { supabase, user } = await requireUser();
   const [{ data: ings }, { data: mine }, { data: staples }] = await Promise.all([
     supabase.from("recipe_ingredients").select("ingredient_name"),
@@ -17,6 +18,7 @@ export default async function PantryPage() {
   const ordered = [...COMMON.filter((c) => all.includes(c)), ...all.filter((a) => !COMMON.includes(a))];
   return (
     <Pantry
+      openReview={sp.revisar === "1"}
       ingredients={ordered}
       commonCount={COMMON.filter((c) => all.includes(c)).length}
       foods={mergeFoods(FOODS, all)}

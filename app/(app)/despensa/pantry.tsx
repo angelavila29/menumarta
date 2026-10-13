@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
 import { FoodInput } from "@/components/food-input";
+import { PantryReview } from "@/components/pantry-review";
 import { CheckIcon, SearchIcon } from "@/components/icons";
 import { searchProducts } from "@/lib/actions";
 import { euro, packSize, superName } from "@/lib/format";
@@ -11,10 +12,11 @@ import type { Product } from "@/lib/types";
 
 type Staple = { product: Product; quantity: number };
 
-export function Pantry({ ingredients, commonCount, have: initialHave, staples: initialStaples, foods }: { ingredients: string[]; commonCount: number; have: string[]; staples: Staple[]; foods: string[] }) {
+export function Pantry({ ingredients, commonCount, have: initialHave, staples: initialStaples, foods, openReview = false }: { ingredients: string[]; commonCount: number; have: string[]; staples: Staple[]; foods: string[]; openReview?: boolean }) {
   const [have, setHave] = useState(new Set(initialHave));
   const [staples, setStaples] = useState(initialStaples);
   const [showAll, setShowAll] = useState(false);
+  const [reviewing, setReviewing] = useState(openReview && initialHave.length > 0);
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [msg, setMsg] = useState("");
@@ -51,7 +53,14 @@ export function Pantry({ ingredients, commonCount, have: initialHave, staples: i
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2 lg:items-start">
         <section className="rounded-2xl bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-bold">Lo que ya tengo en casa ({have.size})</h2>
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-lg font-bold">Lo que ya tengo en casa ({have.size})</h2>
+            {have.size > 0 && (
+              <button type="button" onClick={() => setReviewing(true)} className="shrink-0 rounded-xl border border-cream-dark px-3 py-1.5 text-sm font-medium hover:bg-cream">
+                Revisar
+              </button>
+            )}
+          </div>
           <p className="text-sm text-muted">Al crear la lista del menú, estos ingredientes no se añaden. Desmárcalo cuando se te acabe algo.</p>
           <div className="mt-3">
             <FoodInput label="Añadir algo que tienes en casa" placeholder="Escribe un ingrediente: arroz, huevos…" value={mine} onChange={setMine} suggestions={foods} tone="olive" />
@@ -130,6 +139,13 @@ export function Pantry({ ingredients, commonCount, have: initialHave, staples: i
           {msg && <p role="status" className="mt-2 text-center text-sm text-olive-dark">{msg}</p>}
         </section>
       </div>
+      {reviewing && (
+        <PantryReview
+          items={Array.from(have)}
+          onClose={() => setReviewing(false)}
+          onDone={(removed) => setHave((h) => new Set([...h].filter((x) => !removed.includes(x))))}
+        />
+      )}
     </main>
   );
 }

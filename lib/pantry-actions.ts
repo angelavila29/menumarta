@@ -13,6 +13,19 @@ export async function setPantryItem(ingredient: string, has: boolean) {
   } else {
     await supabase.from("pantry_items").delete().eq("user_id", user.id).eq("ingredient_name", name);
   }
+  await supabase.from("profiles").update({ pantry_reviewed_at: new Date().toISOString() }).eq("id", user.id);
+  revalidatePath("/despensa");
+  revalidatePath("/cocinar");
+  revalidatePath("/menu");
+}
+
+/** Revisión de la despensa: quita de golpe lo que se ha acabado y apunta que está al día. */
+export async function reviewPantry(finished: string[]) {
+  const { supabase, user } = await requireUser();
+  const names = finished.map((n) => n.trim().toLowerCase()).filter(Boolean).slice(0, 200);
+  if (names.length > 0) await supabase.from("pantry_items").delete().eq("user_id", user.id).in("ingredient_name", names);
+  await supabase.from("profiles").update({ pantry_reviewed_at: new Date().toISOString() }).eq("id", user.id);
+  revalidatePath("/");
   revalidatePath("/despensa");
   revalidatePath("/cocinar");
   revalidatePath("/menu");

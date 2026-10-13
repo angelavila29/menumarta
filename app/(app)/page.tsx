@@ -18,7 +18,7 @@ export default async function HomePage() {
   const weekStart = currentWeekStart();
   const canCook = await hasFeature(supabase, user, "cocinar");
   const [profile, supers, menu, recipes, listId, { data: favRows }, { data: priced }] = await Promise.all([
-    supabase.from("profiles").select("display_name,household_size,planning_meals").eq("id", user.id).maybeSingle().then((r) => r.data),
+    supabase.from("profiles").select("display_name,household_size,planning_meals,pantry_reviewed_at").eq("id", user.id).maybeSingle().then((r) => r.data),
     userSupermarketIds(supabase, user.id),
     getOrCreateMenu(supabase, user.id, weekStart),
     loadRecipes(supabase),
@@ -63,6 +63,10 @@ export default async function HomePage() {
   const chainsLabel = supers.map(superName).join(" + ");
   const showComparison = comparison && comparison.comparable > 0 && comparison.cheapest;
 
+  // Despensa sin revisar desde hace una semana: se pregunta si sigue todo
+  const { count: pantryCount } = await supabase.from("pantry_items").select("ingredient_name", { count: "exact", head: true }).eq("user_id", user.id);
+  const pantryStale = (pantryCount ?? 0) > 0 && olderThanAWeek(profile?.pantry_reviewed_at as string | null);
+
   const favorites = (favRows ?? []).map((r) => r.product as unknown as Product | null).filter((p): p is Product => !!p);
 
   return (
@@ -78,6 +82,17 @@ export default async function HomePage() {
         <p className="mt-1 text-lg text-muted">Tu semana {formatWeekRange(weekStart)}</p>
         <p className="text-muted">Comidas sanas, sencillas y a buen precio.</p>
       </div>
+
+      {pantryStale && (
+        <Link href="/despensa?revisar=1" className="flex items-center gap-3 rounded-2xl border border-cream-dark bg-white px-4 py-3 hover:bg-cream/50">
+          <span aria-hidden className="text-2xl">🥫</span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">¿Sigues teniendo todo lo de la despensa?</span>
+            <span className="block text-sm text-muted">Tienes {pantryCount} cosas apuntadas. Quita en un momento lo que se haya acabado.</span>
+          </span>
+          <ChevronRight className="h-5 w-5 shrink-0 text-muted" />
+        </Link>
+      )}
 
       {/* Fila principal: lo que toca ahora + la compra */}
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
@@ -339,6 +354,12 @@ function TodayMeal({ label, recipe, out }: { label: string; recipe: { id: number
   ) : (
     <div className="flex items-center gap-3 rounded-xl bg-cream/60 p-3">{inner}</div>
   );
+}
+
+/** ¿Hace más de 7 días (o nunca)? */
+function olderThanAWeek(iso: string | null | undefined): boolean {
+  if (!iso) return true;
+  return Date.now() - new Date(iso).getTime() > 7 * 24 * 3600 * 1000;
 }
 
 function capitalize(s: string) {
