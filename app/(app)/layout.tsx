@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { BottomNav, SideNav, TopBar } from "@/components/bottom-nav";
-import { backgroundFor, hasFeature } from "@/lib/access";
+import { backgroundFor } from "@/lib/access";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
@@ -8,7 +8,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const [supers, { data: profile }, canCook, background] = await Promise.all([
     userSupermarketIds(supabase, user.id),
     supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
-    hasFeature(supabase, user, "cocinar"),
+    true,
     backgroundFor(supabase, user),
   ]);
   if (supers.length === 0) redirect("/onboarding");

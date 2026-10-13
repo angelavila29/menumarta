@@ -38,6 +38,7 @@ type Props = {
   cheapestName: string | null;
   ingredientsCount: number;
   cookSessions: number;
+  pantryCount: number;
   balance: BalanceItem[];
   goal: GoalPanel;
   settings: MenuSettings;
@@ -120,6 +121,20 @@ export function MenuGrid(p: Props) {
           >
             ↻ Repetir semana anterior
           </button>
+          {p.pantryCount > 0 && (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => {
+                if (filled > 0 && !confirm("¿Sustituir el menú de esta semana por uno hecho con lo que tienes en casa?")) return;
+                start(() => generateWeekAction(menu.week_start, "despensa"));
+              }}
+              title={`Prioriza las ${p.pantryCount} cosas que tienes en la despensa`}
+              className="rounded-xl border border-cream-dark bg-white px-4 py-3 text-sm font-medium shadow-sm hover:bg-cream disabled:opacity-60"
+            >
+              🥫 Con lo que tengo
+            </button>
+          )}
           <button
             type="button"
             onClick={createMenu}

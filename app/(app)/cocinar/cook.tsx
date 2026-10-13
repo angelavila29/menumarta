@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
 import { FoodInput } from "@/components/food-input";
+import { AddToMenuControl } from "@/app/(app)/recetas/[id]/recipe-client";
 import { CartIcon, CheckIcon } from "@/components/icons";
 import { RecipeArt } from "@/components/recipe-art";
 import { rankRecipes, type CookRecipe, type CookResult } from "@/lib/cook";
@@ -29,6 +30,7 @@ export function Cook({
 }) {
   const [have, setHave] = useState(new Set(initialHave));
   const [showAll, setShowAll] = useState(false);
+  const [todayIndex] = useState(() => (new Date().getDay() + 6) % 7);
   const [budgetText, setBudgetText] = useState("");
   const [shown, setShown] = useState(PAGE);
   const [, start] = useTransition();
@@ -124,7 +126,7 @@ export function Cook({
           ) : (
             <ul className="mt-3 flex flex-col gap-3">
               {results.slice(0, shown).map((r) => (
-                <ResultCard key={r.recipe.id} r={r} />
+                <ResultCard key={r.recipe.id} r={r} todayIndex={todayIndex} />
               ))}
             </ul>
           )}
@@ -139,7 +141,7 @@ export function Cook({
   );
 }
 
-function ResultCard({ r }: { r: CookResult }) {
+function ResultCard({ r, todayIndex }: { r: CookResult; todayIndex: number }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
   const router = useRouter();
@@ -216,6 +218,7 @@ function ResultCard({ r }: { r: CookResult }) {
           Ver cómo se hace
         </Link>
       )}
+      <AddToMenuControl recipeId={r.recipe.id} meal="comida" todayIndex={todayIndex} />
     </li>
   );
 }

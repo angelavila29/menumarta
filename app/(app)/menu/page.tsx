@@ -110,6 +110,8 @@ export default async function MenuPage(props: PageProps<"/menu">) {
     unknownSlots: wb.unknownSlots,
   };
 
+  const { count: pantryCount } = await supabase.from("pantry_items").select("ingredient_name", { count: "exact", head: true }).eq("user_id", user.id);
+
   // Ajustes del menú
   const meals = (profile?.planning_meals ?? ["comida", "cena"]).map((m: string) => MEAL_LABEL[m] ?? m);
   const restrictions = [...(profile?.allergies ?? []), ...(profile?.avoid_foods ?? [])].map((a: string) => `sin ${a}`);
@@ -137,6 +139,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
       ingredientsCount={needs.length}
       cookSessions={profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, 14 - slots.filter((s) => s.kind === "out").length)}
       balance={balance}
+      pantryCount={pantryCount ?? 0}
       goal={goal}
       settings={settings}
     />

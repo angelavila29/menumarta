@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowRight, CalendarIcon, CartIcon, CheckIcon, ChevronRight, HeartIcon, PiggyIcon, SearchIcon, UsersIcon } from "@/components/icons";
 import { ChainLogo } from "@/components/chain-logo";
 import { FridgeIcon } from "@/components/icons-extra";
-import { hasFeature } from "@/lib/access";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { compareList } from "@/lib/compare";
 import { euro, formatWeekRange, superName } from "@/lib/format";
@@ -16,7 +15,7 @@ import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 export default async function HomePage() {
   const { supabase, user } = await requireUser();
   const weekStart = currentWeekStart();
-  const canCook = await hasFeature(supabase, user, "cocinar");
+  const canCook = true;
   const [profile, supers, menu, recipes, listId, { data: favRows }, { data: priced }] = await Promise.all([
     supabase.from("profiles").select("display_name,household_size,planning_meals,pantry_reviewed_at").eq("id", user.id).maybeSingle().then((r) => r.data),
     userSupermarketIds(supabase, user.id),

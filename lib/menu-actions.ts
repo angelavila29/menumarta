@@ -10,14 +10,14 @@ import { getOrCreateActiveList } from "@/lib/lists";
 import { currentWeekStart, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
 
-export async function generateWeekAction(weekStart: string) {
+export async function generateWeekAction(weekStart: string, mode: "normal" | "despensa" = "normal") {
   const { supabase, user } = await requireUser();
-  await generateWeekFor(supabase, user.id, weekStart || currentWeekStart());
+  await generateWeekFor(supabase, user.id, weekStart || currentWeekStart(), mode === "despensa");
   revalidatePath("/menu");
 }
 
 /** Genera la semana respetando dieta, alergias y alimentos a evitar del perfil. */
-export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
+export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string, pantryFirst = false) {
   const { data: profile } = await supabase
     .from("profiles")
     .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal,appliances,sex,age,weight_kg,height_cm,activity")
@@ -99,6 +99,7 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     quick: goals.includes("tiempo"),
     healthy: goals.includes("saludable"),
     pantry: pantry.size > 0 ? pantry : undefined,
+    pantryFirst: pantryFirst && pantry.size > 0,
     bodyGoal,
     nutrition,
     kcalPerMeal,

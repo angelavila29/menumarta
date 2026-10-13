@@ -97,6 +97,7 @@ export type GeneratePrefs = {
   quick?: boolean; // objetivo de ahorrar tiempo
   healthy?: boolean; // objetivo de comer más sano
   pantry?: Set<string>; // lo que ya hay en casa: premia recetas que lo gastan y penaliza las que obligan a comprar
+  pantryFirst?: boolean; // "con lo que tengo": la despensa manda aunque se repita algo más
   /** objetivo corporal y nutrición por ración de cada receta: acerca el menú a lo que la persona busca */
   bodyGoal?: "perder" | "mantener" | "ganar" | null;
   nutrition?: Map<number, { kcal: number; protein: number; veg: number }>;
@@ -164,17 +165,18 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
     const varied = candidates.filter((r) => (tagCount.get(r.tags[0] ?? "") ?? 0) < 2);
     // Entre unas pocas al azar (para que cada semana sea distinta) gana la que mejor encaja
     // Con despensa, se miran más candidatas para que de verdad salga lo que aprovecha lo que hay
-    const shortlist = (varied.length > 0 ? varied : candidates).slice(0, opts.pantry ? 12 : 5);
+    const shortlist = (varied.length > 0 ? varied : candidates).slice(0, opts.pantryFirst ? 40 : opts.pantry ? 12 : 5);
     const score = (r: Recipe) => {
       const ings = (opts.ingredients?.get(r.id) ?? []).filter((i) => !BACKGROUND.has(i));
       const shared = ings.filter((i) => bought.has(i)).length;
       const missing = opts.pantry ? ings.length - shared : 0;
       // Variedad: que no se repita el ingrediente principal (el primero de la receta) toda la semana
       const repeats = mainOf(ings).reduce((n, m) => n + (mains.get(m) ?? 0), 0) + dishWords(r.name).filter((w) => dishes.has(w)).length * 2;
+      const pf = opts.pantryFirst ? 3 : 1;
       return (
-        shared * 2 -
-        missing * 1.5 -
-        repeats * 3 +
+        shared * 2 * pf -
+        missing * 1.5 * pf -
+        repeats * (opts.pantryFirst ? 1.5 : 3) +
         goalBonus(r, opts) +
         (opts.thrifty && r.tags.includes("económico") ? 3 : 0) +
         (opts.quick && r.tags.includes("rápido") ? 2 : 0) +

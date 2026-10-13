@@ -17,8 +17,8 @@ de supermercados españoles (Madrid). Usuarios: dos personas (uso personal).
   y carga datos en Supabase con la service_role key. Fuente: dataset Parquet diario
   de "opencesta" (github.com/ruvelro/opencesta), Mercadona zona "mad1" y Dia.
 - Sin LLM por ahora. Sin servicios de pago.
-- Funciones en pruebas (hoy: `/cocinar`) solo para los correos de la tabla `feature_access`;
-  se añaden desde el SQL Editor, nunca en el código (el repo es público).
+- Funciones en pruebas (hoy ninguna; `/cocinar` ya es para todos) solo para los correos de la tabla
+  `feature_access`; se añaden desde el SQL Editor, nunca en el código (el repo es público).
 
 ## Principios
 - Móvil primero. Interfaz en español, simple, grande, sin adornos. Tailwind plano,
