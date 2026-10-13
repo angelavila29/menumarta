@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
 import { euro } from "@/lib/format";
 import { DAYS, MEALS, type Menu, type Recipe, type Slot } from "@/lib/menu";
-import { generateWeekAction, repeatPreviousWeekAction, setCookedAction, setCookSessionsAction, setServingsAction, setSlotAction } from "@/lib/menu-actions";
+import { generateWeekAction, repeatPreviousWeekAction, setCookedAction, setCookSessionsAction, setServingsAction, setSideAction, setSlotAction } from "@/lib/menu-actions";
 import { RecipeArt } from "@/components/recipe-art";
 
 export type MenuSettings = { meals: string; diet: string; chains: string; prefs: string };
@@ -59,6 +59,7 @@ export function MenuGrid(p: Props) {
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState("");
   const recipeById = new Map(recipes.map((r) => [r.id, r]));
+  const sideRecipes = recipes.filter((r) => r.tags.includes("guarnicion"));
   const slotAt = (day: number, meal: string) => slots.find((s) => s.day === day && s.meal === meal);
   const recipeAt = (day: number, meal: string) => {
     const id = slotAt(day, meal)?.recipe_id;
@@ -214,6 +215,9 @@ export function MenuGrid(p: Props) {
                     disabled={pending}
                     ariaLabel={`Cambiar ${meal} del ${name.toLowerCase()}`}
                     onChange={(id) => start(() => setSlotAction(menu.id, day, meal, id))}
+                    side={recipeById.get(slotAt(day, meal)?.side_recipe_id ?? -1) ?? null}
+                    sides={sideRecipes}
+                    onSide={(id) => start(() => setSideAction(menu.id, day, meal, id))}
                   />
                 ))}
               </div>
@@ -359,7 +363,7 @@ function Stat({ icon, iconBg, big, small, label, bigClass = "text-3xl" }: { icon
   );
 }
 
-function MealSlot({ label, meal, day, recipe, isOut, isLeftover, cooked, onCooked, recipes, disabled, ariaLabel, onChange }: {
+function MealSlot({ label, meal, day, recipe, isOut, isLeftover, cooked, onCooked, recipes, disabled, ariaLabel, onChange, side, sides, onSide }: {
   label: string;
   meal: string;
   day: number;
@@ -372,6 +376,9 @@ function MealSlot({ label, meal, day, recipe, isOut, isLeftover, cooked, onCooke
   disabled: boolean;
   ariaLabel: string;
   onChange: (value: number | "out" | null) => void;
+  side: Recipe | null;
+  sides: Recipe[];
+  onSide: (id: number | null) => void;
 }) {
   return (
     <div>
@@ -417,9 +424,32 @@ function MealSlot({ label, meal, day, recipe, isOut, isLeftover, cooked, onCooke
         </label>
       )}
       {recipe ? (
-        <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`mt-1.5 line-clamp-2 block min-h-[2.5em] text-sm leading-tight hover:text-brand hover:underline ${isLeftover ? "text-muted" : ""}`}>
-          {recipe.name}
-        </Link>
+        <>
+          <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`mt-1.5 line-clamp-2 block min-h-[2.5em] text-sm leading-tight hover:text-brand hover:underline ${isLeftover ? "text-muted" : ""}`}>
+            {recipe.name}
+          </Link>
+          {/* Guarnición: "con puré", "con arroz"… elegida a mano */}
+          {side ? (
+            <p className="mt-1 flex items-center gap-1 text-xs text-olive-dark">
+              <Link href={`/recetas/${side.id}`} className="line-clamp-1 hover:underline">con {side.name.toLowerCase()}</Link>
+              <button type="button" disabled={disabled} onClick={() => onSide(null)} aria-label={`Quitar ${side.name}`} className="shrink-0 rounded px-1 text-muted hover:text-red-700">×</button>
+            </p>
+          ) : (
+            <label className="relative mt-1 inline-flex cursor-pointer items-center text-xs font-medium text-muted hover:text-brand">
+              ＋ con…
+              <select
+                value=""
+                disabled={disabled}
+                aria-label={`Añadir guarnición a ${recipe.name}`}
+                onChange={(e) => e.target.value && onSide(Number(e.target.value))}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              >
+                <option value="">Elige guarnición</option>
+                {sides.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+              </select>
+            </label>
+          )}
+        </>
       ) : (
         <p className="mt-1.5 min-h-[2.5em] text-sm leading-tight text-muted">{isOut ? "No hace falta cocinar" : "Sin plato"}</p>
       )}

@@ -5442,5 +5442,383 @@
       "Monta en una fuente: bechamel, placas, carne, y repite hasta terminar con bechamel y el queso rallado.",
       "Hornea 25 minutos a 190 °C hasta que esté dorada."
     ]
+  },
+  {
+    "name": "Puré de patatas",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "económico"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Suave y cremoso. Va con salchichas, salmón, filetes rusos o carrilleras.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "leche",
+        "qty": 150,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "mantequilla",
+        "qty": 30,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Pela las patatas, córtalas en trozos y cuécelas 20 minutos en agua con sal.",
+      "Escúrrelas y cháfalas con la leche caliente, la mantequilla y sal hasta que quede cremoso."
+    ]
+  },
+  {
+    "name": "Arroz blanco",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "rápido"
+    ],
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "description": "El acompañamiento comodín: salsas, guisos, pescado o pollo.",
+    "ingredients": [
+      {
+        "ingredient": "arroz",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 15,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "laurel",
+        "qty": 1,
+        "unit": "ud"
+      }
+    ],
+    "steps": [
+      "Dora el ajo con el aceite, añade el arroz y remueve un minuto.",
+      "Cubre con el doble de agua, sal y el laurel, y cuece 16 minutos a fuego bajo. Deja reposar tapado."
+    ]
+  },
+  {
+    "name": "Patatas panaderas",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "económico"
+    ],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "description": "Patata, cebolla y pimiento pochados despacio en la sartén.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento verde",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 50,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en rodajas finas, la cebolla en juliana y el pimiento en tiras.",
+      "Pocha todo en la sartén con el aceite y sal, tapado y a fuego medio-bajo, unos 25 minutos."
+    ]
+  },
+  {
+    "name": "Patatas fritas caseras",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "económico"
+    ],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "description": "Las de toda la vida, en sartén.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 150,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en bastones, lávalas y sécalas bien.",
+      "Fríelas en aceite caliente hasta que estén doradas y sala al sacarlas."
+    ]
+  },
+  {
+    "name": "Patatas al horno",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "económico"
+    ],
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "description": "Gajos de patata con pimentón, sin freír.",
+    "ingredients": [
+      {
+        "ingredient": "patata",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "pimentón",
+        "qty": 5,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Corta las patatas en gajos y mézclalas con aceite, sal y pimentón.",
+      "Hornea 30 minutos a 200 °C dándoles la vuelta a mitad."
+    ]
+  },
+  {
+    "name": "Ensalada verde",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "rápido"
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "Lechuga y cebolla bien aliñadas. La guarnición más ligera.",
+    "ingredients": [
+      {
+        "ingredient": "lechuga",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      },
+      {
+        "ingredient": "vinagre",
+        "qty": 10,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Lava y trocea la lechuga y corta la cebolla en juliana fina.",
+      "Aliña con aceite, vinagre y sal justo antes de servir."
+    ]
+  },
+  {
+    "name": "Verduras salteadas",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "rápido"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Calabacín, pimiento y zanahoria a fuego fuerte.",
+    "ingredients": [
+      {
+        "ingredient": "calabacín",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "pimiento rojo",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "zanahoria",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "cebolla",
+        "qty": 1,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta la verdura en tiras finas.",
+      "Saltéala a fuego fuerte con el aceite y sal unos 8 minutos, que quede al dente."
+    ]
+  },
+  {
+    "name": "Pasta con ajo y aceite",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "rápido"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Pasta sencilla para acompañar carnes o salsas.",
+    "ingredients": [
+      {
+        "ingredient": "macarrones",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 30,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Cuece la pasta en agua con sal.",
+      "Dora el ajo laminado con el aceite y mézclalo con la pasta escurrida."
+    ]
+  },
+  {
+    "name": "Cuscús",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "rápido"
+    ],
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "description": "Listo en cinco minutos, solo con agua caliente.",
+    "ingredients": [
+      {
+        "ingredient": "cuscús",
+        "qty": 300,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 15,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Hierve la misma cantidad de agua que de cuscús con sal y el aceite.",
+      "Apaga, añade el cuscús, tapa 5 minutos y suéltalo con un tenedor."
+    ]
+  },
+  {
+    "name": "Champiñones salteados",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "rápido"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Con ajo y perejil. Van con casi cualquier carne.",
+    "ingredients": [
+      {
+        "ingredient": "champiñones",
+        "qty": 400,
+        "unit": "g"
+      },
+      {
+        "ingredient": "ajo",
+        "qty": 2,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "perejil",
+        "qty": 5,
+        "unit": "g"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 20,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Limpia y lamina los champiñones.",
+      "Saltéalos a fuego fuerte con el ajo picado y el aceite 8 minutos; termina con perejil y sal."
+    ]
+  },
+  {
+    "name": "Pimientos fritos",
+    "meal": "ambas",
+    "servings": 4,
+    "tags": [
+      "guarnicion",
+      "rápido"
+    ],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "description": "Pimientos verdes en sartén, de acompañamiento clásico.",
+    "ingredients": [
+      {
+        "ingredient": "pimiento verde",
+        "qty": 4,
+        "unit": "ud"
+      },
+      {
+        "ingredient": "aceite de oliva",
+        "qty": 40,
+        "unit": "ml"
+      }
+    ],
+    "steps": [
+      "Corta los pimientos en tiras.",
+      "Fríelos a fuego medio con el aceite hasta que estén blandos y sala al final."
+    ]
   }
 ]

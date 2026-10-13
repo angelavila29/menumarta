@@ -18,3 +18,6 @@ alter table recipes add column if not exists based_on bigint references recipes(
 
 -- Última vez que se revisó o tocó la despensa (para el recordatorio semanal).
 alter table profiles add column if not exists pantry_reviewed_at timestamptz;
+
+-- Guarnición opcional en cada comida del menú ("Salmón con puré").
+alter table weekly_menu_slots add column if not exists side_recipe_id bigint references recipes(id) on delete set null;

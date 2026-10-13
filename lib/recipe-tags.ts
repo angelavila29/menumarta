@@ -1,7 +1,7 @@
 /** Opciones del formulario de recetas (compartidas entre cliente y servidor). */
 export const MAIN_TAGS: [string, string][] = [
   ["legumbre", "Legumbres"], ["pasta", "Pasta"], ["arroz", "Arroz"], ["carne", "Carne"], ["pescado", "Pescado"],
-  ["huevo", "Huevos"], ["sopa", "Sopa o crema"], ["ensalada", "Ensalada"], ["verdura", "Verdura"], ["guiso", "Guiso u otro"],
+  ["huevo", "Huevos"], ["sopa", "Sopa o crema"], ["ensalada", "Ensalada"], ["verdura", "Verdura"], ["guiso", "Guiso u otro"], ["guarnicion", "Guarnición"],
 ];
 export const EXTRA_TAGS: [string, string][] = [
   ["vegetariano", "Vegetariana"], ["económico", "Económica"], ["rápido", "Rápida"], ["táper", "De táper"], ["pocas ollas", "Pocas ollas"],

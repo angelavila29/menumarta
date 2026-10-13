@@ -165,6 +165,17 @@ mejor encaja.
       receta avisa de qué hace falta. Con tests.
 - [x] Fotos de Dia: se construyen por SKU porque opencesta no las trae.
 
+## M. Lo que pidieron Celia y Marta (13 oct)
+- [x] Calorías: perder peso resta un 15 % del gasto (antes 400 kcal fijas, imposible para
+      personas pequeñas y sedentarias); se descartan platos que se pasan y "Ajustar" prueba 12
+      semanas y se queda la mejor. Simulado con el perfil de Celia: cuadra 6 de 6.
+- [x] "Hacer mi versión": copia una receta como tuya para editarla; la original no cambia.
+- [x] Despensa: "Revisar" quita de golpe lo que se acabó; aviso en la portada a la semana.
+- [x] "¿Qué cocino hoy?" para todos, con "Añadir a mi menú"; en el menú, "Con lo que tengo".
+- [x] Guarnición: "＋ con…" en cada plato del menú (11 guarniciones nuevas en el banco). Suma a
+      la compra y a las calorías. Las salsas siguen siendo recetas aparte. El generador no elige
+      guarnición solo, de momento.
+
 ## Pendiente, decidido a propósito
 - Las extensiones `pg_trgm` y `unaccent` siguen en el esquema `public`. Moverlas rompería la columna
   generada `products.name_norm`, que es de lo que vive el buscador.

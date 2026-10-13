@@ -16,7 +16,10 @@ export type Recipe = {
   photo_url?: string | null;
 };
 // kind "out" = como fuera o no cocino: el generador no toca ese hueco
-export type Slot = { day: number; meal: "comida" | "cena"; recipe_id: number | null; kind: "meal" | "out"; cooked?: boolean };
+export type Slot = { day: number; meal: "comida" | "cena"; recipe_id: number | null; kind: "meal" | "out"; cooked?: boolean; side_recipe_id?: number | null };
+
+/** Las guarniciones (puré, arroz blanco…) acompañan a un plato; nunca son la comida por sí solas. */
+export const isSide = (r: { tags: string[] }) => r.tags.includes("guarnicion");
 export type Menu = { id: string; week_start: string; servings: number };
 
 export const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -70,7 +73,7 @@ export async function loadIngredientNames(supabase: Supa): Promise<Map<number, s
 }
 
 export async function loadSlots(supabase: Supa, menuId: string): Promise<Slot[]> {
-  const { data } = await supabase.from("weekly_menu_slots").select("day,meal,recipe_id,kind,cooked").eq("menu_id", menuId);
+  const { data } = await supabase.from("weekly_menu_slots").select("day,meal,recipe_id,kind,cooked,side_recipe_id").eq("menu_id", menuId);
   return (data ?? []) as Slot[];
 }
 
@@ -227,7 +230,9 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
 export type Need = { ingredient: string; qty: number; unit: string }; // unidad de receta: g, ml, ud
 
 export async function aggregateIngredients(supabase: Supa, slots: Slot[], servings: number): Promise<Need[]> {
-  const recipeIds = Array.from(new Set(slots.map((s) => s.recipe_id).filter((x): x is number => x !== null)));
+  // Plato y guarnición cuentan igual: cada uno tantas veces como aparezca
+  const used = slots.flatMap((s) => [s.recipe_id, s.side_recipe_id ?? null]).filter((x): x is number => x !== null);
+  const recipeIds = Array.from(new Set(used));
   if (recipeIds.length === 0) return [];
   const [{ data: recipes }, { data: ings }] = await Promise.all([
     supabase.from("recipes").select("id,servings").in("id", recipeIds),
@@ -236,7 +241,7 @@ export async function aggregateIngredients(supabase: Supa, slots: Slot[], servin
   const baseServings = new Map((recipes ?? []).map((r) => [r.id as number, Number(r.servings) || 4]));
   // Una receta puede estar en varios huecos: se cuenta tantas veces como aparezca
   const times = new Map<number, number>();
-  for (const s of slots) if (s.recipe_id !== null) times.set(s.recipe_id, (times.get(s.recipe_id) ?? 0) + 1);
+  for (const id of used) times.set(id, (times.get(id) ?? 0) + 1);
 
   const acc = new Map<string, Need>();
   for (const i of ings ?? []) {

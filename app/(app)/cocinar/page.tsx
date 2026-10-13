@@ -34,6 +34,7 @@ export default async function CookPage() {
   const recipes: CookRecipe[] = (recipeRows ?? [])
     .filter((r) => recipeAllowed(r as unknown as Recipe, (byRecipe.get(r.id as number) ?? []).map((i) => i.ingredient_name), prefs))
     .filter((r) => canCook(r.steps as string[] | null, (profile?.appliances as string[] | null) ?? null))
+    .filter((r) => !((r.tags ?? []) as string[]).includes("guarnicion"))
     .map((r) => {
       const base = Number(r.servings) || 4;
       return {

@@ -38,3 +38,10 @@ test("valoración: solo ensaladas para ganar músculo → falta proteína", () =
   assert.equal(a.headline, "Te falta proteína");
   assert.ok(a.tips.length >= 2);
 });
+
+test("la guarnición suma a las calorías del día", () => {
+  const sin = weekBalance([{ day: 0, meal: "comida", recipe_id: 1, kind: "meal" }], nutrition);
+  const con = weekBalance([{ day: 0, meal: "comida", recipe_id: 1, kind: "meal", side_recipe_id: 2 }], nutrition);
+  assert.ok(con.days[0].kcal > sin.days[0].kcal);
+  assert.ok(con.days[0].veg > sin.days[0].veg);
+});

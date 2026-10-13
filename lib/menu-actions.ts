@@ -7,7 +7,7 @@ import { targetsFor, type Body } from "@/lib/goal";
 import { requireUser } from "@/lib/auth";
 import { assess, nutritionByRecipe, weekBalance } from "@/lib/menu-nutrition";
 import { getOrCreateActiveList } from "@/lib/lists";
-import { currentWeekStart, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
+import { isSide, currentWeekStart, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
 
 export async function generateWeekAction(weekStart: string, mode: "normal" | "despensa" = "normal") {
@@ -64,7 +64,8 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
       (maxMinutes === null || (minutes.get(r.id) ?? 0) <= maxMinutes) &&
       canCook(stepsById.get(r.id), kitchen)
   );
-  if (allowed.length < 6) allowed = pool; // demasiado restrictivo: mejor un menú que ninguno
+  allowed = allowed.filter((r) => !isSide(r));
+  if (allowed.length < 6) allowed = pool.filter((r) => !isSide(r)); // demasiado restrictivo: mejor un menú que ninguno
 
   // Perder peso: fuera los platos que se pasan claramente de lo que toca por comida.
   // Si eso deja muy pocas recetas, se relaja en vez de dejar la semana vacía.
@@ -123,7 +124,8 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
       }
     }
   }
-  const slots = week.map((s) => ({ ...s, menu_id: menu.id, cooked: false }));
+  // Menú nuevo, guarniciones fuera: las elige cada uno
+  const slots = week.map((s) => ({ ...s, menu_id: menu.id, cooked: false, side_recipe_id: null }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
 }
@@ -137,6 +139,20 @@ export async function setSlotAction(menuId: string, day: number, meal: "comida" 
     .upsert({ menu_id: menuId, day, meal, ...row }, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
   revalidatePath("/menu");
+}
+
+/** Guarnición de un hueco: "con puré", "con arroz"… o null para quitarla. */
+export async function setSideAction(menuId: string, day: number, meal: "comida" | "cena", sideId: number | null) {
+  const { supabase } = await requireUser();
+  const { error } = await supabase
+    .from("weekly_menu_slots")
+    .update({ side_recipe_id: sideId })
+    .eq("menu_id", menuId)
+    .eq("day", day)
+    .eq("meal", meal);
+  if (error) throw new Error(error.message);
+  revalidatePath("/menu");
+  revalidatePath("/");
 }
 
 export async function setServingsAction(menuId: string, servings: number) {

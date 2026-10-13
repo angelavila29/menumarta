@@ -43,9 +43,10 @@ export function weekBalance(slots: Slot[], nutrition: Map<number, RecipeNutritio
       continue;
     }
     const d = days[s.day];
-    d.kcal += n.kcal * portion;
-    d.protein += n.protein * portion;
-    d.veg += n.veg * portion;
+    const side = s.side_recipe_id != null ? nutrition.get(s.side_recipe_id) : undefined;
+    d.kcal += (n.kcal + (side?.kcal ?? 0)) * portion;
+    d.protein += (n.protein + (side?.protein ?? 0)) * portion;
+    d.veg += (n.veg + (side?.veg ?? 0)) * portion;
     d.meals++;
   }
   const active = days.filter((d) => d.meals > 0);

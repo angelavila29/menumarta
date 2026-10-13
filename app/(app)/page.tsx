@@ -38,6 +38,8 @@ export default async function HomePage() {
     label: DAYS[d],
     comida: recipeById.get(slots.find((s) => s.day === d && s.meal === "comida")?.recipe_id ?? -1) ?? null,
     cena: recipeById.get(slots.find((s) => s.day === d && s.meal === "cena")?.recipe_id ?? -1) ?? null,
+    comidaSide: recipeById.get(slots.find((s) => s.day === d && s.meal === "comida")?.side_recipe_id ?? -1) ?? null,
+    cenaSide: recipeById.get(slots.find((s) => s.day === d && s.meal === "cena")?.side_recipe_id ?? -1) ?? null,
     comidaOut: slots.find((s) => s.day === d && s.meal === "comida")?.kind === "out",
     cenaOut: slots.find((s) => s.day === d && s.meal === "cena")?.kind === "out",
   }));
@@ -140,8 +142,8 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <TodayMeal label="Comida" recipe={today.comida} out={today.comidaOut} />
-              <TodayMeal label="Cena" recipe={today.cena} out={today.cenaOut} />
+              <TodayMeal label="Comida" recipe={today.comida} side={today.comidaSide} out={today.comidaOut} />
+              <TodayMeal label="Cena" recipe={today.cena} side={today.cenaSide} out={today.cenaOut} />
             </div>
             <ul className="no-scrollbar -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 md:mx-0 md:px-0">
               {orderedDays.slice(1, 7).map((d) => (
@@ -336,7 +338,7 @@ export default async function HomePage() {
   );
 }
 
-function TodayMeal({ label, recipe, out }: { label: string; recipe: { id: number; name: string; tags: string[] } | null; out?: boolean }) {
+function TodayMeal({ label, recipe, side, out }: { label: string; recipe: { id: number; name: string; tags: string[] } | null; side?: { name: string } | null; out?: boolean }) {
   const inner = (
     <>
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cream text-2xl">
@@ -345,6 +347,7 @@ function TodayMeal({ label, recipe, out }: { label: string; recipe: { id: number
       <span className="min-w-0">
         <span className="block text-xs text-muted">{label}</span>
         <span className="line-clamp-2 font-semibold leading-tight">{recipe?.name ?? (out ? "Como fuera" : "Sin plato")}</span>
+        {side && <span className="block text-sm text-olive-dark">con {side.name.toLowerCase()}</span>}
       </span>
     </>
   );
