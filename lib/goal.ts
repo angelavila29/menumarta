@@ -47,8 +47,10 @@ export function targetsFor(b: Body): Targets {
   // Mifflin-St Jeor
   const bmr = 10 * w + 6.25 * h - 5 * age + (sex === "hombre" ? 5 : -161);
   const tdee = bmr * ACTIVITY_FACTOR[b.activity ?? "media"];
-  const kcalDay = Math.round(Math.max(1200, tdee + (goal === "perder" ? -400 : goal === "ganar" ? 250 : 0)));
-  const gPerKg = goal === "ganar" ? 1.7 : goal === "perder" ? 1.6 : 1.2;
+  // Para perder, un 15 % menos del gasto (no una cifra fija, que en personas pequeñas y
+  // sedentarias deja objetivos imposibles); para ganar, un pequeño superávit.
+  const kcalDay = Math.round(Math.max(1200, goal === "perder" ? tdee * 0.85 : goal === "ganar" ? tdee + 250 : tdee));
+  const gPerKg = goal === "ganar" ? 1.7 : goal === "perder" ? 1.4 : 1.2;
   const proteinDay = Math.round(w * gPerKg);
   return {
     kcalDay,

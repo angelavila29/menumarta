@@ -100,6 +100,8 @@ export type GeneratePrefs = {
   /** objetivo corporal y nutrición por ración de cada receta: acerca el menú a lo que la persona busca */
   bodyGoal?: "perder" | "mantener" | "ganar" | null;
   nutrition?: Map<number, { kcal: number; protein: number; veg: number }>;
+  /** kcal que debería tener cada plato (comida o cena) según el objetivo */
+  kcalPerMeal?: number;
 };
 
 /** Puntos extra según el objetivo: proteína para ganar músculo, ligereza y verdura para perder peso. */
@@ -107,7 +109,11 @@ function goalBonus(r: Recipe, opts: GeneratePrefs): number {
   const n = opts.nutrition?.get(r.id);
   if (!n || !opts.bodyGoal) return 0;
   if (opts.bodyGoal === "ganar") return Math.min(12, n.protein / 4) - (n.protein < 15 ? 4 : 0);
-  if (opts.bodyGoal === "perder") return Math.min(4, n.veg * 2) - Math.max(0, (n.kcal - 550) / 60) + (n.protein >= 25 ? 2 : 0);
+  if (opts.bodyGoal === "perder") {
+    const target = opts.kcalPerMeal ?? 450;
+    // Ligero pero saciante: la proteína pesa tanto como no pasarse
+    return Math.min(3, n.veg * 1.5) - Math.max(0, (n.kcal - target) / 30) + Math.min(8, n.protein / 4);
+  }
   return 0;
 }
 

@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { canCook } from "@/lib/appliances";
+import { targetsFor, type Body } from "@/lib/goal";
 import { requireUser } from "@/lib/auth";
-import { nutritionByRecipe } from "@/lib/menu-nutrition";
+import { assess, nutritionByRecipe, weekBalance } from "@/lib/menu-nutrition";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { currentWeekStart, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
@@ -19,7 +20,7 @@ export async function generateWeekAction(weekStart: string) {
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal,appliances")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal,appliances,sex,age,weight_kg,height_cm,activity")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
@@ -64,12 +65,33 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
       canCook(stepsById.get(r.id), kitchen)
   );
   if (allowed.length < 6) allowed = pool; // demasiado restrictivo: mejor un menú que ninguno
+
+  // Perder peso: fuera los platos que se pasan claramente de lo que toca por comida.
+  // Si eso deja muy pocas recetas, se relaja en vez de dejar la semana vacía.
+  let kcalPerMeal: number | undefined;
+  let goalTargets: ReturnType<typeof targetsFor> | null = null;
+  if (bodyGoal && nutrition) {
+    const t = targetsFor({
+      sex: (profile?.sex as Body["sex"]) ?? null,
+      age: profile?.age ?? null,
+      weightKg: profile?.weight_kg != null ? Number(profile.weight_kg) : null,
+      heightCm: profile?.height_cm ?? null,
+      activity: (profile?.activity as Body["activity"]) ?? null,
+      bodyGoal,
+    });
+    goalTargets = t;
+    kcalPerMeal = Math.round(t.kcalMeals / 2);
+    if (bodyGoal === "perder") {
+      const light = allowed.filter((r) => (nutrition.get(r.id)?.kcal ?? 0) <= kcalPerMeal! * 1.25);
+      if (light.length >= 8) allowed = light;
+    }
+  }
   // Los huecos "como fuera" se respetan; se cocina las veces que diga el perfil
   const existing = await loadSlots(supabase, menu.id);
   const blocked = new Set(existing.filter((s) => s.kind === "out").map((s) => `${s.day}-${s.meal}`));
   const sessions = profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, 14 - blocked.size);
   const goals: string[] = profile?.goals ?? [];
-  const slots = generateWeek(allowed, {
+  const opts = {
     sessions,
     blocked,
     ingredients,
@@ -79,7 +101,28 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     pantry: pantry.size > 0 ? pantry : undefined,
     bodyGoal,
     nutrition,
-  }).map((s) => ({ ...s, menu_id: menu.id, cooked: false }));
+    kcalPerMeal,
+  };
+  // Con objetivo, se prueban varias semanas y se queda la que mejor cuadra (calorías, proteína
+  // y verdura). Así "Ajustar el menú a mi objetivo" mejora de verdad en vez de sortear otra vez.
+  let week = generateWeek(allowed, opts);
+  if (bodyGoal && nutrition && goalTargets) {
+    const rate = (w: typeof week) => {
+      const b = weekBalance(w, nutrition);
+      const a = assess(b, goalTargets!, bodyGoal);
+      return a.score * 1000 - Math.abs(b.avgKcal - goalTargets!.kcalMeals) + Math.min(b.avgProtein, goalTargets!.proteinMeals) * 3;
+    };
+    let best = rate(week);
+    for (let i = 0; i < 11; i++) {
+      const candidate = generateWeek(allowed, opts);
+      const r = rate(candidate);
+      if (r > best) {
+        best = r;
+        week = candidate;
+      }
+    }
+  }
+  const slots = week.map((s) => ({ ...s, menu_id: menu.id, cooked: false }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
 }
