@@ -40,3 +40,28 @@ body {
 .font-hand {
   font-family: var(--font-hand), "Segoe Script", cursive;
 }
+
+/* Carrusel de días del menú: sin barra en móvil (se desliza con el dedo), barra fina en escritorio */
+.days-scroll {
+  scrollbar-width: none;
+}
+.days-scroll::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .days-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #cfc5b6 transparent;
+  }
+  .days-scroll::-webkit-scrollbar {
+    display: block;
+    height: 10px;
+  }
+  .days-scroll::-webkit-scrollbar-thumb {
+    background: #cfc5b6;
+    border-radius: 999px;
+  }
+  .days-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
+  }
+}

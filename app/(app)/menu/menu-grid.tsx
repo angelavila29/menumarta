@@ -98,9 +98,17 @@ export function MenuGrid(p: Props) {
   useEffect(() => {
     if (p.todayIndex) goToDay(p.todayIndex, false);
   }, [p.todayIndex]);
+  // Flechas (escritorio): avanzan un día y se apagan al llegar a cada extremo
+  const [edges, setEdges] = useState({ left: false, right: true });
+  const stepDays = (dir: 1 | -1) => {
+    const box = scroller.current;
+    const col = box?.children[0] as HTMLElement | undefined;
+    if (box && col) box.scrollBy({ left: dir * (col.offsetWidth + 12), behavior: "smooth" });
+  };
   const onDaysScroll = () => {
     const box = scroller.current;
     if (!box) return;
+    setEdges({ left: box.scrollLeft > 4, right: box.scrollLeft + box.clientWidth < box.scrollWidth - 4 });
     const cols = Array.from(box.children) as HTMLElement[];
     const x = box.scrollLeft + box.offsetLeft;
     let best = 0;
@@ -339,10 +347,23 @@ export function MenuGrid(p: Props) {
           })}
         </ul>
 
+        <div className="relative mt-3">
+          {([[-1, "Días anteriores", "left-0 -translate-x-1/2", edges.left], [1, "Días siguientes", "right-0 translate-x-1/2", edges.right]] as const).map(([dir, label, pos, on]) => (
+            <button
+              key={dir}
+              type="button"
+              aria-label={label}
+              disabled={!on}
+              onClick={() => stepDays(dir)}
+              className={`absolute top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-cream-dark bg-white shadow-md transition hover:text-brand disabled:pointer-events-none disabled:opacity-0 md:flex ${pos}`}
+            >
+              {dir === -1 ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            </button>
+          ))}
         <div
           ref={scroller}
           onScroll={onDaysScroll}
-          className="no-scrollbar -mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-4 pb-2 md:mx-0 md:px-0"
+          className="days-scroll -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-2 md:mx-0 md:snap-none md:px-0 md:pb-3"
         >
           {DAYS.map((name, day) => {
             const today = p.todayIndex === day;
@@ -394,6 +415,7 @@ export function MenuGrid(p: Props) {
               </section>
             );
           })}
+        </div>
         </div>
       </div>
 
@@ -606,10 +628,10 @@ function MealSlot({ label, day, recipe, minutes, isOut, isLeftover, cooked, onCo
   return (
     <article className={`overflow-hidden rounded-xl border bg-white ${cooked ? "border-olive" : "border-cream-dark"}`}>
       <div className="relative">
-        <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className={`aspect-[16/9] w-full text-6xl ${isLeftover ? "opacity-60" : ""}`} />
+        <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className="aspect-[16/9] w-full text-6xl" />
         <span className="absolute left-2 top-2 flex items-center gap-1">
           <span className="rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide">{label}</span>
-          <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${isLeftover ? "bg-white/95 text-muted" : "bg-brand text-white"}`}>{isLeftover ? "Sobras" : "Cocinas"}</span>
+          <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${isLeftover ? "bg-olive text-white" : "bg-brand text-white"}`}>{isLeftover ? "Sobras" : "Cocinas"}</span>
         </span>
         <button
           type="button"
@@ -622,7 +644,7 @@ function MealSlot({ label, day, recipe, minutes, isOut, isLeftover, cooked, onCo
         </button>
       </div>
       <div className="p-3">
-        <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`line-clamp-2 block min-h-[2.6em] font-semibold leading-snug hover:text-brand hover:underline ${isLeftover ? "text-muted" : ""}`}>
+        <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`line-clamp-2 block min-h-[2.6em] font-semibold leading-snug hover:text-brand hover:underline`}>
           {recipe.name}
         </Link>
         <p className="mt-0.5 flex min-h-[1.25rem] items-center gap-1 text-xs text-muted">
