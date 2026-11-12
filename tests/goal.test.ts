@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { bmi, healthyWeight, judge, paceOptions, targetsFor } from "../lib/goal";
+import { bmi, dayBreakdown, healthyWeight, judge, paceOptions, targetsFor } from "../lib/goal";
 
 test("objetivos diarios: hombre 22 años, 72 kg, 176 cm, actividad media, mantener", () => {
   const t = targetsFor({ sex: "hombre", age: 22, weightKg: 72, heightCm: 176, activity: "media", bodyGoal: "mantener" });
@@ -71,4 +71,16 @@ test("un ritmo que deja por debajo del mínimo no se ofrece", () => {
   const o = paceOptions({ sex: "mujer", age: 22, weightKg: 55, heightCm: 155, activity: "baja", bodyGoal: "perder" });
   assert.equal(o.find((x) => x.pace === 0.75)!.allowed, false);
   assert.equal(o.find((x) => x.pace === 0.25)!.recommended, true);
+});
+
+test("sin desayuno, sus calorías pasan a las demás comidas", () => {
+  const b = { sex: "hombre" as const, age: 24, weightKg: 86, heightCm: 170, activity: "media" as const, bodyGoal: "mantener" as const };
+  const all = targetsFor(b);
+  const noBreakfast = targetsFor({ ...b, skipMeals: ["desayuno"] });
+  assert.equal(noBreakfast.kcalDay, all.kcalDay);
+  assert.ok(noBreakfast.kcalMeals > all.kcalMeals);
+  assert.equal(targetsFor({ ...b, skipMeals: ["desayuno", "picoteo"] }).kcalMeals, all.kcalDay);
+  const parts = dayBreakdown(2000, ["desayuno"]);
+  assert.equal(parts[0].kcal, 0);
+  assert.ok(Math.abs(parts.reduce((a, p) => a + p.kcal, 0) - 2000) <= 20);
 });

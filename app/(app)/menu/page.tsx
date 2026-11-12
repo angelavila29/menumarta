@@ -33,7 +33,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
   const weekStart = currentWeekStart(offset);
 
   const [{ data: profile }, supers, { data: chainRows }, listId] = await Promise.all([
-    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions,weekly_budget,compare_mode,main_supermarket,sex,age,weight_kg,height_cm,activity,body_goal,target_weight_kg,loss_pace").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions,weekly_budget,compare_mode,main_supermarket,sex,age,weight_kg,height_cm,activity,body_goal,target_weight_kg,loss_pace,skipped_meals").eq("id", user.id).maybeSingle(),
     userSupermarketIds(supabase, user.id),
     supabase.from("supermarkets").select("id,name,has_prices"),
     getOrCreateActiveList(supabase, user.id),
@@ -90,6 +90,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
     bodyGoal: (profile?.body_goal as Body["bodyGoal"]) ?? null,
     targetWeightKg: profile?.target_weight_kg != null ? Number(profile.target_weight_kg) : null,
     paceKgWeek: profile?.loss_pace != null ? Number(profile.loss_pace) : null,
+      skipMeals: (profile?.skipped_meals as string[] | null) ?? [],
   };
   const nutrition = nutritionByRecipe(
     (ingRows ?? []).map((r) => ({ recipe_id: r.recipe_id as number, ingredient_name: r.ingredient_name as string, qty: Number(r.qty), unit: r.unit as string })),
@@ -106,6 +107,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
     fatDay: targets.fatDay,
     carbsDay: targets.carbsDay,
     portion: menu.portion,
+    skipMeals: body.skipMeals ?? [],
     plan:
       body.bodyGoal === "perder" && targets.kgPerWeek > 0
         ? {

@@ -9,7 +9,7 @@ import { FoodInput } from "@/components/food-input";
 import { KitchenPicker } from "@/components/kitchen-picker";
 import type { ApplianceId } from "@/lib/appliances";
 import { COOK_RANGES, cookRangeOf } from "@/lib/cook-sessions";
-import { bmi, bmiLabel, hasBodyData, healthyWeight, paceOptions, targetsFor, type Body } from "@/lib/goal";
+import { DAY_PARTS, bmi, bmiLabel, hasBodyData, healthyWeight, paceOptions, targetsFor, type Body } from "@/lib/goal";
 import { saveSettings, type SettingsInput } from "@/lib/settings-actions";
 
 export type Chain = { id: string; name: string; has_prices: boolean };
@@ -106,11 +106,21 @@ export function SettingsForm({ initial, email, chains, location, foods, account 
   const name = v.displayName.trim() || email.split("@")[0];
   const main = v.mainSupermarket ?? chains.find((c) => c.has_prices)?.id ?? chains[0]?.id ?? null;
 
-  const checks = [
-    !!v.displayName.trim(), !!v.phone.trim(), v.householdSize > 0, v.planningMeals.length > 0, !!v.diet,
-    !!location.label, chains.length > 0, !!v.mainSupermarket, !!v.compareMode, v.weeklyBudget !== null, v.maxRecipeMinutes !== null, v.goals.length > 0,
+  // Solo cuenta lo que de verdad cambia el menú o la compra; cada cosa que falta sabe en qué pestaña está
+  const checks: { ok: boolean; missing: string; tab: string }[] = [
+    { ok: !!v.displayName.trim(), missing: "Tu nombre", tab: "perfil" },
+    { ok: v.householdSize > 0, missing: "Cuántos sois en casa", tab: "perfil" },
+    { ok: v.sex !== null && v.age !== null && v.weightKg !== null && v.heightCm !== null, missing: "Sexo, edad, peso y altura", tab: "objetivo" },
+    { ok: v.activity !== null, missing: "Tu nivel de actividad", tab: "objetivo" },
+    { ok: v.appliances !== null, missing: "Qué tienes en la cocina", tab: "cocina" },
+    { ok: v.maxRecipeMinutes !== null, missing: "Cuánto tiempo quieres cocinar", tab: "cocina" },
+    { ok: v.weeklyBudget !== null, missing: "Tu presupuesto semanal", tab: "cocina" },
+    { ok: v.goals.length > 0, missing: "Qué te importa más al planificar", tab: "cocina" },
+    { ok: !!location.label, missing: "Tu zona", tab: "compra" },
+    { ok: chains.length > 0 && !!v.mainSupermarket, missing: "Tu supermercado habitual", tab: "compra" },
   ];
-  const completion = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  const pendingChecks = checks.filter((c) => !c.ok);
+  const completion = Math.round(((checks.length - pendingChecks.length) / checks.length) * 100);
 
   function save() {
     start(async () => {
@@ -150,7 +160,7 @@ export function SettingsForm({ initial, email, chains, location, foods, account 
         ))}
       </nav>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_320px] lg:items-start">
+      <div className={`mt-5 grid gap-5 lg:items-start ${pendingChecks.length > 0 ? "lg:grid-cols-[1fr_320px]" : ""}`}>
         <div role="tabpanel" className="flex flex-col gap-4">
           {tab === "perfil" && (
             <>
@@ -260,6 +270,30 @@ export function SettingsForm({ initial, email, chains, location, foods, account 
                     <Chip key={id} small on={v.activity === id} onClick={() => set("activity", id)}>{label}</Chip>
                   ))}
                 </div>
+                {v.bodyGoal && (
+                  <>
+                    <p className="mb-1 mt-4 text-sm font-semibold">¿Qué comidas haces al día?</p>
+                    <p className="mb-2 text-xs text-muted">Si te saltas alguna, sus calorías se reparten entre las demás y el menú sube las raciones de comida y cena.</p>
+                    <div className="flex flex-wrap gap-2">
+                      {DAY_PARTS.map((part) =>
+                        part.menu ? (
+                          <span key={part.key} className="inline-flex items-center gap-2 rounded-xl border border-olive bg-olive-soft px-2.5 py-1.5 text-xs font-medium text-olive-dark">
+                            {part.emoji} {part.label} · en tu menú
+                          </span>
+                        ) : (
+                          <Chip
+                            key={part.key}
+                            small
+                            on={!v.skipMeals.includes(part.key)}
+                            onClick={() => set("skipMeals", v.skipMeals.includes(part.key) ? v.skipMeals.filter((m) => m !== part.key) : [...v.skipMeals, part.key])}
+                          >
+                            {part.emoji} {part.label}
+                          </Chip>
+                        )
+                      )}
+                    </div>
+                  </>
+                )}
                 {v.bodyGoal === "perder" && <LossPlan v={v} set={set} />}
                 <GoalSummary v={v} />
               </Card>
@@ -406,17 +440,36 @@ export function SettingsForm({ initial, email, chains, location, foods, account 
           )}
         </div>
 
-        <div className="hidden flex-col gap-4 lg:flex">
-          <section className="rounded-2xl bg-olive-soft p-4">
-            <p className="flex items-center gap-2 font-bold text-olive-dark">
-              <StarIcon className="h-6 w-6" /> Tu perfil está completo al {completion} %
-            </p>
-            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/70" role="progressbar" aria-valuenow={completion} aria-valuemin={0} aria-valuemax={100} aria-label="Perfil completado">
-              <div className="h-full rounded-full bg-olive" style={{ width: `${completion}%` }} />
-            </div>
-            <p className="mt-2 text-sm text-olive-dark/90">Cuanta más información nos des, mejores y más personalizadas serán tus recetas y recomendaciones.</p>
-          </section>
-        </div>
+        {pendingChecks.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <section className="rounded-2xl bg-olive-soft p-4">
+              <p className="flex items-center gap-2 font-bold text-olive-dark">
+                <StarIcon className="h-6 w-6" /> Tu perfil está completo al {completion} %
+              </p>
+              <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/70" role="progressbar" aria-valuenow={completion} aria-valuemin={0} aria-valuemax={100} aria-label="Perfil completado">
+                <div className="h-full rounded-full bg-olive" style={{ width: `${completion}%` }} />
+              </div>
+              <p className="mt-3 text-sm font-semibold text-olive-dark">Te falta:</p>
+              <ul className="mt-1 flex flex-col gap-1">
+                {pendingChecks.map((c) => (
+                  <li key={c.missing}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        goTo(c.tab);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="flex w-full items-center justify-between gap-2 rounded-lg bg-white/70 px-3 py-2 text-left text-sm text-olive-dark hover:bg-white"
+                    >
+                      {c.missing}
+                      <span aria-hidden>→</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -582,13 +635,13 @@ function GoalSummary({ v }: { v: SettingsInput }) {
   const body: Body = {
     sex: (v.sex as Body["sex"]) ?? null, age: v.age, weightKg: v.weightKg, heightCm: v.heightCm,
     activity: (v.activity as Body["activity"]) ?? null, bodyGoal: (v.bodyGoal as Body["bodyGoal"]) ?? null,
-    targetWeightKg: v.targetWeightKg, paceKgWeek: v.lossPace,
+    targetWeightKg: v.targetWeightKg, paceKgWeek: v.lossPace, skipMeals: v.skipMeals,
   };
   if (!v.bodyGoal) return <p className="mt-4 text-sm text-muted">Sin objetivo, el menú solo mira tus gustos, tu despensa y tu presupuesto.</p>;
   const t = targetsFor(body);
   return (
     <div className="mt-4">
-      <DayBreakdown kcalDay={t.kcalDay} proteinDay={t.proteinDay} fatDay={t.fatDay} carbsDay={t.carbsDay} />
+      <DayBreakdown kcalDay={t.kcalDay} proteinDay={t.proteinDay} fatDay={t.fatDay} carbsDay={t.carbsDay} skip={v.skipMeals} />
       {!hasBodyData(body) && <p className="mt-1 text-xs text-muted">Faltan datos (sexo, edad, peso o altura), así que es una estimación media. Rellénalos y afinará.</p>}
     </div>
   );

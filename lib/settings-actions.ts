@@ -26,6 +26,7 @@ export type SettingsInput = {
   bodyGoal: string | null;
   targetWeightKg: number | null;
   lossPace: number | null;
+  skipMeals: string[];
   appliances: string[] | null;
   compareMode: string;
   mainSupermarket: string | null;
@@ -77,6 +78,7 @@ export async function saveSettings(input: SettingsInput) {
       activity: ["baja", "media", "alta"].includes(input.activity ?? "") ? input.activity : null,
       body_goal: ["perder", "mantener", "ganar"].includes(input.bodyGoal ?? "") ? input.bodyGoal : null,
       target_weight_kg: input.bodyGoal === "perder" ? numIn(input.targetWeightKg, 25, 300) : null,
+      skipped_meals: (input.skipMeals ?? []).filter((m) => m === "desayuno" || m === "picoteo"),
       loss_pace: input.bodyGoal === "perder" && [0.25, 0.5, 0.75, 1].includes(input.lossPace ?? 0) ? input.lossPace : null,
       appliances: input.appliances ? input.appliances.filter((a) => APPLIANCE_IDS.has(a)) : null,
       compare_mode: COMPARE.includes(input.compareMode) ? input.compareMode : "avisar",

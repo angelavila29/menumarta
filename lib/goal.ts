@@ -13,6 +13,8 @@ export type Body = {
   /** plan para perder: peso al que se quiere llegar y ritmo en kg por semana */
   targetWeightKg?: number | null;
   paceKgWeek?: number | null;
+  /** comidas del día que no hace ("desayuno", "picoteo"): lo suyo se reparte entre las demás */
+  skipMeals?: string[] | null;
 };
 
 export type Targets = {
@@ -45,20 +47,28 @@ const TEE: Record<"hombre" | "mujer", Record<"baja" | "media" | "alta", [number,
 };
 // Reparto habitual en España: desayuno ~20-25 %, media mañana y merienda ~10-15 %, comida ~35 % y
 // cena ~30 %. Comida + cena ≈ 65 % del día; el resto lo pone lo que el menú no planifica.
-const MEALS_SHARE_KCAL = 0.65;
-
 /** Cómo se reparte el objetivo diario. `menu` = lo planifica el menú semanal. */
 export const DAY_PARTS = [
-  { key: "desayuno", label: "Desayuno", emoji: "☕", share: 0.22, menu: false },
-  { key: "picoteo", label: "Media mañana y merienda", emoji: "🍎", share: 0.13, menu: false },
-  { key: "comida", label: "Comida", emoji: "🍲", share: 0.35, menu: true },
-  { key: "cena", label: "Cena", emoji: "🌙", share: 0.3, menu: true },
+  { key: "desayuno", label: "Desayuno", emoji: "☕", share: 0.22, protein: 0.25, menu: false },
+  { key: "picoteo", label: "Media mañana y merienda", emoji: "🍎", share: 0.13, protein: 0.15, menu: false },
+  { key: "comida", label: "Comida", emoji: "🍲", share: 0.35, protein: 0.32, menu: true },
+  { key: "cena", label: "Cena", emoji: "🌙", share: 0.3, protein: 0.28, menu: true },
 ] as const;
+/** Las que se pueden quitar: comida y cena son las que planifica el menú. */
+export const SKIPPABLE_MEALS = ["desayuno", "picoteo"] as const;
 
-export function dayBreakdown(kcalDay: number) {
-  return DAY_PARTS.map((p) => ({ ...p, kcal: Math.round((kcalDay * p.share) / 10) * 10 }));
+/** Parte del día que toca a comida + cena, repartiendo lo de las comidas que no se hacen. */
+function menuShare(skip: string[] | null | undefined, field: "share" | "protein"): number {
+  const eaten = DAY_PARTS.filter((p) => p.menu || !(skip ?? []).includes(p.key));
+  const total = eaten.reduce((a, p) => a + p[field], 0);
+  return eaten.filter((p) => p.menu).reduce((a, p) => a + p[field], 0) / total;
 }
-const MEALS_SHARE_PROTEIN = 0.6; // el desayuno (leche, yogur, huevos) también aporta proteína
+
+export function dayBreakdown(kcalDay: number, skip?: string[] | null) {
+  const skipped = (p: (typeof DAY_PARTS)[number]) => !p.menu && (skip ?? []).includes(p.key);
+  const total = DAY_PARTS.filter((p) => !skipped(p)).reduce((a, p) => a + p.share, 0);
+  return DAY_PARTS.map((p) => ({ ...p, skipped: skipped(p), kcal: skipped(p) ? 0 : Math.round((kcalDay * p.share) / total / 10) * 10 }));
+}
 
 export function hasBodyData(b: Body): boolean {
   return b.age != null && b.weightKg != null && b.heightCm != null && b.sex != null;
@@ -152,8 +162,8 @@ export function targetsFor(b: Body): Targets {
     kgPerWeek: goal === "perder" ? Math.round((((tee - kcalDay) * 7) / KCAL_PER_KG) * 100) / 100 : 0,
     kcalDay,
     proteinDay,
-    kcalMeals: Math.round(kcalDay * MEALS_SHARE_KCAL),
-    proteinMeals: Math.round(proteinDay * MEALS_SHARE_PROTEIN),
+    kcalMeals: Math.round(kcalDay * menuShare(b.skipMeals, "share")),
+    proteinMeals: Math.round(proteinDay * menuShare(b.skipMeals, "protein")),
     vegMeals: 2,
     estimated,
   };

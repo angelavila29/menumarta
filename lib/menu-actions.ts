@@ -20,7 +20,7 @@ export async function generateWeekAction(weekStart: string, mode: "normal" | "de
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string, pantryFirst = false) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal,target_weight_kg,loss_pace,appliances,sex,age,weight_kg,height_cm,activity")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal,target_weight_kg,loss_pace,skipped_meals,appliances,sex,age,weight_kg,height_cm,activity")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
@@ -81,6 +81,7 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
       bodyGoal,
       targetWeightKg: profile?.target_weight_kg != null ? Number(profile.target_weight_kg) : null,
       paceKgWeek: profile?.loss_pace != null ? Number(profile.loss_pace) : null,
+      skipMeals: (profile?.skipped_meals as string[] | null) ?? [],
     });
     goalTargets = t;
     kcalPerMeal = Math.round(t.kcalMeals / 2);

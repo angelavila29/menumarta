@@ -210,3 +210,7 @@ mejor encaja.
 - [x] Macros del día (proteína, hidratos, grasa) en Ajustes y en el menú.
 - [x] Tamaño de ración del menú (`weekly_menus.portion`): se ajusta al generar para cuadrar las
       calorías, multiplica la compra y se puede cambiar con − / +.
+- [x] "¿Qué comidas haces al día?" (`profiles.skipped_meals`): sin desayuno o sin merienda, sus
+      calorías se reparten entre las demás y suben las raciones de comida y cena.
+- [x] "Tu perfil está completo al X %": solo cuenta lo que afecta al menú, dice qué falta con un
+      botón que lleva a su pestaña, y desaparece al llegar al 100 %.

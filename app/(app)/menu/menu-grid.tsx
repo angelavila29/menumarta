@@ -20,6 +20,7 @@ export type GoalPanel = {
   carbsDay: number;
   /** tamaño de ración del menú (1 = la de la receta) */
   portion: number;
+  skipMeals: string[];
   plan: { kgPerWeek: number; targetKg: number | null; weeks: number | null } | null;
   kcal: Meter;
   protein: Meter;
@@ -309,7 +310,7 @@ export function MenuGrid(p: Props) {
                       . <Link href="/ajustes#objetivo" className="font-medium text-brand hover:underline">Cambiar</Link>
                     </p>
                   )}
-                  <DayBreakdown kcalDay={p.goal.kcalDay} proteinDay={p.goal.proteinDay} fatDay={p.goal.fatDay} carbsDay={p.goal.carbsDay} />
+                  <DayBreakdown kcalDay={p.goal.kcalDay} proteinDay={p.goal.proteinDay} fatDay={p.goal.fatDay} carbsDay={p.goal.carbsDay} skip={p.goal.skipMeals} />
                   <div className="flex items-center justify-between gap-3 rounded-xl border border-cream-dark px-3 py-2 text-sm">
                     <span className="min-w-0">
                       <b>{PORTION_LABEL[p.goal.portion] ?? `Ración ×${num(p.goal.portion)}`}</b>

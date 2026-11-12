@@ -34,3 +34,7 @@ alter table profiles
 -- Tamaño de ración del menú (1 = la de la receta). Se ajusta al generar para cuadrar las calorías
 -- del objetivo, y multiplica las cantidades de la compra.
 alter table weekly_menus add column if not exists portion numeric not null default 1 check (portion between 0.5 and 2.5);
+
+-- Comidas del día que la persona no hace ('desayuno', 'picoteo'): sus calorías se reparten entre
+-- las que sí hace, así comida y cena pesan más.
+alter table profiles add column if not exists skipped_meals text[] not null default '{}';

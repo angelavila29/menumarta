@@ -4,9 +4,11 @@ import { dayBreakdown } from "@/lib/goal";
 const kcal = (n: number) => n.toLocaleString("es-ES", { useGrouping: "always" } as Intl.NumberFormatOptions);
 
 /** El objetivo diario y cómo se reparte entre las comidas del día; marca las que planifica el menú. */
-export function DayBreakdown({ kcalDay, proteinDay, fatDay, carbsDay }: { kcalDay: number; proteinDay?: number; fatDay?: number; carbsDay?: number }) {
-  const parts = dayBreakdown(kcalDay);
-  const menuKcal = Math.round(kcalDay * parts.filter((p) => p.menu).reduce((s, p) => s + p.share, 0));
+export function DayBreakdown({ kcalDay, proteinDay, fatDay, carbsDay, skip }: { kcalDay: number; proteinDay?: number; fatDay?: number; carbsDay?: number; skip?: string[] | null }) {
+  const parts = dayBreakdown(kcalDay, skip);
+  const eaten = parts.filter((p) => !p.skipped);
+  const menuKcal = Math.round((kcalDay * eaten.filter((p) => p.menu).reduce((s, p) => s + p.share, 0)) / eaten.reduce((s, p) => s + p.share, 0));
+  const others = eaten.some((p) => !p.menu);
   return (
     <div className="rounded-xl bg-olive-soft p-3 text-sm text-olive-dark">
       <p>
@@ -25,18 +27,18 @@ export function DayBreakdown({ kcalDay, proteinDay, fatDay, carbsDay }: { kcalDa
       )}
       <ul className="mt-2 flex flex-col gap-1">
         {parts.map((p) => (
-          <li key={p.key} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1 ${p.menu ? "bg-white font-medium text-ink" : ""}`}>
+          <li key={p.key} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1 ${p.menu ? "bg-white font-medium text-ink" : ""} ${p.skipped ? "opacity-50" : ""}`}>
             <span>
               <span aria-hidden className="mr-1.5">{p.emoji}</span>
               {p.label}
               {p.menu && <span className="ml-1.5 rounded bg-olive px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">en tu menú</span>}
             </span>
-            <span className="shrink-0 tabular-nums">~{kcal(p.kcal)} kcal</span>
+            <span className="shrink-0 tabular-nums">{p.skipped ? "no lo haces" : `~${kcal(p.kcal)} kcal`}</span>
           </li>
         ))}
       </ul>
       <p className="mt-2 text-xs">
-        El menú planifica comida y cena (~{kcal(menuKcal)} kcal). Desayuno, fruta, pan y postre los pones tú.
+        El menú planifica comida y cena (~{kcal(menuKcal)} kcal). {others ? "El resto del día lo pones tú." : "Es todo lo que comes en el día, así que las raciones son grandes."}
       </p>
     </div>
   );
