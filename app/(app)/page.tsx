@@ -9,7 +9,7 @@ import { compareList } from "@/lib/compare";
 import { euro, formatWeekRange, superName } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { currentWeekStart, DAYS, getOrCreateMenu, loadRecipes, loadSlots, todayIndex } from "@/lib/menu";
-import { recipeEmoji } from "@/lib/recipe-emoji";
+import { RecipeArt } from "@/components/recipe-art";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
 export default async function HomePage() {
@@ -67,6 +67,14 @@ export default async function HomePage() {
   // Despensa sin revisar desde hace una semana: se pregunta si sigue todo
   const { count: pantryCount } = await supabase.from("pantry_items").select("ingredient_name", { count: "exact", head: true }).eq("user_id", user.id);
   const pantryStale = (pantryCount ?? 0) > 0 && olderThanAWeek(profile?.pantry_reviewed_at as string | null);
+
+  // Platos con foto que no salen esta semana, distintos cada día
+  const inWeek = new Set(slots.map((s) => s.recipe_id));
+  const daySeed = Number(weekStart.replaceAll("-", "")) + todayIdx;
+  const showcase = recipes
+    .filter((r) => r.photo_url && r.owner_id === null && !inWeek.has(r.id) && !r.tags.includes("guarnicion"))
+    .sort((a, b) => ((a.id * 31 + daySeed) % 97) - ((b.id * 31 + daySeed) % 97))
+    .slice(0, 4);
 
   const favorites = (favRows ?? []).map((r) => r.product as unknown as Product | null).filter((p): p is Product => !!p);
 
@@ -141,20 +149,37 @@ export default async function HomePage() {
                 Ver la semana <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-2 gap-3">
               <TodayMeal label="Comida" recipe={today.comida} side={today.comidaSide} out={today.comidaOut} />
               <TodayMeal label="Cena" recipe={today.cena} side={today.cenaSide} out={today.cenaOut} />
             </div>
             {/* solo lo que queda de semana: los días pasados no son "lo siguiente" */}
-            <ul className="no-scrollbar -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 empty:hidden md:mx-0 md:px-0">
-              {orderedDays.slice(1, 7 - todayIdx).map((d) => (
-                <li key={d.day} className="w-36 shrink-0 rounded-xl bg-cream px-3 py-2 text-xs">
-                  <p className="font-semibold">{d.label}</p>
-                  <p className="truncate text-muted">{d.comida?.name ?? (d.comidaOut ? "Como fuera" : "—")}</p>
-                  <p className="truncate text-muted">{d.cena?.name ?? (d.cenaOut ? "Como fuera" : "—")}</p>
-                </li>
-              ))}
-            </ul>
+            {7 - todayIdx > 1 && (
+              <>
+                <p className="mt-5 text-sm font-semibold">Lo que viene</p>
+                <ul className="no-scrollbar -mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
+                  {orderedDays.slice(1, 7 - todayIdx).map((d) => (
+                    <li key={d.day} className="w-44 shrink-0">
+                      <Link href="/menu" className="block rounded-xl border border-cream-dark p-2 hover:bg-cream/60">
+                        <p className="px-1 text-xs font-semibold">{d.label}</p>
+                        <div className="mt-1.5 flex flex-col gap-1.5">
+                          {([[d.comida, d.comidaOut, "Comida"], [d.cena, d.cenaOut, "Cena"]] as const).map(([r, out, label]) => (
+                            <div key={label} className="flex items-center gap-2">
+                              {r ? (
+                                <RecipeArt tags={r.tags} name={r.name} photoUrl={r.photo_url} className="h-10 w-10 shrink-0 rounded-lg text-xl" />
+                              ) : (
+                                <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cream text-sm text-muted">{out ? "🍴" : "—"}</span>
+                              )}
+                              <span className="line-clamp-2 min-w-0 text-xs leading-tight">{r?.name ?? (out ? "Como fuera" : "Sin plato")}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </section>
         )}
 
@@ -314,8 +339,11 @@ export default async function HomePage() {
 
       {/* Próxima semana */}
       <section className="overflow-hidden rounded-2xl border border-cream-dark bg-white md:grid md:grid-cols-[220px_1fr_auto_auto] md:items-center">
-        <div aria-hidden className="hidden h-full min-h-32 items-center justify-center gap-1 bg-gradient-to-br from-olive-soft to-brand-soft text-5xl md:flex">
-          📋<span className="text-4xl">🥕🍅</span>
+        {/* Mosaico con fotos de platos del banco que no están en tu semana */}
+        <div aria-hidden className="grid h-32 grid-cols-4 md:h-full md:min-h-36 md:grid-cols-2">
+          {showcase.map((r) => (
+            <RecipeArt key={r.id} tags={r.tags} name={r.name} photoUrl={r.photo_url} className="h-full w-full text-3xl" />
+          ))}
         </div>
         <div className="p-5">
           <h2 className="text-xl font-bold">¿Sin ideas para la próxima semana?</h2>
@@ -339,23 +367,26 @@ export default async function HomePage() {
   );
 }
 
-function TodayMeal({ label, recipe, side, out }: { label: string; recipe: { id: number; name: string; tags: string[] } | null; side?: { name: string } | null; out?: boolean }) {
-  const inner = (
-    <>
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cream text-2xl">
-        {recipe ? recipeEmoji(recipe.tags, recipe.name) : out ? "🍴" : "·"}
+function TodayMeal({ label, recipe, side, out }: { label: string; recipe: { id: number; name: string; tags: string[]; photo_url?: string | null } | null; side?: { name: string } | null; out?: boolean }) {
+  if (!recipe) {
+    return (
+      <Link href="/menu" className="flex aspect-[4/5] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-cream-dark p-3 text-center text-sm text-muted hover:border-brand hover:text-brand sm:aspect-[4/3]">
+        <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
+        <span aria-hidden className="text-3xl">{out ? "🍴" : "＋"}</span>
+        {out ? "Como fuera" : "Elegir plato"}
+      </Link>
+    );
+  }
+  // La foto manda: ocupa la tarjeta y el nombre va encima, sobre un degradado para que se lea
+  return (
+    <Link href={`/recetas/${recipe.id}`} className="group relative block aspect-[4/5] overflow-hidden rounded-2xl sm:aspect-[4/3]">
+      <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className="h-full w-full text-7xl transition duration-300 group-hover:scale-[1.03]" />
+      <span className="absolute left-2.5 top-2.5 rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide">{label}</span>
+      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent p-3 pt-10 text-white">
+        <span className="line-clamp-2 font-semibold leading-tight sm:text-lg">{recipe.name}</span>
+        {side && <span className="mt-0.5 block text-xs text-white/85 sm:text-sm">con {side.name.toLowerCase()}</span>}
       </span>
-      <span className="min-w-0">
-        <span className="block text-xs text-muted">{label}</span>
-        <span className="line-clamp-2 font-semibold leading-tight">{recipe?.name ?? (out ? "Como fuera" : "Sin plato")}</span>
-        {side && <span className="block text-sm text-olive-dark">con {side.name.toLowerCase()}</span>}
-      </span>
-    </>
-  );
-  return recipe ? (
-    <Link href={`/recetas/${recipe.id}`} className="flex items-center gap-3 rounded-xl bg-cream/60 p-3 hover:bg-cream">{inner}</Link>
-  ) : (
-    <div className="flex items-center gap-3 rounded-xl bg-cream/60 p-3">{inner}</div>
+    </Link>
   );
 }
 
