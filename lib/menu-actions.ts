@@ -186,9 +186,19 @@ export async function confirmMenuListAction(rawItems: ConfirmItem[], staples: { 
     if (!productByIngredient.has(it.ingredient)) productByIngredient.set(it.ingredient, it.productId);
   }
 
+  // Lo que puso el menú la vez anterior (y aún no se ha comprado) se retira antes de añadir lo
+  // nuevo: pulsar dos veces, o rehacer el menú y volver a pasarlo, no duplica la compra.
+  const { data: before } = await supabase.from("shopping_list_items").select("id,quantity,menu_qty,checked").eq("list_id", listId).gt("menu_qty", 0);
+  for (const e of before ?? []) {
+    if (e.checked) continue; // ya comprado: se queda como está
+    const rest = Number(e.quantity) - Number(e.menu_qty);
+    if (rest <= 0) await supabase.from("shopping_list_items").delete().eq("id", e.id);
+    else await supabase.from("shopping_list_items").update({ quantity: rest, menu_qty: 0 }).eq("id", e.id);
+  }
+
   const { data: existing } = await supabase
     .from("shopping_list_items")
-    .select("id,product_id,quantity")
+    .select("id,product_id,quantity,menu_qty,checked")
     .eq("list_id", listId);
   const byProduct = new Map((existing ?? []).map((e) => [e.product_id as number, e]));
 
@@ -196,13 +206,14 @@ export async function confirmMenuListAction(rawItems: ConfirmItem[], staples: { 
   for (const [productId, quantity] of qtyByProduct) {
     const prev = byProduct.get(productId);
     if (prev && stapleOnly.has(productId)) continue; // un básico que ya está en la lista no se duplica
+    if (prev && prev.checked && Number(prev.menu_qty) > 0) continue; // ya comprado para este menú
     if (prev) {
       await supabase
         .from("shopping_list_items")
-        .update({ quantity: Number(prev.quantity) + quantity, checked: false })
+        .update({ quantity: Number(prev.quantity) + quantity, menu_qty: quantity, checked: false })
         .eq("id", prev.id);
     } else {
-      await supabase.from("shopping_list_items").insert({ list_id: listId, product_id: productId, quantity });
+      await supabase.from("shopping_list_items").insert({ list_id: listId, product_id: productId, quantity, menu_qty: quantity });
     }
   }
 

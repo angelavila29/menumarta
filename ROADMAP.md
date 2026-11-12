@@ -198,6 +198,6 @@ mejor encaja.
       guarniciones ya no salen como plato principal.
 - [x] Detalles: emojis de guarniciones, guarniciones al final del banco, filas de la compra y de
       ingredientes más legibles, la portada solo enseña los días que quedan de semana.
-- [ ] Pendiente: "Añadir a mi lista" dos veces suma cantidades (duplica la compra del menú).
+- [x] "Añadir a mi lista" dos veces (o tras rehacer el menú) ya no duplica: sustituye lo que puso el menú.
 - [ ] Pendiente: con objetivo corporal, las recetas se quedan cortas de calorías para hombres activos
       (haría falta un tamaño de ración por persona).

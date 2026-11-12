@@ -21,3 +21,7 @@ alter table profiles add column if not exists pantry_reviewed_at timestamptz;
 
 -- Guarnición opcional en cada comida del menú ("Salmón con puré").
 alter table weekly_menu_slots add column if not exists side_recipe_id bigint references recipes(id) on delete set null;
+
+-- Cuánto de la cantidad de un producto de la lista viene del menú semanal. Al volver a pasar el
+-- menú a la lista se quita lo anterior y se pone lo nuevo, en vez de sumarlo otra vez.
+alter table shopping_list_items add column if not exists menu_qty numeric not null default 0;
