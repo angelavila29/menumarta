@@ -25,6 +25,12 @@ export type Menu = { id: string; week_start: string; servings: number };
 export const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 export const MEALS = ["comida", "cena"] as const;
 
+/** Día de la semana de hoy en horario español: 0 = lunes … 6 = domingo. */
+export function todayIndex(): number {
+  const wd = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Madrid", weekday: "short" }).format(new Date());
+  return Math.max(0, ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(wd));
+}
+
 /**
  * Lunes de la semana actual en horario español, como 'YYYY-MM-DD'. El servidor va en UTC, así
  * que de 00:00 a 02:00 la fecha UTC es la del día anterior: hay que calcularla en Madrid.
@@ -38,7 +44,8 @@ export function currentWeekStart(offsetWeeks = 0): string {
   return d.toISOString().slice(0, 10);
 }
 
-export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart: string, defaultServings = 2): Promise<Menu> {
+/** Si el menú no existe se crea para las personas que viven en casa (perfil), salvo que se indique otra cosa. */
+export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart: string, defaultServings?: number): Promise<Menu> {
   const { data } = await supabase
     .from("weekly_menus")
     .select("id,week_start,servings")
@@ -46,9 +53,14 @@ export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart:
     .eq("week_start", weekStart)
     .maybeSingle();
   if (data) return data as Menu;
+  let servings = defaultServings;
+  if (servings == null) {
+    const { data: profile } = await supabase.from("profiles").select("household_size").eq("id", userId).maybeSingle();
+    servings = profile?.household_size ?? 2;
+  }
   const { data: created, error } = await supabase
     .from("weekly_menus")
-    .insert({ user_id: userId, week_start: weekStart, servings: defaultServings })
+    .insert({ user_id: userId, week_start: weekStart, servings })
     .select("id,week_start,servings")
     .single();
   if (error) throw new Error(error.message);

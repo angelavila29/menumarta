@@ -37,6 +37,10 @@ export default async function RecipesPage(props: PageProps<"/recetas">) {
     };
   });
 
+  // Las guarniciones de Sobremesa al final: son las últimas que se cargaron y, si no, tapan los platos
+  const isBankSide = (r: BankRecipe) => r.source === "sobremesa" && r.tags.includes("guarnicion");
+  recipes.sort((a, b) => Number(isBankSide(a)) - Number(isBankSide(b)));
+
   const view = typeof sp.ver === "string" ? sp.ver : "todas";
   const author = typeof sp.autor === "string" ? sp.autor : null;
   return <RecipeBank recipes={recipes} initialView={view} initialAuthor={author} friendCount={friendNames.size} friendsMode={me?.friend_recipes_mode === "saved" ? "saved" : "all"} />;

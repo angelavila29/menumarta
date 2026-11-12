@@ -23,6 +23,12 @@ body {
   color: var(--color-ink);
 }
 
+/* Los hijos de un grid no pueden ensanchar la página: sin esto, un carrusel o un texto largo
+   dentro de una columna "auto" provoca scroll horizontal en móvil. */
+.grid > * {
+  min-width: 0;
+}
+
 /* Ocultar scrollbar en carruseles horizontales */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

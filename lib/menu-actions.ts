@@ -7,7 +7,7 @@ import { targetsFor, type Body } from "@/lib/goal";
 import { requireUser } from "@/lib/auth";
 import { assess, nutritionByRecipe, weekBalance } from "@/lib/menu-nutrition";
 import { getOrCreateActiveList } from "@/lib/lists";
-import { isSide, currentWeekStart, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
+import { isSide, currentWeekStart, todayIndex, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
 
 export async function generateWeekAction(weekStart: string, mode: "normal" | "despensa" = "normal") {
@@ -87,10 +87,18 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
       if (light.length >= 8) allowed = light;
     }
   }
-  // Los huecos "como fuera" se respetan; se cocina las veces que diga el perfil
+  // Los huecos "como fuera" se respetan; se cocina las veces que diga el perfil.
+  // En la semana en curso el menú empieza hoy: los días que ya han pasado se dejan como estén,
+  // para no planificar (ni comprar) comidas de días que ya no se pueden cocinar.
   const existing = await loadSlots(supabase, menu.id);
-  const blocked = new Set(existing.filter((s) => s.kind === "out").map((s) => `${s.day}-${s.meal}`));
-  const sessions = profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, 14 - blocked.size);
+  const out = new Set(existing.filter((s) => s.kind === "out").map((s) => `${s.day}-${s.meal}`));
+  const fromDay = weekStart === currentWeekStart() ? todayIndex() : 0;
+  const blocked = new Set(out);
+  for (let day = 0; day < fromDay; day++) for (const meal of ["comida", "cena"]) blocked.add(`${day}-${meal}`);
+  const activeAll = 14 - out.size;
+  const activeNow = 14 - blocked.size;
+  const perWeek = profile?.cook_sessions ?? defaultCookSessions(profile?.household_size ?? 2, activeAll);
+  const sessions = fromDay === 0 ? perWeek : Math.max(1, Math.min(activeNow, Math.round((perWeek * activeNow) / Math.max(1, activeAll))));
   const goals: string[] = profile?.goals ?? [];
   const opts = {
     sessions,
@@ -125,7 +133,7 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
     }
   }
   // Menú nuevo, guarniciones fuera: las elige cada uno
-  const slots = week.map((s) => ({ ...s, menu_id: menu.id, cooked: false, side_recipe_id: null }));
+  const slots = week.filter((s) => s.day >= fromDay).map((s) => ({ ...s, menu_id: menu.id, cooked: false, side_recipe_id: null }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
   if (error) throw new Error(error.message);
 }

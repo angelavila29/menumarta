@@ -8,7 +8,7 @@ import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { compareList } from "@/lib/compare";
 import { euro, formatWeekRange, superName } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
-import { currentWeekStart, DAYS, getOrCreateMenu, loadRecipes, loadSlots } from "@/lib/menu";
+import { currentWeekStart, DAYS, getOrCreateMenu, loadRecipes, loadSlots, todayIndex } from "@/lib/menu";
 import { recipeEmoji } from "@/lib/recipe-emoji";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 
@@ -32,7 +32,7 @@ export default async function HomePage() {
 
   const name = profile?.display_name?.trim() || capitalize(user.email?.split("@")[0] ?? "");
   const recipeById = new Map(recipes.map((r) => [r.id, r]));
-  const todayIdx = (new Date().getDay() + 6) % 7;
+  const todayIdx = todayIndex();
   const days = [0, 1, 2, 3, 4, 5, 6].map((d) => ({
     day: d,
     label: DAYS[d],
@@ -96,7 +96,7 @@ export default async function HomePage() {
       )}
 
       {/* Fila principal: lo que toca ahora + la compra */}
-      <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         {!hasMenu ? (
           <section className="relative overflow-hidden rounded-2xl border border-cream-dark bg-[#fbf3ea] p-6 md:p-8">
             <div className="relative z-10 flex gap-4 md:max-w-[60%]">
@@ -145,8 +145,9 @@ export default async function HomePage() {
               <TodayMeal label="Comida" recipe={today.comida} side={today.comidaSide} out={today.comidaOut} />
               <TodayMeal label="Cena" recipe={today.cena} side={today.cenaSide} out={today.cenaOut} />
             </div>
-            <ul className="no-scrollbar -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 md:mx-0 md:px-0">
-              {orderedDays.slice(1, 7).map((d) => (
+            {/* solo lo que queda de semana: los días pasados no son "lo siguiente" */}
+            <ul className="no-scrollbar -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 empty:hidden md:mx-0 md:px-0">
+              {orderedDays.slice(1, 7 - todayIdx).map((d) => (
                 <li key={d.day} className="w-36 shrink-0 rounded-xl bg-cream px-3 py-2 text-xs">
                   <p className="font-semibold">{d.label}</p>
                   <p className="truncate text-muted">{d.comida?.name ?? (d.comidaOut ? "Como fuera" : "—")}</p>
@@ -246,7 +247,7 @@ export default async function HomePage() {
         </Link>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <section className="rounded-2xl border border-cream-dark bg-white p-5">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-brand"><SearchIcon className="h-6 w-6" /></span>

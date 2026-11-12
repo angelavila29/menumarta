@@ -8,7 +8,7 @@ import { RecipeArt } from "@/components/recipe-art";
 import { requireUser, userSupermarketIds } from "@/lib/auth";
 import { euro } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
-import { cheapestProductFor, currentWeekStart, DAYS, toProductUnit, type Need } from "@/lib/menu";
+import { cheapestProductFor, currentWeekStart, DAYS, toProductUnit, type Need, todayIndex } from "@/lib/menu";
 import { nutritionPerServing, unitGramsOf } from "@/lib/nutrition";
 import { APPLIANCES, requiredAppliances } from "@/lib/appliances";
 import { formatUnits } from "@/lib/qty";
@@ -207,8 +207,8 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
               {needs.map((n) => (
                 <li key={`${n.ingredient}-${n.unit}`} className="flex items-center gap-3 py-2">
                   <span aria-hidden className="w-7 shrink-0 text-center text-xl">{ingredientEmoji(n.ingredient)}</span>
-                  <span className="min-w-0 flex-1 text-sm">{capitalize(n.ingredient)}</span>
-                  <span className="w-20 shrink-0 text-xs text-muted">{fmtQty(n.qty, n.unit)}</span>
+                  <span className="min-w-0 flex-1 break-words text-sm">{capitalize(n.ingredient)}</span>
+                  <span className="w-[4.5rem] shrink-0 text-right text-xs text-muted sm:w-20">{fmtQty(n.qty, n.unit)}</span>
                   {inList(n.ingredient) ? (
                     <span className="flex w-28 shrink-0 items-center justify-center gap-1 rounded-lg bg-olive-soft px-2 py-1 text-xs font-medium text-olive-dark">
                       <CheckIcon className="h-3.5 w-3.5" /> Ya en tu lista
@@ -316,7 +316,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
             </p>
           )}
           <AddAllButton recipeId={recipeId} needs={missingNeeds} />
-          <AddToMenuControl recipeId={recipeId} meal={recipe.meal as string} todayIndex={(new Date().getDay() + 6) % 7} />
+          <AddToMenuControl recipeId={recipeId} meal={recipe.meal as string} todayIndex={todayIndex()} />
           <FavoriteRecipeButton key={`b-${isFav}`} recipeId={recipeId} initial={isFav} variant="button" />
         </section>
 

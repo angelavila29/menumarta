@@ -187,3 +187,17 @@ mejor encaja.
 2. Punto 4: crear una cuenta gratuita en Resend o Brevo y ejecutar `scripts/setup_email.ts`;
    después añadir `NEXT_PUBLIC_LOGIN_CODE=1` en Vercel. Eso activa el acceso con código de 6
    dígitos, quita el límite de 2 correos por hora y permite el recordatorio del domingo.
+
+## N. Repaso general (12 nov)
+
+- [x] El menú nuevo se crea para las personas del perfil (antes, si entrabas por la portada, salía para 2).
+- [x] En la semana en curso el menú se genera de hoy en adelante; los días pasados no se tocan ni se compran.
+- [x] "Hoy" se calcula en horario español (`todayIndex` en `lib/menu.ts`), no en UTC.
+- [x] Sin scroll horizontal en móvil en la portada y en ¿Qué cocino hoy? (`.grid > * { min-width: 0 }`).
+- [x] Menú: cabecera ordenada en móvil, cambios instantáneos (cocinado, plato, guarnición) y las
+      guarniciones ya no salen como plato principal.
+- [x] Detalles: emojis de guarniciones, guarniciones al final del banco, filas de la compra y de
+      ingredientes más legibles, la portada solo enseña los días que quedan de semana.
+- [ ] Pendiente: "Añadir a mi lista" dos veces suma cantidades (duplica la compra del menú).
+- [ ] Pendiente: con objetivo corporal, las recetas se quedan cortas de calorías para hombres activos
+      (haría falta un tamaño de ración por persona).

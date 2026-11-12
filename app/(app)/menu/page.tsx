@@ -10,8 +10,7 @@ import {
   loadRecipes,
   loadSlots,
   weekOffsetFrom,
-  type Recipe,
-} from "@/lib/menu";
+  type Recipe, todayIndex } from "@/lib/menu";
 import { buildPlanRows, recommendedPlan, summarize } from "@/lib/plan";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { targetsFor, type Body } from "@/lib/goal";
@@ -131,7 +130,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
       slots={slots}
       offset={offset}
       weekRange={formatWeekRange(weekStart)}
-      todayIndex={offset === 0 ? (new Date().getDay() + 6) % 7 : null}
+      todayIndex={offset === 0 ? todayIndex() : null}
       listTotal={listTotal}
       weekCost={weekCost}
       weekCostWhere={weekCostWhere}

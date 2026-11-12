@@ -149,9 +149,8 @@ export function Review({ rows: initialRows, chains, recommended, mainChain, budg
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm">
-                          <b className="capitalize">{x.row.need.ingredient}</b> <span className="text-muted">· necesitas {fmtQty(x.row.need)}</span>
-                        </p>
+                        <p className="text-sm font-bold capitalize">{x.row.need.ingredient}</p>
+                        <p className="text-xs text-muted">Necesitas {fmtQty(x.row.need)}</p>
                         <p className="line-clamp-1 text-sm">{p.name}</p>
                         <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
                           <span className="inline-flex items-center gap-1"><ChainLogo id={p.supermarket_id} size={12} /> {superName(p.supermarket_id)}</span>

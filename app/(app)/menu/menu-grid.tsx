@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { DayBreakdown } from "@/components/day-breakdown";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
 import { euro } from "@/lib/format";
@@ -56,8 +56,14 @@ const UsersIcon = ({ className }: { className?: string }) => (
 const hrefFor = (o: number) => (o === 0 ? "/menu" : `/menu?semana=${o}`);
 
 export function MenuGrid(p: Props) {
-  const { menu, recipes, slots, offset } = p;
+  const { menu, recipes, offset } = p;
   const [pending, start] = useTransition();
+  // Los toques (cocinado, cambiar plato, guarnición) se ven al instante; el servidor confirma después
+  const [slots, patchSlot] = useOptimistic(p.slots, (state: Slot[], patch: Pick<Slot, "day" | "meal"> & Partial<Slot>) => {
+    const i = state.findIndex((s) => s.day === patch.day && s.meal === patch.meal);
+    if (i === -1) return [...state, { recipe_id: null, kind: "meal", cooked: false, side_recipe_id: null, ...patch } as Slot];
+    return state.map((s, k) => (k === i ? { ...s, ...patch } : s));
+  });
   const [notice, setNotice] = useState("");
   const recipeById = new Map(recipes.map((r) => [r.id, r]));
   const sideRecipes = recipes.filter((r) => r.tags.includes("guarnicion"));
@@ -86,9 +92,15 @@ export function MenuGrid(p: Props) {
   function adjustToGoal() {
     start(() => generateWeekAction(menu.week_start));
   }
+  // En la semana en curso solo se planifica de hoy en adelante
+  const fromToday = p.todayIndex !== null && p.todayIndex > 0;
+  const startsToday = () => setNotice(fromToday ? `El menú empieza hoy, ${DAYS[p.todayIndex!].toLowerCase()}: los días que ya han pasado no se tocan.` : "");
   function createMenu() {
-    if (filled > 0 && !confirm("¿Sustituir el menú de esta semana por uno nuevo?")) return;
-    start(() => generateWeekAction(menu.week_start));
+    if (filled > 0 && !confirm(fromToday ? "¿Sustituir el menú de hoy en adelante por uno nuevo?" : "¿Sustituir el menú de esta semana por uno nuevo?")) return;
+    start(async () => {
+      await generateWeekAction(menu.week_start);
+      startsToday();
+    });
   }
 
   return (
@@ -100,8 +112,8 @@ export function MenuGrid(p: Props) {
           <p className="mt-1 text-lg md:text-2xl">Semana {p.weekRange}</p>
           <p className="text-muted">Comidas equilibradas, sencillas y a buen precio.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <nav className="flex items-center rounded-xl border border-cream-dark bg-white shadow-sm" aria-label="Cambiar de semana">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-3">
+          <nav className="col-span-2 flex items-center justify-between rounded-xl border border-cream-dark bg-white shadow-sm" aria-label="Cambiar de semana">
             <Link href={hrefFor(offset - 1)} aria-label="Semana anterior" className="flex h-11 w-10 items-center justify-center text-muted hover:text-brand">
               <ChevronLeft className="h-5 w-5" />
             </Link>
@@ -119,7 +131,7 @@ export function MenuGrid(p: Props) {
               if (filled > 0 && !confirm("¿Sustituir el menú de esta semana por el de la semana anterior?")) return;
               start(async () => setNotice((await repeatPreviousWeekAction(menu.week_start)) ? "" : "La semana anterior no tiene menú que copiar."));
             }}
-            className="rounded-xl border border-cream-dark bg-white px-4 py-3 text-sm font-medium shadow-sm hover:bg-cream disabled:opacity-60"
+            className={`order-3 rounded-xl border border-cream-dark bg-white px-2 py-3 text-[13px] font-medium shadow-sm hover:bg-cream disabled:opacity-60 sm:order-none sm:px-4 sm:text-sm ${p.pantryCount > 0 ? "" : "col-span-2"}`}
           >
             ↻ Repetir semana anterior
           </button>
@@ -129,10 +141,13 @@ export function MenuGrid(p: Props) {
               disabled={pending}
               onClick={() => {
                 if (filled > 0 && !confirm("¿Sustituir el menú de esta semana por uno hecho con lo que tienes en casa?")) return;
-                start(() => generateWeekAction(menu.week_start, "despensa"));
+                start(async () => {
+                  await generateWeekAction(menu.week_start, "despensa");
+                  startsToday();
+                });
               }}
               title={`Prioriza las ${p.pantryCount} cosas que tienes en la despensa`}
-              className="rounded-xl border border-cream-dark bg-white px-4 py-3 text-sm font-medium shadow-sm hover:bg-cream disabled:opacity-60"
+              className="order-3 rounded-xl border border-cream-dark bg-white px-2 py-3 text-[13px] font-medium shadow-sm hover:bg-cream disabled:opacity-60 sm:order-none sm:px-4 sm:text-sm"
             >
               🥫 Con lo que tengo
             </button>
@@ -141,7 +156,7 @@ export function MenuGrid(p: Props) {
             type="button"
             onClick={createMenu}
             disabled={pending}
-            className="flex items-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-sm hover:bg-brand-dark disabled:opacity-60"
+            className="order-2 col-span-2 flex items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-sm hover:bg-brand-dark disabled:opacity-60 sm:order-none"
           >
             <PlusIcon className="h-5 w-5" />
             {pending ? "Preparando…" : filled > 0 ? "Crear nuevo menú" : "Generar menú"}
@@ -211,14 +226,29 @@ export function MenuGrid(p: Props) {
                     isOut={slotAt(day, meal)?.kind === "out"}
                     isLeftover={leftovers.has(`${day}-${meal}`)}
                     cooked={slotAt(day, meal)?.cooked === true}
-                    onCooked={(v) => start(() => setCookedAction(menu.id, day, meal, v))}
+                    onCooked={(v) =>
+                      start(async () => {
+                        patchSlot({ day, meal, cooked: v });
+                        await setCookedAction(menu.id, day, meal, v);
+                      })
+                    }
                     recipes={recipes}
                     disabled={pending}
                     ariaLabel={`Cambiar ${meal} del ${name.toLowerCase()}`}
-                    onChange={(id) => start(() => setSlotAction(menu.id, day, meal, id))}
+                    onChange={(id) =>
+                      start(async () => {
+                        patchSlot({ day, meal, recipe_id: typeof id === "number" ? id : null, kind: id === "out" ? "out" : "meal", cooked: false, side_recipe_id: null });
+                        await setSlotAction(menu.id, day, meal, id);
+                      })
+                    }
                     side={recipeById.get(slotAt(day, meal)?.side_recipe_id ?? -1) ?? null}
                     sides={sideRecipes}
-                    onSide={(id) => start(() => setSideAction(menu.id, day, meal, id))}
+                    onSide={(id) =>
+                      start(async () => {
+                        patchSlot({ day, meal, side_recipe_id: id });
+                        await setSideAction(menu.id, day, meal, id);
+                      })
+                    }
                   />
                 ))}
               </div>
@@ -240,12 +270,12 @@ export function MenuGrid(p: Props) {
             </div>
             <span className="shrink-0 rounded-lg bg-cream px-2.5 py-1 text-sm">{filled} comidas</span>
           </div>
-          <ul className="mt-4 grid grid-cols-4 gap-2 text-center">
+          <ul className="mt-4 grid grid-cols-4 gap-1 text-center sm:gap-2">
             {p.balance.map((b) => (
-              <li key={b.label}>
+              <li key={b.label} className="min-w-0">
                 <span className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full text-2xl ${b.bg}`}>{b.emoji}</span>
-                <p className="mt-2 text-sm font-semibold">{b.label}</p>
-                <p className="text-sm text-muted">{b.n} {b.n === 1 ? "plato" : "platos"}</p>
+                <p className="mt-2 text-[13px] font-semibold sm:text-sm">{b.label}</p>
+                <p className="text-xs text-muted sm:text-sm">{b.n} {b.n === 1 ? "plato" : "platos"}</p>
               </li>
             ))}
           </ul>
@@ -417,7 +447,7 @@ function MealSlot({ label, meal, day, recipe, isOut, isLeftover, cooked, onCooke
           <option value="">— vacío —</option>
           <option value="out">🍴 Como fuera / no cocino</option>
           {recipes
-            .filter((r) => r.meal === meal || r.meal === "ambas")
+            .filter((r) => (r.meal === meal || r.meal === "ambas") && (!r.tags.includes("guarnicion") || r.id === recipe?.id))
             .map((r) => (
               <option key={r.id} value={r.id}>{r.name}{r.owner_id ? ` · de ${r.author_name ?? "un amigo"}` : ""}</option>
             ))}

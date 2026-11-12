@@ -65,7 +65,7 @@ export function Cook({
       <h1 className="text-3xl font-bold md:text-5xl">¿Qué cocino hoy?</h1>
       <p className="mt-1 text-muted md:text-lg">Marca lo que tienes en la nevera y cuánto quieres gastar. Te decimos qué receta encaja mejor.</p>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
+      <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
         <div className="flex flex-col gap-5 lg:sticky lg:top-5">
           <section className="rounded-2xl bg-white p-5 shadow-sm">
             <h2 className="text-lg font-bold">Lo que tengo en casa ({have.size})</h2>
