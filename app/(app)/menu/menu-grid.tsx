@@ -1,7 +1,7 @@
 "use client";
 import { useConfirm } from "@/components/confirm-dialog";
 import Link from "next/link";
-import { useOptimistic, useState, useTransition } from "react";
+import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
 import { DayBreakdown } from "@/components/day-breakdown";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
 import { euro } from "@/lib/format";
@@ -86,6 +86,31 @@ export function MenuGrid(p: Props) {
   const [ask, confirmDialog] = useConfirm();
   const [picking, setPicking] = useState<{ day: number; meal: "comida" | "cena"; kind: "main" | "side" } | null>(null);
   const favorites = new Set(p.favoriteIds);
+  // Carrusel de días: empieza en hoy y la tira de arriba salta al día que toques
+  const scroller = useRef<HTMLDivElement>(null);
+  const [activeDay, setActiveDay] = useState(p.todayIndex ?? 0);
+  const goToDay = (day: number, smooth = true) => {
+    const box = scroller.current;
+    const col = box?.children[day] as HTMLElement | undefined;
+    if (!box || !col) return;
+    box.scrollTo({ left: col.offsetLeft - box.offsetLeft, behavior: smooth ? "smooth" : "auto" });
+  };
+  useEffect(() => {
+    if (p.todayIndex) goToDay(p.todayIndex, false);
+  }, [p.todayIndex]);
+  const onDaysScroll = () => {
+    const box = scroller.current;
+    if (!box) return;
+    const cols = Array.from(box.children) as HTMLElement[];
+    const x = box.scrollLeft + box.offsetLeft;
+    let best = 0;
+    cols.forEach((c, i) => {
+      if (Math.abs(c.offsetLeft - x) < Math.abs(cols[best].offsetLeft - x)) best = i;
+    });
+    // al final del carrusel no se puede llegar al último día por posición: se marca al tocar fondo
+    if (box.scrollLeft + box.clientWidth >= box.scrollWidth - 4 && best < cols.length - 1 && activeDay > best) return;
+    setActiveDay(best);
+  };
   const recipeById = new Map(recipes.map((r) => [r.id, r]));
   const sideRecipes = recipes.filter((r) => r.tags.includes("guarnicion"));
   const slotAt = (day: number, meal: string) => slots.find((s) => s.day === day && s.meal === meal);
@@ -115,13 +140,12 @@ export function MenuGrid(p: Props) {
   }
   // En la semana en curso solo se planifica de hoy en adelante
   const fromToday = p.todayIndex !== null && p.todayIndex > 0;
-  const startsToday = () => setNotice(fromToday ? `El menú empieza hoy, ${DAYS[p.todayIndex!].toLowerCase()}: los días que ya han pasado no se tocan.` : "");
   const replaceBody = fromToday ? "Se cambian los platos de hoy en adelante. Los días que ya han pasado no se tocan." : "Se cambian todos los platos de esta semana.";
   async function createMenu() {
     if (filled > 0 && !(await ask({ title: "¿Regenerar el menú?", body: replaceBody, confirmLabel: "Regenerar" }))) return;
     start(async () => {
       await generateWeekAction(menu.week_start);
-      startsToday();
+      setNotice("");
     });
   }
 
@@ -223,7 +247,7 @@ export function MenuGrid(p: Props) {
                 if (filled > 0 && !(await ask({ title: "¿Hacer el menú con lo que tienes?", body: `${replaceBody} Se priorizan las recetas que gastan tu despensa.`, confirmLabel: "Hacer menú" }))) return;
                 start(async () => {
                   await generateWeekAction(menu.week_start, "despensa");
-                  startsToday();
+                  setNotice("");
                 });
               }}
               title={`Prioriza las ${p.pantryCount} cosas que tienes en la despensa`}
@@ -246,8 +270,8 @@ export function MenuGrid(p: Props) {
 
       {notice && <p role="status" className="rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900">{notice}</p>}
 
-      {/* Resumen */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Resumen (en móvil va debajo de los días, que es a lo que se viene) */}
+      <div className="grid gap-4 max-sm:order-2 sm:grid-cols-3">
         <Stat
           icon={<ForkIcon className="h-7 w-7" />}
           iconBg="bg-olive-soft text-olive-dark"
@@ -280,57 +304,101 @@ export function MenuGrid(p: Props) {
       </div>
 
       {/* Semana */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-        {DAYS.map((name, day) => {
-          const today = p.todayIndex === day;
-          return (
-            <section
-              key={day}
-              className={`rounded-2xl p-4 shadow-sm ${today ? "border-2 border-brand bg-brand-soft/50" : "border border-transparent bg-white"}`}
-            >
-              <div className="mb-3 flex items-baseline justify-between gap-2">
-                <h2 className={`text-lg font-bold ${today ? "text-brand" : ""}`}>
-                  {name} <span className="text-xs font-normal text-muted">{dayDate(menu.week_start, day)}</span>
-                </h2>
-                {today && <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-semibold text-white">Hoy</span>}
-              </div>
-              <div className="flex flex-col gap-3">
-                {MEALS.map((meal) => (
-                  <MealSlot
-                    key={meal}
-                    day={day}
-                    label={meal === "comida" ? "Comida" : "Cena"}
-                    recipe={recipeAt(day, meal)}
-                    isOut={slotAt(day, meal)?.kind === "out"}
-                    isLeftover={leftovers.has(`${day}-${meal}`)}
-                    cooked={slotAt(day, meal)?.cooked === true}
-                    onCooked={(v) =>
-                      start(async () => {
-                        patchSlot({ day, meal, cooked: v });
-                        await setCookedAction(menu.id, day, meal, v);
-                      })
-                    }
-                    disabled={pending}
-                    ariaLabel={`Cambiar ${meal} del ${name.toLowerCase()}`}
-                    side={recipeById.get(slotAt(day, meal)?.side_recipe_id ?? -1) ?? null}
-                    onOpen={() => setPicking({ day, meal, kind: "main" })}
-                    onOpenSide={() => setPicking({ day, meal, kind: "side" })}
-                    onRemoveSide={() =>
-                      start(async () => {
-                        patchSlot({ day, meal, side_recipe_id: null });
-                        await setSideAction(menu.id, day, meal, null);
-                      })
-                    }
-                  />
-                ))}
-              </div>
-            </section>
-          );
-        })}
+      {/* Tira de días: de un vistazo qué hay planificado, y salta al día que toques */}
+      <div className="max-sm:order-1">
+        <ul className="grid grid-cols-7 gap-1 rounded-2xl bg-white p-1.5 shadow-sm sm:gap-2 sm:p-2">
+          {DAYS.map((name, day) => {
+            const today = p.todayIndex === day;
+            const planned = MEALS.filter((meal) => slotAt(day, meal)?.recipe_id != null || slotAt(day, meal)?.kind === "out").length;
+            const on = activeDay === day;
+            return (
+              <li key={day}>
+                <button
+                  type="button"
+                  aria-label={`Ir al ${name.toLowerCase()}`}
+                  aria-current={on ? "true" : undefined}
+                  onClick={() => {
+                    setActiveDay(day);
+                    goToDay(day);
+                  }}
+                  className={`flex w-full flex-col items-center rounded-xl px-1 py-2 transition ${on ? "bg-brand text-white" : today ? "bg-brand-soft text-brand-dark" : "hover:bg-cream"}`}
+                >
+                  <span className="text-[11px] font-medium uppercase sm:text-xs">
+                    <span className="sm:hidden">{name.slice(0, 1)}</span>
+                    <span className="hidden sm:inline">{name.slice(0, 3)}</span>
+                  </span>
+                  <span className="text-base font-bold leading-tight sm:text-lg">{dayNumber(menu.week_start, day)}</span>
+                  <span className="mt-1 flex gap-0.5" aria-hidden>
+                    {[0, 1].map((i) => (
+                      <span key={i} className={`h-1.5 w-1.5 rounded-full ${i < planned ? (on ? "bg-white" : "bg-olive") : on ? "bg-white/40" : "bg-cream-dark"}`} />
+                    ))}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div
+          ref={scroller}
+          onScroll={onDaysScroll}
+          className="no-scrollbar -mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-4 pb-2 md:mx-0 md:px-0"
+        >
+          {DAYS.map((name, day) => {
+            const today = p.todayIndex === day;
+            const past = p.todayIndex !== null && day < p.todayIndex;
+            return (
+              <section
+                key={day}
+                aria-label={name}
+                className={`w-[84%] max-w-[340px] shrink-0 snap-start scroll-ml-4 rounded-2xl p-3 shadow-sm sm:w-[260px] md:scroll-ml-0 ${today ? "border-2 border-brand bg-brand-soft/60" : "border-2 border-transparent bg-white"} ${past ? "opacity-70" : ""}`}
+              >
+                <div className="mb-3 flex items-center justify-between gap-2 px-1">
+                  <h2 className={`text-lg font-bold leading-tight ${today ? "text-brand-dark" : ""}`}>
+                    {name}
+                    <span className="block text-xs font-normal text-muted">{dayDate(menu.week_start, day)}</span>
+                  </h2>
+                  {today && <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-white">Hoy</span>}
+                </div>
+                <div className="flex flex-col gap-3">
+                  {MEALS.map((meal) => (
+                    <MealSlot
+                      key={meal}
+                      day={day}
+                      label={meal === "comida" ? "Comida" : "Cena"}
+                      recipe={recipeAt(day, meal)}
+                      minutes={p.minutes[slotAt(day, meal)?.recipe_id ?? -1] ?? null}
+                      isOut={slotAt(day, meal)?.kind === "out"}
+                      isLeftover={leftovers.has(`${day}-${meal}`)}
+                      cooked={slotAt(day, meal)?.cooked === true}
+                      onCooked={(v) =>
+                        start(async () => {
+                          patchSlot({ day, meal, cooked: v });
+                          await setCookedAction(menu.id, day, meal, v);
+                        })
+                      }
+                      disabled={pending}
+                      ariaLabel={`Cambiar ${meal} del ${name.toLowerCase()}`}
+                      side={recipeById.get(slotAt(day, meal)?.side_recipe_id ?? -1) ?? null}
+                      onOpen={() => setPicking({ day, meal, kind: "main" })}
+                      onOpenSide={() => setPicking({ day, meal, kind: "side" })}
+                      onRemoveSide={() =>
+                        start(async () => {
+                          patchSlot({ day, meal, side_recipe_id: null });
+                          await setSideAction(menu.id, day, meal, null);
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
 
       {/* Pie: equilibrio, lista y ajustes */}
-      <div className="grid gap-4 lg:grid-cols-[1.3fr_1.2fr_1fr]">
+      <div className="grid gap-4 max-sm:order-3 lg:grid-cols-[1.3fr_1.2fr_1fr]">
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <div className="flex items-start gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-olive text-white"><LeafIcon className="h-5 w-5" /></span>
@@ -491,10 +559,11 @@ function Stat({ icon, iconBg, big, small, label, bigClass = "text-3xl" }: { icon
   );
 }
 
-function MealSlot({ label, day, recipe, isOut, isLeftover, cooked, onCooked, disabled, ariaLabel, onOpen, side, onOpenSide, onRemoveSide }: {
+function MealSlot({ label, day, recipe, minutes, isOut, isLeftover, cooked, onCooked, disabled, ariaLabel, onOpen, side, onOpenSide, onRemoveSide }: {
   label: string;
   day: number;
   recipe: Recipe | null;
+  minutes: number | null;
   isOut: boolean;
   isLeftover: boolean;
   cooked: boolean;
@@ -506,66 +575,85 @@ function MealSlot({ label, day, recipe, isOut, isLeftover, cooked, onCooked, dis
   onOpenSide: () => void;
   onRemoveSide: () => void;
 }) {
-  // Fila: la imagen (o el hueco) abre el selector de platos; el nombre abre la receta
-  return (
-    <div className="flex gap-3">
-      <button type="button" disabled={disabled} onClick={onOpen} aria-label={ariaLabel} title="Cambiar plato" className="group relative h-20 w-20 shrink-0 disabled:opacity-70">
-        {recipe ? (
-          <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className={`h-full w-full rounded-xl text-4xl transition group-hover:brightness-95 ${isLeftover ? "opacity-60" : ""}`} />
-        ) : isOut ? (
-          <span className="flex h-full w-full items-center justify-center rounded-xl bg-cream text-3xl" aria-hidden>🍴</span>
-        ) : (
-          <span className="flex h-full w-full items-center justify-center rounded-xl border-2 border-dashed border-cream-dark text-muted group-hover:border-brand group-hover:text-brand">
-            <PlusIcon className="h-6 w-6" />
-          </span>
-        )}
-        {(recipe || isOut) && (
-          <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-cream-dark bg-white text-muted shadow-sm group-hover:text-brand" aria-hidden>
-            <RefreshIcon className="h-3.5 w-3.5" />
-          </span>
-        )}
-      </button>
-      <div className="min-w-0 flex-1">
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
-          {label}
-          {recipe && (
-            <span className={`rounded-md px-1.5 py-0.5 text-[10px] normal-case tracking-normal ${isLeftover ? "bg-cream text-muted" : "bg-brand-soft text-brand-dark"}`}>
-              {isLeftover ? "Sobras · táper" : "Cocinas"}
-            </span>
-          )}
-        </p>
-        {recipe ? (
+  // Hueco sin plato: una sola zona grande para elegir
+  if (!recipe) {
+    return (
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onOpen}
+        aria-label={ariaLabel}
+        className={`group flex aspect-[16/9] w-full flex-col items-center justify-center gap-1 rounded-xl text-sm disabled:opacity-70 ${
+          isOut ? "bg-cream text-muted" : "border-2 border-dashed border-cream-dark text-muted hover:border-brand hover:text-brand"
+        }`}
+      >
+        <span className="text-[11px] font-semibold uppercase tracking-wide">{label}</span>
+        {isOut ? (
           <>
-            <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`mt-0.5 line-clamp-2 block text-[15px] font-medium leading-snug hover:text-brand hover:underline ${isLeftover ? "text-muted" : ""}`}>
-              {recipe.name}
-            </Link>
-            {/* Guarnición: "con puré", "con arroz"… elegida a mano */}
-            {side && (
-              <p className="flex items-center gap-1 text-xs text-olive-dark">
-                <Link href={`/recetas/${side.id}`} className="line-clamp-1 hover:underline">con {side.name.toLowerCase()}</Link>
-                <button type="button" disabled={disabled} onClick={onRemoveSide} aria-label={`Quitar ${side.name}`} className="shrink-0 rounded px-1 text-muted hover:text-red-700">×</button>
-              </p>
-            )}
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-              <label className={`flex items-center gap-1.5 ${cooked ? "font-medium text-olive-dark" : ""}`}>
-                <input type="checkbox" checked={cooked} disabled={disabled} onChange={(e) => onCooked(e.target.checked)} className="h-4 w-4 accent-olive" />
-                {cooked ? "Hecho" : isLeftover ? "Comido" : "Cocinado"}
-              </label>
-              {!side && (
-                <button type="button" disabled={disabled} onClick={onOpenSide} aria-label={`Añadir guarnición a ${recipe.name}`} className="font-medium hover:text-brand">
-                  ＋ guarnición
-                </button>
-              )}
-            </div>
+            <span aria-hidden className="text-3xl">🍴</span>
+            Como fuera
           </>
         ) : (
-          <button type="button" disabled={disabled} onClick={onOpen} className="mt-0.5 block text-left text-[15px] leading-snug text-muted hover:text-brand">
-            {isOut ? "Como fuera · no hace falta cocinar" : "Sin plato · toca para elegir"}
-          </button>
+          <>
+            <PlusIcon className="h-6 w-6" />
+            Elegir plato
+          </>
         )}
+      </button>
+    );
+  }
+  // Tarjeta: la imagen arriba (con "Cambiar"), el nombre abre la receta, y abajo las dos acciones
+  return (
+    <article className={`overflow-hidden rounded-xl border bg-white ${cooked ? "border-olive" : "border-cream-dark"}`}>
+      <div className="relative">
+        <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className={`aspect-[16/9] w-full text-6xl ${isLeftover ? "opacity-60" : ""}`} />
+        <span className="absolute left-2 top-2 flex items-center gap-1">
+          <span className="rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide">{label}</span>
+          <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${isLeftover ? "bg-white/95 text-muted" : "bg-brand text-white"}`}>{isLeftover ? "Sobras" : "Cocinas"}</span>
+        </span>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={onOpen}
+          aria-label={ariaLabel}
+          className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold shadow-sm hover:bg-white hover:text-brand disabled:opacity-70"
+        >
+          <RefreshIcon className="h-3.5 w-3.5" /> Cambiar
+        </button>
       </div>
-    </div>
+      <div className="p-3">
+        <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`line-clamp-2 block min-h-[2.6em] font-semibold leading-snug hover:text-brand hover:underline ${isLeftover ? "text-muted" : ""}`}>
+          {recipe.name}
+        </Link>
+        <p className="mt-0.5 flex min-h-[1.25rem] items-center gap-1 text-xs text-muted">
+          {minutes && !isLeftover ? <span>⏱ {minutes} min</span> : isLeftover ? <span>Ya cocinado: solo calentar</span> : null}
+          {side && (
+            <>
+              <span aria-hidden>·</span>
+              <Link href={`/recetas/${side.id}`} className="line-clamp-1 text-olive-dark hover:underline">con {side.name.toLowerCase()}</Link>
+              <button type="button" disabled={disabled} onClick={onRemoveSide} aria-label={`Quitar ${side.name}`} className="shrink-0 rounded px-1 hover:text-red-700">×</button>
+            </>
+          )}
+        </p>
+        <div className="mt-2 flex items-center justify-between gap-2 border-t border-cream-dark pt-2 text-xs">
+          <label className={`flex cursor-pointer items-center gap-1.5 ${cooked ? "font-semibold text-olive-dark" : "text-muted"}`}>
+            <input type="checkbox" checked={cooked} disabled={disabled} onChange={(e) => onCooked(e.target.checked)} className="h-4 w-4 accent-olive" />
+            {cooked ? "Hecho" : isLeftover ? "Comido" : "Cocinado"}
+          </label>
+          {!side && (
+            <button type="button" disabled={disabled} onClick={onOpenSide} aria-label={`Añadir guarnición a ${recipe.name}`} className="font-medium text-muted hover:text-brand">
+              ＋ Guarnición
+            </button>
+          )}
+        </div>
+      </div>
+    </article>
   );
+}
+
+function dayNumber(weekStart: string, d: number) {
+  const [y, m, dd] = weekStart.split("-").map(Number);
+  return new Date(y, m - 1, dd + d).getDate();
 }
 
 function dayDate(weekStart: string, d: number) {

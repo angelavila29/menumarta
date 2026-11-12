@@ -221,4 +221,6 @@ mejor encaja.
 - [x] Solo dan sobras los platos con etiqueta "táper" (`keepsWell`): un sándwich o unas tostas no se repiten.
 - [x] Cambiar plato con un modal visual (`components/recipe-picker.tsx`): recomendadas, buscador,
       filtros e imágenes. También para la guarnición. Fuera los desplegables.
-- [x] Días del menú en filas (imagen + texto), 3-4 por fila en escritorio en vez de 7 columnas.
+- [x] Días del menú como carrusel horizontal que empieza en hoy, con tira de días arriba para
+      saltar y tarjetas grandes (imagen, nombre, tiempo, cocinado, guarnición). En móvil, los días
+      van antes que el resumen.
