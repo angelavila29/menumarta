@@ -95,6 +95,9 @@ export async function loadSlots(supabase: Supa, menuId: string): Promise<Slot[]>
   return (data ?? []) as Slot[];
 }
 
+/** Platos que se guardan bien y pueden dar sobras o táper (guisos, legumbres, arroces…). */
+export const keepsWell = (r: { tags: string[] }) => r.tags.includes("táper");
+
 export const MAX_PORTIONS = 3; // una receta cocinada da como mucho 3 comidas (por conservación)
 
 /**
@@ -204,20 +207,25 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
   const dishes = new Set<string>(); // palabras de los platos elegidos: "pisto", "puré", "ensalada"…
   const cookedAt = new Map<number, { day: number; count: number; meal: Recipe["meal"] }>();
   const isFree = (day: number, meal: string) => day <= 6 && !blocked.has(keyOf(day, meal)) && !assigned.has(keyOf(day, meal));
+  const keeps = new Set(recipes.filter(keepsWell).map((r) => r.id));
   let done = 0;
 
   for (const slot of active) {
     const from = leftoverOf.get(keyOf(slot.day, slot.meal));
     if (from !== undefined) {
       const id = assigned.get(from);
-      if (id !== undefined) {
+      // solo se repite lo que aguanta: un sándwich o unas tostas no dan sobras, se cocina otra cosa
+      if (id === undefined) continue; // su plato no llegó a cocinarse: lo rellena el paso final
+      if (keeps.has(id)) {
         assigned.set(keyOf(slot.day, slot.meal), id);
         cookedAt.get(id)!.count++;
+        continue;
       }
-      continue;
-    }
-    if (done >= sessions) continue; // cocinando muy pocas veces no hay reparto que valga: lo rellena el paso final
-    const candidates = shuffled.filter((r) => !used.has(r.id) && (r.meal === slot.meal || r.meal === "ambas"));
+    } else if (done >= sessions) continue; // cocinando muy pocas veces no hay reparto que valga: lo rellena el paso final
+    const fits = shuffled.filter((r) => !used.has(r.id) && (r.meal === slot.meal || r.meal === "ambas"));
+    // si de este plato van a salir sobras, tiene que ser de los que se guardan bien
+    const keepers = donorUses.has(keyOf(slot.day, slot.meal)) ? fits.filter((r) => keeps.has(r.id)) : [];
+    const candidates = keepers.length > 0 ? keepers : fits;
     const varied = candidates.filter((r) => (tagCount.get(r.tags[0] ?? "") ?? 0) < 2);
     // Entre unas pocas al azar (para que cada semana sea distinta) gana la que mejor encaja
     // Con despensa, se miran más candidatas para que de verdad salga lo que aprovecha lo que hay
@@ -255,7 +263,7 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
   for (const slot of active) {
     if (assigned.has(keyOf(slot.day, slot.meal))) continue;
     const donor = [...cookedAt.entries()].find(
-      ([, c]) => c.count < MAX_PORTIONS && slot.day > c.day && slot.day - c.day <= 3 && (c.meal === slot.meal || c.meal === "ambas")
+      ([id, c]) => keeps.has(id) && c.count < MAX_PORTIONS && slot.day > c.day && slot.day - c.day <= 3 && (c.meal === slot.meal || c.meal === "ambas")
     );
     if (donor) {
       assigned.set(keyOf(slot.day, slot.meal), donor[0]);

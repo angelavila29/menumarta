@@ -100,7 +100,7 @@ test("evitar 'tomate natural' quita las recetas con tomate fresco pero no las de
 });
 
 test("variedad: no repite el ingrediente principal toda la semana", () => {
-  const mk = (id: number, name: string): Recipe => ({ id, name, meal: "ambas", servings: 4, tags: ["guiso"], owner_id: null, author_name: null });
+  const mk = (id: number, name: string): Recipe => ({ id, name, meal: "ambas", servings: 4, tags: ["guiso", "táper"], owner_id: null, author_name: null });
   const recipes = [mk(1, "Patatas a lo pobre"), mk(2, "Puré de patata"), mk(3, "Tortilla de patatas"), mk(4, "Pollo al curry"), mk(5, "Lentejas"), mk(6, "Merluza")];
   const ingredients = new Map<number, string[]>([
     [1, ["patata", "pimiento verde", "huevo"]], [2, ["patata", "leche"]], [3, ["patata", "huevo"]],
@@ -117,7 +117,7 @@ test("variedad: no repite el ingrediente principal toda la semana", () => {
 });
 
 test("variedad: no pone dos versiones del mismo plato la misma semana", () => {
-  const mk = (id: number, name: string): Recipe => ({ id, name, meal: "ambas", servings: 4, tags: ["verdura"], owner_id: null, author_name: null });
+  const mk = (id: number, name: string): Recipe => ({ id, name, meal: "ambas", servings: 4, tags: ["verdura", "táper"], owner_id: null, author_name: null });
   const recipes = [mk(1, "Pisto con arroz"), mk(2, "Pisto con huevo"), mk(3, "Lentejas"), mk(4, "Merluza"), mk(5, "Pollo al curry")];
   const ingredients = new Map<number, string[]>([[1, ["calabacín", "arroz"]], [2, ["calabacín", "huevo"]], [3, ["lentejas"]], [4, ["merluza"]], [5, ["pechuga de pollo"]]]);
   let both = 0;
@@ -136,7 +136,7 @@ test("tamaño de ración: cuadra calorías en saltos de cuarto, entre 0,75 y 2",
 });
 
 test("sobras repartidas: cocinando 10 veces no se repite plato en días seguidos ni dos sobras el mismo día", () => {
-  const recipes: Recipe[] = Array.from({ length: 40 }, (_, i) => ({ id: i + 1, name: `Plato ${i + 1}`, meal: "ambas", servings: 2, tags: [`t${i % 9}`], owner_id: null, author_name: null }));
+  const recipes: Recipe[] = Array.from({ length: 40 }, (_, i) => ({ id: i + 1, name: `Plato ${i + 1}`, meal: "ambas", servings: 2, tags: [`t${i % 9}`, "táper"], owner_id: null, author_name: null }));
   for (let k = 0; k < 20; k++) {
     const week = generateWeek(recipes, { sessions: 10 });
     const at = (d: number, m: string) => week.find((s) => s.day === d && s.meal === m)?.recipe_id ?? null;
@@ -153,5 +153,18 @@ test("sobras repartidas: cocinando 10 veces no se repite plato en días seguidos
       }
       assert.ok(leftovers <= 1, "dos sobras el mismo día");
     }
+  }
+});
+
+test("solo dan sobras los platos que se guardan bien: un sándwich nunca se repite", () => {
+  const mk = (id: number, tags: string[]): Recipe => ({ id, name: `Plato ${id}`, meal: "ambas", servings: 2, tags, owner_id: null, author_name: null });
+  // 20 que no aguantan (sándwich, tostas…) y 20 de táper
+  const recipes = [...Array.from({ length: 20 }, (_, i) => mk(i + 1, [`r${i % 7}`])), ...Array.from({ length: 20 }, (_, i) => mk(i + 21, [`g${i % 7}`, "táper"]))];
+  for (let k = 0; k < 20; k++) {
+    const week = generateWeek(recipes, { sessions: 10 });
+    const times = new Map<number, number>();
+    for (const s of week) if (s.recipe_id !== null) times.set(s.recipe_id, (times.get(s.recipe_id) ?? 0) + 1);
+    for (const [id, n] of times) if (id <= 20) assert.equal(n, 1, "un plato que no se guarda bien no puede repetirse");
+    assert.ok(week.every((s) => s.recipe_id !== null));
   }
 });

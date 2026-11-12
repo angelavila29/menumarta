@@ -218,3 +218,7 @@ mejor encaja.
       y por defecto se cocinan 10 de 14 comidas en casas de una o dos personas.
 - [x] Sin `confirm()` del navegador: modal propio (`components/confirm-dialog.tsx`, `useConfirm`).
       Con menú ya hecho el botón es "Regenerar menú".
+- [x] Solo dan sobras los platos con etiqueta "táper" (`keepsWell`): un sándwich o unas tostas no se repiten.
+- [x] Cambiar plato con un modal visual (`components/recipe-picker.tsx`): recomendadas, buscador,
+      filtros e imágenes. También para la guarnición. Fuera los desplegables.
+- [x] Días del menú en filas (imagen + texto), 3-4 por fila en escritorio en vez de 7 columnas.

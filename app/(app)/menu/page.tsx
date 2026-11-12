@@ -139,10 +139,19 @@ export default async function MenuPage(props: PageProps<"/menu">) {
     prefs: restrictions.length > 0 ? capitalize(restrictions.slice(0, 3).join(", ")) : "Sin preferencias especiales",
   };
 
+  const [{ data: favRows }, { data: timeRows }] = await Promise.all([
+    supabase.from("favorite_recipes").select("recipe_id").eq("user_id", user.id),
+    supabase.from("recipes").select("id,time_minutes"),
+  ]);
+  const favoriteIds = (favRows ?? []).map((f) => f.recipe_id as number);
+  const minutes: Record<number, number | null> = Object.fromEntries((timeRows ?? []).map((t) => [t.id as number, t.time_minutes as number | null]));
+
   return (
     <MenuGrid
       menu={menu}
       recipes={recipes}
+      favoriteIds={favoriteIds}
+      minutes={minutes}
       slots={slots}
       offset={offset}
       weekRange={formatWeekRange(weekStart)}
