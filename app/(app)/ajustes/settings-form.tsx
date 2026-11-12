@@ -113,8 +113,7 @@ export function SettingsForm({ initial, email, chains, location, foods, account 
     { ok: v.sex !== null && v.age !== null && v.weightKg !== null && v.heightCm !== null, missing: "Sexo, edad, peso y altura", tab: "objetivo" },
     { ok: v.activity !== null, missing: "Tu nivel de actividad", tab: "objetivo" },
     { ok: v.appliances !== null, missing: "Qué tienes en la cocina", tab: "cocina" },
-    { ok: v.maxRecipeMinutes !== null, missing: "Cuánto tiempo quieres cocinar", tab: "cocina" },
-    { ok: v.weeklyBudget !== null, missing: "Tu presupuesto semanal", tab: "cocina" },
+    // presupuesto y tiempo no cuentan: "me es indiferente" y "sin límite" son respuestas válidas
     { ok: v.goals.length > 0, missing: "Qué te importa más al planificar", tab: "cocina" },
     { ok: !!location.label, missing: "Tu zona", tab: "compra" },
     { ok: chains.length > 0 && !!v.mainSupermarket, missing: "Tu supermercado habitual", tab: "compra" },
@@ -308,9 +307,9 @@ export function SettingsForm({ initial, email, chains, location, foods, account 
                   <KitchenPicker value={(v.appliances ?? ["fuego", "horno", "microondas"]) as ApplianceId[]} onChange={(next) => set("appliances", next)} />
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                  <Field label="Presupuesto semanal" hint="Referencia para tu compra semanal.">
+                  <Field label="Presupuesto semanal" hint="Si pones uno, el menú tira a platos baratos y te avisa si te pasas.">
                     <select value={v.weeklyBudget ?? ""} onChange={(e) => set("weeklyBudget", e.target.value ? Number(e.target.value) : null)} className={inputCls}>
-                      <option value="">Sin definir</option>
+                      <option value="">Me es indiferente</option>
                       {BUDGETS.map((b) => <option key={b} value={b}>{b} €</option>)}
                     </select>
                   </Field>

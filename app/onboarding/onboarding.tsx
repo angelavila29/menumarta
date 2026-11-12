@@ -247,7 +247,7 @@ export function Onboarding({ initial }: { initial: Initial }) {
           <div>
           <p className="mb-2 text-sm font-semibold">Presupuesto semanal <span className="font-normal text-muted">(opcional)</span></p>
           <div className="mb-5 flex flex-wrap gap-2">
-            <Chip on={budget === null} onClick={() => setBudget(null)}>Sin definir</Chip>
+            <Chip on={budget === null} onClick={() => setBudget(null)}>Me es indiferente</Chip>
             {BUDGETS.map((b) => (
               <Chip key={b} on={budget === b} onClick={() => setBudget(b)}>{b} €</Chip>
             ))}
