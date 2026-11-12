@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { judge, targetsFor } from "../lib/goal";
+import { bmi, healthyWeight, judge, paceOptions, targetsFor } from "../lib/goal";
 
 test("objetivos diarios: hombre 22 años, 72 kg, 176 cm, actividad media, mantener", () => {
   const t = targetsFor({ sex: "hombre", age: 22, weightKg: 72, heightCm: 176, activity: "media", bodyGoal: "mantener" });
@@ -45,4 +45,30 @@ test("perder nunca baja del mínimo ni quita más de 500 kcal", () => {
   assert.equal(keep.kcalDay - big.kcalDay, 500);
   const tiny = targetsFor({ sex: "mujer", age: 70, weightKg: 40, heightCm: 145, activity: "baja", bodyGoal: "perder" });
   assert.ok(tiny.kcalDay >= 1200);
+});
+
+test("peso saludable e IMC para 170 cm", () => {
+  assert.deepEqual(healthyWeight(170), { min: 54, max: 71 });
+  assert.ok(Math.abs(bmi(86, 170) - 29.76) < 0.01);
+});
+
+test("ritmos para perder: calorías, semanas y cuál se recomienda", () => {
+  const b = { sex: "hombre" as const, age: 24, weightKg: 86, heightCm: 170, activity: "media" as const, bodyGoal: "perder" as const, targetWeightKg: 71 };
+  const o = paceOptions(b);
+  assert.deepEqual(o.map((x) => x.pace), [0.25, 0.5, 0.75, 1]);
+  // gasto ≈ 3017; medio kilo por semana son 550 kcal menos
+  assert.ok(Math.abs(o[1].kcalDay - 2467) <= 2, String(o[1].kcalDay));
+  assert.equal(o[1].weeks, 30);
+  assert.equal(o[1].recommended, true);
+  assert.equal(o[3].allowed, false); // 1 kg/semana es más del 1 % de 86 kg
+  const t = targetsFor({ ...b, paceKgWeek: 0.5 });
+  assert.equal(t.kcalDay, o[1].kcalDay);
+  assert.equal(t.kgPerWeek, 0.5);
+  assert.ok(Math.abs(t.proteinDay * 4 + t.carbsDay * 4 + t.fatDay * 9 - t.kcalDay) < 12);
+});
+
+test("un ritmo que deja por debajo del mínimo no se ofrece", () => {
+  const o = paceOptions({ sex: "mujer", age: 22, weightKg: 55, heightCm: 155, activity: "baja", bodyGoal: "perder" });
+  assert.equal(o.find((x) => x.pace === 0.75)!.allowed, false);
+  assert.equal(o.find((x) => x.pace === 0.25)!.recommended, true);
 });

@@ -7,7 +7,7 @@ import { targetsFor, type Body } from "@/lib/goal";
 import { requireUser } from "@/lib/auth";
 import { assess, nutritionByRecipe, weekBalance } from "@/lib/menu-nutrition";
 import { getOrCreateActiveList } from "@/lib/lists";
-import { isSide, currentWeekStart, todayIndex, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
+import { isSide, currentWeekStart, todayIndex, portionFor, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
 
 export async function generateWeekAction(weekStart: string, mode: "normal" | "despensa" = "normal") {
@@ -20,7 +20,7 @@ export async function generateWeekAction(weekStart: string, mode: "normal" | "de
 export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>>, userId: string, weekStart: string, pantryFirst = false) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal,appliances,sex,age,weight_kg,height_cm,activity")
+    .select("household_size,diet,allergies,avoid_foods,max_recipe_minutes,friend_recipes_mode,cook_sessions,weekly_budget,goals,body_goal,target_weight_kg,loss_pace,appliances,sex,age,weight_kg,height_cm,activity")
     .eq("id", userId)
     .maybeSingle();
   const menu = await getOrCreateMenu(supabase, userId, weekStart, profile?.household_size ?? 2);
@@ -79,6 +79,8 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
       heightCm: profile?.height_cm ?? null,
       activity: (profile?.activity as Body["activity"]) ?? null,
       bodyGoal,
+      targetWeightKg: profile?.target_weight_kg != null ? Number(profile.target_weight_kg) : null,
+      paceKgWeek: profile?.loss_pace != null ? Number(profile.loss_pace) : null,
     });
     goalTargets = t;
     kcalPerMeal = Math.round(t.kcalMeals / 2);
@@ -115,23 +117,29 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
   };
   // Con objetivo, se prueban varias semanas y se queda la que mejor cuadra (calorías, proteína
   // y verdura). Así "Ajustar el menú a mi objetivo" mejora de verdad en vez de sortear otra vez.
+  // El tamaño de ración se ajusta para que las calorías cuadren; entre semanas candidatas gana la
+  // que, ya con esa ración, mejor cubre proteína y verdura.
   let week = generateWeek(allowed, opts);
+  let portion = 1;
   if (bodyGoal && nutrition && goalTargets) {
     const rate = (w: typeof week) => {
-      const b = weekBalance(w, nutrition);
+      const size = portionFor(goalTargets!.kcalMeals, weekBalance(w, nutrition).avgKcal);
+      const b = weekBalance(w, nutrition, size);
       const a = assess(b, goalTargets!, bodyGoal);
-      return a.score * 1000 - Math.abs(b.avgKcal - goalTargets!.kcalMeals) + Math.min(b.avgProtein, goalTargets!.proteinMeals) * 3;
+      return { size, score: a.score * 1000 - Math.abs(b.avgKcal - goalTargets!.kcalMeals) + Math.min(b.avgProtein, goalTargets!.proteinMeals) * 3 };
     };
     let best = rate(week);
     for (let i = 0; i < 11; i++) {
       const candidate = generateWeek(allowed, opts);
       const r = rate(candidate);
-      if (r > best) {
+      if (r.score > best.score) {
         best = r;
         week = candidate;
       }
     }
+    portion = best.size;
   }
+  if (portion !== menu.portion) await supabase.from("weekly_menus").update({ portion }).eq("id", menu.id);
   // Menú nuevo, guarniciones fuera: las elige cada uno
   const slots = week.filter((s) => s.day >= fromDay).map((s) => ({ ...s, menu_id: menu.id, cooked: false, side_recipe_id: null }));
   const { error } = await supabase.from("weekly_menu_slots").upsert(slots, { onConflict: "menu_id,day,meal" });
@@ -226,6 +234,15 @@ export async function confirmMenuListAction(rawItems: ConfirmItem[], staples: { 
   }
   revalidatePath("/lista");
   redirect("/lista");
+}
+
+/** Tamaño de ración del menú: multiplica calorías y cantidades de la compra. */
+export async function setPortionAction(menuId: string, portion: number) {
+  const { supabase } = await requireUser();
+  const n = Math.min(2, Math.max(0.75, Math.round(portion * 4) / 4));
+  await supabase.from("weekly_menus").update({ portion: n }).eq("id", menuId);
+  revalidatePath("/menu");
+  revalidatePath("/menu/lista");
 }
 
 /** Cuántas veces cocinas a la semana (el resto se cubre con sobras). Se guarda en el perfil. */

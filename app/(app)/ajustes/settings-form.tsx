@@ -9,7 +9,7 @@ import { FoodInput } from "@/components/food-input";
 import { KitchenPicker } from "@/components/kitchen-picker";
 import type { ApplianceId } from "@/lib/appliances";
 import { COOK_RANGES, cookRangeOf } from "@/lib/cook-sessions";
-import { hasBodyData, targetsFor, type Body } from "@/lib/goal";
+import { bmi, bmiLabel, hasBodyData, healthyWeight, paceOptions, targetsFor, type Body } from "@/lib/goal";
 import { saveSettings, type SettingsInput } from "@/lib/settings-actions";
 
 export type Chain = { id: string; name: string; has_prices: boolean };
@@ -260,6 +260,7 @@ export function SettingsForm({ initial, email, chains, location, foods, account 
                     <Chip key={id} small on={v.activity === id} onClick={() => set("activity", id)}>{label}</Chip>
                   ))}
                 </div>
+                {v.bodyGoal === "perder" && <LossPlan v={v} set={set} />}
                 <GoalSummary v={v} />
               </Card>
             </>
@@ -473,16 +474,121 @@ function cap(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+const kg = (n: number) => n.toLocaleString("es-ES", { maximumFractionDigits: 1 });
+const kcalFmt = (n: number) => n.toLocaleString("es-ES", { useGrouping: "always" } as Intl.NumberFormatOptions);
+function howLong(weeks: number): string {
+  if (weeks < 9) return `${weeks} semanas`;
+  const months = Math.round(weeks / 4.345);
+  return months < 12 ? `unos ${months} meses` : months === 12 ? "un año" : `${kg(Math.round((months / 12) * 10) / 10)} años`;
+}
+
+/** Plan para perder peso: peso saludable, a cuál se quiere llegar y a qué ritmo. */
+function LossPlan({ v, set }: { v: SettingsInput; set: <K extends keyof SettingsInput>(k: K, val: SettingsInput[K]) => void }) {
+  const body: Body = {
+    sex: (v.sex as Body["sex"]) ?? null, age: v.age, weightKg: v.weightKg, heightCm: v.heightCm,
+    activity: (v.activity as Body["activity"]) ?? null, bodyGoal: "perder", targetWeightKg: v.targetWeightKg, paceKgWeek: v.lossPace,
+  };
+  if (!hasBodyData(body)) {
+    return <p className="mt-4 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">Rellena sexo, edad, peso y altura y te decimos tu peso saludable y a qué ritmo puedes llegar.</p>;
+  }
+  const w = v.weightKg!;
+  const range = healthyWeight(v.heightCm!);
+  const now = bmi(w, v.heightCm!);
+  if (now < 18.5) {
+    return <p className="mt-4 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">Con {kg(w)} kg estás por debajo del peso saludable para tu altura ({range.min}-{range.max} kg). No te recomendamos perder peso; elige «Mantenerme» o consúltalo con tu médico.</p>;
+  }
+  // Metas sugeridas: el tope del rango saludable y, si queda lejos, un primer paso del 5 %
+  const first = Math.round(w * 0.95);
+  const ideas: [number, string][] = [];
+  if (w > range.max) {
+    if (first > range.max + 1) ideas.push([first, `${first} kg · primer paso (−5 %)`]);
+    ideas.push([range.max, `${range.max} kg · peso saludable`]);
+  } else if (w - 2 >= range.min) {
+    ideas.push([Math.round(w - 2), `${Math.round(w - 2)} kg`]);
+  }
+  const target = v.targetWeightKg;
+  const tooLow = target != null && target < range.min;
+  const options = paceOptions(body);
+  const chosen = v.lossPace ?? null;
+  return (
+    <div className="mt-5 border-t border-cream-dark pt-4">
+      <p className="text-sm font-semibold">Tu peso</p>
+      <p className="mt-1 text-sm">
+        Ahora pesas <b>{kg(w)} kg</b> (IMC {kg(now)}, {bmiLabel(now)}). Para {v.heightCm} cm, el peso saludable va de <b>{range.min} a {range.max} kg</b>.
+      </p>
+      {now < 25 && <p className="mt-1 text-sm text-muted">Ya estás en un peso saludable: si quieres bajar, que sea poco y despacio.</p>}
+
+      <p className="mb-2 mt-4 text-sm font-semibold">¿A qué peso quieres llegar?</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="flex items-center gap-2">
+          <input
+            inputMode="decimal"
+            aria-label="Peso objetivo en kilos"
+            value={target ?? ""}
+            onChange={(e) => set("targetWeightKg", e.target.value ? Number(e.target.value.replace(",", ".")) || null : null)}
+            placeholder={String(ideas[0]?.[0] ?? Math.round(w))}
+            className={`${inputCls} w-24`}
+          />
+          <span className="text-sm text-muted">kg</span>
+        </span>
+        {ideas.map(([value, label]) => (
+          <Chip key={value} small on={target === value} onClick={() => set("targetWeightKg", value)}>{label}</Chip>
+        ))}
+      </div>
+      {tooLow && <p className="mt-2 text-sm text-amber-900">{kg(target!)} kg queda por debajo del peso saludable para tu altura (mínimo {range.min} kg).</p>}
+      {target != null && target >= w && <p className="mt-2 text-sm text-muted">Ese peso no está por debajo del actual.</p>}
+
+      <p className="mb-2 mt-4 text-sm font-semibold">¿A qué ritmo?</p>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {options.map((o) => {
+          const on = chosen === o.pace;
+          return (
+            <li key={o.pace}>
+              <button
+                type="button"
+                disabled={!o.allowed}
+                aria-pressed={on}
+                onClick={() => set("lossPace", on ? null : o.pace)}
+                className={`w-full rounded-xl border px-3 py-2.5 text-left text-sm ${
+                  on ? "border-olive bg-olive-soft" : o.allowed ? "border-cream-dark bg-white hover:bg-cream" : "border-cream-dark bg-cream opacity-60"
+                }`}
+              >
+                <span className="flex flex-wrap items-center gap-x-2">
+                  <b>{o.label} · {o.pace.toLocaleString("es-ES")} kg por semana</b>
+                  {o.recommended && <span className="rounded bg-olive px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">Recomendado</span>}
+                </span>
+                <span className="block text-muted">
+                  {o.allowed ? (
+                    <>
+                      {kcalFmt(o.kcalDay)} kcal al día{o.weeks != null && !tooLow && <> · llegas en {howLong(o.weeks)}</>}
+                    </>
+                  ) : (
+                    <>No recomendable: {o.why}.</>
+                  )}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-xs text-muted">
+        Cada kilo son unas 7.700 kcal: perder medio kilo por semana supone comer unas 550 kcal menos al día de las que gastas. Sin elegir ritmo se aplica uno moderado. Es orientativo, no consejo médico.
+      </p>
+    </div>
+  );
+}
+
 function GoalSummary({ v }: { v: SettingsInput }) {
   const body: Body = {
     sex: (v.sex as Body["sex"]) ?? null, age: v.age, weightKg: v.weightKg, heightCm: v.heightCm,
     activity: (v.activity as Body["activity"]) ?? null, bodyGoal: (v.bodyGoal as Body["bodyGoal"]) ?? null,
+    targetWeightKg: v.targetWeightKg, paceKgWeek: v.lossPace,
   };
   if (!v.bodyGoal) return <p className="mt-4 text-sm text-muted">Sin objetivo, el menú solo mira tus gustos, tu despensa y tu presupuesto.</p>;
   const t = targetsFor(body);
   return (
     <div className="mt-4">
-      <DayBreakdown kcalDay={t.kcalDay} proteinDay={t.proteinDay} />
+      <DayBreakdown kcalDay={t.kcalDay} proteinDay={t.proteinDay} fatDay={t.fatDay} carbsDay={t.carbsDay} />
       {!hasBodyData(body) && <p className="mt-1 text-xs text-muted">Faltan datos (sexo, edad, peso o altura), así que es una estimación media. Rellénalos y afinará.</p>}
     </div>
   );

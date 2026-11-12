@@ -201,3 +201,12 @@ mejor encaja.
 - [x] "Añadir a mi lista" dos veces (o tras rehacer el menú) ya no duplica: sustituye lo que puso el menú.
 - [ ] Pendiente: con objetivo corporal, las recetas se quedan cortas de calorías para hombres activos
       (haría falta un tamaño de ración por persona).
+
+## O. Plan para perder peso y tamaño de ración (12 nov)
+
+- [x] Ajustes → Objetivo → "Perder peso": IMC y rango de peso saludable (OMS), peso al que llegar
+      (sugerencias: −5 % y tope saludable) y ritmo (0,25 / 0,5 / 0,75 / 1 kg por semana) con las kcal
+      y el tiempo de cada uno. No se ofrece lo que pase del 1 % del peso por semana o baje del mínimo.
+- [x] Macros del día (proteína, hidratos, grasa) en Ajustes y en el menú.
+- [x] Tamaño de ración del menú (`weekly_menus.portion`): se ajusta al generar para cuadrar las
+      calorías, multiplica la compra y se puede cambiar con − / +.

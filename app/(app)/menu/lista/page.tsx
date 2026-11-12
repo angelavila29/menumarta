@@ -19,7 +19,7 @@ export default async function MenuListPage(props: PageProps<"/menu/lista">) {
   ]);
   const menu = await getOrCreateMenu(supabase, user.id, weekStart, profile?.household_size ?? 2);
   const slots = await loadSlots(supabase, menu.id);
-  const needs = await aggregateIngredients(supabase, slots, menu.servings);
+  const needs = await aggregateIngredients(supabase, slots, menu.servings * menu.portion);
 
   if (needs.length === 0) {
     return (

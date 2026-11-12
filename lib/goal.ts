@@ -10,6 +10,9 @@ export type Body = {
   heightCm: number | null;
   activity: "baja" | "media" | "alta" | null;
   bodyGoal: "perder" | "mantener" | "ganar" | null;
+  /** plan para perder: peso al que se quiere llegar y ritmo en kg por semana */
+  targetWeightKg?: number | null;
+  paceKgWeek?: number | null;
 };
 
 export type Targets = {
@@ -23,6 +26,12 @@ export type Targets = {
   vegMeals: number;
   /** si faltan datos, se usan valores medios y se avisa */
   estimated: boolean;
+  /** reparto del día en gramos: grasa ≈ 30 % de las kcal, hidratos el resto */
+  fatDay: number;
+  carbsDay: number;
+  /** gasto diario estimado y, si se pierde peso, kg por semana que supone el déficit */
+  tee: number;
+  kgPerWeek: number;
 };
 
 export const GOAL_LABEL: Record<NonNullable<Body["bodyGoal"]>, string> = { perder: "Perder peso", mantener: "Mantenerme", ganar: "Ganar músculo" };
@@ -55,6 +64,66 @@ export function hasBodyData(b: Body): boolean {
   return b.age != null && b.weightKg != null && b.heightCm != null && b.sex != null;
 }
 
+/** 1 kg de grasa corporal ≈ 7.700 kcal. */
+export const KCAL_PER_KG = 7700;
+const kcalFloor = (sex: "mujer" | "hombre") => (sex === "hombre" ? 1500 : 1200);
+/** Ritmo máximo sensato: un 1 % del peso por semana, sin pasar de 1 kg. */
+export const maxPace = (weightKg: number) => Math.min(1, weightKg * 0.01);
+
+export function bmi(weightKg: number, heightCm: number): number {
+  const m = heightCm / 100;
+  return weightKg / (m * m);
+}
+export function bmiLabel(v: number): string {
+  return v < 18.5 ? "por debajo del peso saludable" : v < 25 ? "peso saludable" : v < 30 ? "sobrepeso" : "obesidad";
+}
+/** Rango de peso saludable para una altura (IMC 18,5-24,9, criterio de la OMS). */
+export function healthyWeight(heightCm: number): { min: number; max: number } {
+  const m2 = (heightCm / 100) ** 2;
+  return { min: Math.ceil(18.5 * m2), max: Math.floor(24.9 * m2) };
+}
+
+export type PaceOption = {
+  pace: number;
+  label: string;
+  kcalDay: number;
+  /** semanas hasta el peso objetivo (null si no hay objetivo o ya se ha llegado) */
+  weeks: number | null;
+  allowed: boolean;
+  recommended: boolean;
+  why?: string;
+};
+
+/** Ritmos posibles para perder peso con las calorías que supone cada uno. */
+export function paceOptions(b: Body): PaceOption[] {
+  if (!hasBodyData(b)) return [];
+  const w = b.weightKg!;
+  const sex = b.sex!;
+  const base = targetsFor({ ...b, bodyGoal: "mantener" });
+  const toLose = b.targetWeightKg != null ? w - b.targetWeightKg : null;
+  const opts = ([[0.25, "Suave"], [0.5, "Moderado"], [0.75, "Rápido"], [1, "Muy rápido"]] as const).map(([pace, label]) => {
+    const kcalDay = Math.round(base.tee - (pace * KCAL_PER_KG) / 7);
+    const tooFast = pace > maxPace(w) + 0.001;
+    const tooLow = kcalDay < kcalFloor(sex);
+    return {
+      pace,
+      label,
+      kcalDay,
+      weeks: toLose != null && toLose > 0 ? Math.ceil(toLose / pace) : null,
+      allowed: !tooFast && !tooLow,
+      recommended: false,
+      why: tooLow ? `te dejaría por debajo de ${kcalFloor(sex).toLocaleString("es-ES")} kcal al día` : tooFast ? "es más del 1 % de tu peso por semana" : undefined,
+    };
+  });
+  // Lo recomendado: en torno al 0,6 % del peso por semana (pauta habitual de 0,5-1 %)
+  const ok = opts.filter((o) => o.allowed);
+  if (ok.length > 0) {
+    const ideal = w * 0.006;
+    ok.reduce((best, o) => (Math.abs(o.pace - ideal) < Math.abs(best.pace - ideal) ? o : best)).recommended = true;
+  }
+  return opts;
+}
+
 export function targetsFor(b: Body): Targets {
   const estimated = !hasBodyData(b);
   const sex = b.sex ?? "mujer";
@@ -64,16 +133,23 @@ export function targetsFor(b: Body): Targets {
   const goal = b.bodyGoal ?? "mantener";
   const [a, bAge, cH, dW] = TEE[sex][b.activity ?? "media"];
   const tee = a - bAge * age + cH * h + dW * w;
-  // Perder: déficit del 20 % sin pasar de 500 kcal (pauta habitual de 500-750; así nadie baja de golpe)
-  // y nunca por debajo de 1.200 (mujer) / 1.500 (hombre). Ganar: superávit pequeño, +10 %, para
-  // que lo ganado sea sobre todo músculo. Proteína: 1,6 g/kg ganando (meta-análisis de Morton 2018),
-  // 1,4 perdiendo para conservar músculo y 1,2 manteniendo.
-  const deficit = Math.min(500, tee * 0.2);
-  const floor = sex === "hombre" ? 1500 : 1200;
+  // Perder: si la persona ha elegido ritmo, el déficit sale de él (1 kg de grasa ≈ 7.700 kcal);
+  // si no, un 20 % sin pasar de 500 kcal. Nunca por debajo de 1.200 (mujer) / 1.500 (hombre).
+  // Ganar: superávit pequeño, +10 %, para que lo ganado sea sobre todo músculo. Proteína: 1,6 g/kg
+  // ganando (meta-análisis de Morton 2018), 1,4 perdiendo para conservar músculo y 1,2 manteniendo.
+  const pace = goal === "perder" && b.paceKgWeek ? Math.min(b.paceKgWeek, maxPace(w)) : null;
+  const deficit = pace ? (pace * KCAL_PER_KG) / 7 : Math.min(500, tee * 0.2);
+  const floor = kcalFloor(sex);
   const kcalDay = Math.round(goal === "perder" ? Math.max(floor, tee - deficit) : goal === "ganar" ? tee * 1.1 : tee);
   const gPerKg = goal === "ganar" ? 1.6 : goal === "perder" ? 1.4 : 1.2;
   const proteinDay = Math.round(w * gPerKg);
+  const fatDay = Math.round((kcalDay * 0.3) / 9);
+  const carbsDay = Math.max(0, Math.round((kcalDay - proteinDay * 4 - fatDay * 9) / 4));
   return {
+    fatDay,
+    carbsDay,
+    tee: Math.round(tee),
+    kgPerWeek: goal === "perder" ? Math.round((((tee - kcalDay) * 7) / KCAL_PER_KG) * 100) / 100 : 0,
     kcalDay,
     proteinDay,
     kcalMeals: Math.round(kcalDay * MEALS_SHARE_KCAL),

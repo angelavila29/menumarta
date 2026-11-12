@@ -24,6 +24,8 @@ export type SettingsInput = {
   heightCm: number | null;
   activity: string | null;
   bodyGoal: string | null;
+  targetWeightKg: number | null;
+  lossPace: number | null;
   appliances: string[] | null;
   compareMode: string;
   mainSupermarket: string | null;
@@ -74,6 +76,8 @@ export async function saveSettings(input: SettingsInput) {
       height_cm: numIn(input.heightCm, 100, 250),
       activity: ["baja", "media", "alta"].includes(input.activity ?? "") ? input.activity : null,
       body_goal: ["perder", "mantener", "ganar"].includes(input.bodyGoal ?? "") ? input.bodyGoal : null,
+      target_weight_kg: input.bodyGoal === "perder" ? numIn(input.targetWeightKg, 25, 300) : null,
+      loss_pace: input.bodyGoal === "perder" && [0.25, 0.5, 0.75, 1].includes(input.lossPace ?? 0) ? input.lossPace : null,
       appliances: input.appliances ? input.appliances.filter((a) => APPLIANCE_IDS.has(a)) : null,
       compare_mode: COMPARE.includes(input.compareMode) ? input.compareMode : "avisar",
       main_supermarket: input.mainSupermarket && mine.includes(input.mainSupermarket) ? input.mainSupermarket : null,

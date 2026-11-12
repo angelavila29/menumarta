@@ -4,15 +4,25 @@ import { dayBreakdown } from "@/lib/goal";
 const kcal = (n: number) => n.toLocaleString("es-ES", { useGrouping: "always" } as Intl.NumberFormatOptions);
 
 /** El objetivo diario y cómo se reparte entre las comidas del día; marca las que planifica el menú. */
-export function DayBreakdown({ kcalDay, proteinDay }: { kcalDay: number; proteinDay?: number }) {
+export function DayBreakdown({ kcalDay, proteinDay, fatDay, carbsDay }: { kcalDay: number; proteinDay?: number; fatDay?: number; carbsDay?: number }) {
   const parts = dayBreakdown(kcalDay);
   const menuKcal = Math.round(kcalDay * parts.filter((p) => p.menu).reduce((s, p) => s + p.share, 0));
   return (
     <div className="rounded-xl bg-olive-soft p-3 text-sm text-olive-dark">
       <p>
         Tu objetivo diario: <b className="text-base">{kcal(kcalDay)} kcal</b>
-        {proteinDay != null && <> y <b>{proteinDay} g de proteína</b></>}
+        {proteinDay != null && fatDay == null && <> y <b>{proteinDay} g de proteína</b></>}
       </p>
+      {proteinDay != null && fatDay != null && carbsDay != null && (
+        <ul className="mt-2 grid grid-cols-3 gap-1.5 text-center">
+          {([["Proteína", proteinDay], ["Hidratos", carbsDay], ["Grasa", fatDay]] as const).map(([label, g]) => (
+            <li key={label} className="rounded-lg bg-white px-1 py-1.5 text-ink">
+              <b className="block tabular-nums">{g} g</b>
+              <span className="text-xs text-muted">{label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       <ul className="mt-2 flex flex-col gap-1">
         {parts.map((p) => (
           <li key={p.key} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1 ${p.menu ? "bg-white font-medium text-ink" : ""}`}>

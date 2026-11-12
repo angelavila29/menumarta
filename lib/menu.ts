@@ -20,7 +20,13 @@ export type Slot = { day: number; meal: "comida" | "cena"; recipe_id: number | n
 
 /** Las guarniciones (puré, arroz blanco…) acompañan a un plato; nunca son la comida por sí solas. */
 export const isSide = (r: { tags: string[] }) => r.tags.includes("guarnicion");
-export type Menu = { id: string; week_start: string; servings: number };
+export type Menu = { id: string; week_start: string; servings: number; portion: number };
+
+/** Tamaño de ración para cuadrar unas calorías: de 0,75 a 2, en saltos de cuarto. */
+export function portionFor(targetKcal: number, actualKcal: number): number {
+  if (!(targetKcal > 0) || !(actualKcal > 0)) return 1;
+  return Math.min(2, Math.max(0.75, Math.round((targetKcal / actualKcal) * 4) / 4));
+}
 
 export const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 export const MEALS = ["comida", "cena"] as const;
@@ -48,11 +54,11 @@ export function currentWeekStart(offsetWeeks = 0): string {
 export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart: string, defaultServings?: number): Promise<Menu> {
   const { data } = await supabase
     .from("weekly_menus")
-    .select("id,week_start,servings")
+    .select("id,week_start,servings,portion")
     .eq("user_id", userId)
     .eq("week_start", weekStart)
     .maybeSingle();
-  if (data) return data as Menu;
+  if (data) return { ...data, portion: Number(data.portion) || 1 } as Menu;
   let servings = defaultServings;
   if (servings == null) {
     const { data: profile } = await supabase.from("profiles").select("household_size").eq("id", userId).maybeSingle();
@@ -61,10 +67,10 @@ export async function getOrCreateMenu(supabase: Supa, userId: string, weekStart:
   const { data: created, error } = await supabase
     .from("weekly_menus")
     .insert({ user_id: userId, week_start: weekStart, servings })
-    .select("id,week_start,servings")
+    .select("id,week_start,servings,portion")
     .single();
   if (error) throw new Error(error.message);
-  return created as Menu;
+  return { ...created, portion: Number(created.portion) || 1 } as Menu;
 }
 
 export async function loadRecipes(supabase: Supa): Promise<Recipe[]> {

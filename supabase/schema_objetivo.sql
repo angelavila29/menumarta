@@ -25,3 +25,12 @@ alter table weekly_menu_slots add column if not exists side_recipe_id bigint ref
 -- Cuánto de la cantidad de un producto de la lista viene del menú semanal. Al volver a pasar el
 -- menú a la lista se quita lo anterior y se pone lo nuevo, en vez de sumarlo otra vez.
 alter table shopping_list_items add column if not exists menu_qty numeric not null default 0;
+
+-- Plan para perder peso: a qué peso se quiere llegar y a qué ritmo (kg por semana).
+alter table profiles
+  add column if not exists target_weight_kg numeric check (target_weight_kg between 25 and 300),
+  add column if not exists loss_pace numeric check (loss_pace between 0.1 and 1.5);
+
+-- Tamaño de ración del menú (1 = la de la receta). Se ajusta al generar para cuadrar las calorías
+-- del objetivo, y multiplica las cantidades de la compra.
+alter table weekly_menus add column if not exists portion numeric not null default 1 check (portion between 0.5 and 2.5);

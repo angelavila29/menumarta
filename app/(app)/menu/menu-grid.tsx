@@ -5,7 +5,7 @@ import { DayBreakdown } from "@/components/day-breakdown";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
 import { euro } from "@/lib/format";
 import { DAYS, MEALS, type Menu, type Recipe, type Slot } from "@/lib/menu";
-import { generateWeekAction, repeatPreviousWeekAction, setCookedAction, setCookSessionsAction, setServingsAction, setSideAction, setSlotAction } from "@/lib/menu-actions";
+import { generateWeekAction, repeatPreviousWeekAction, setCookedAction, setCookSessionsAction, setPortionAction, setServingsAction, setSideAction, setSlotAction } from "@/lib/menu-actions";
 import { RecipeArt } from "@/components/recipe-art";
 
 export type MenuSettings = { meals: string; diet: string; chains: string; prefs: string };
@@ -15,6 +15,12 @@ export type GoalPanel = {
   bodyGoal: "perder" | "mantener" | "ganar" | null;
   estimated: boolean;
   kcalDay: number;
+  proteinDay: number;
+  fatDay: number;
+  carbsDay: number;
+  /** tamaño de ración del menú (1 = la de la receta) */
+  portion: number;
+  plan: { kgPerWeek: number; targetKg: number | null; weeks: number | null } | null;
   kcal: Meter;
   protein: Meter;
   veg: Meter;
@@ -52,6 +58,9 @@ const ForkIcon = ({ className }: { className?: string }) => (
 const UsersIcon = ({ className }: { className?: string }) => (
   <svg {...svg} className={className}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6" /></svg>
 );
+
+const num = (n: number) => n.toLocaleString("es-ES", { maximumFractionDigits: 2 });
+const PORTION_LABEL: Record<number, string> = { 0.75: "Ración algo más pequeña", 1: "Ración normal", 1.25: "Ración generosa", 1.5: "Ración y media", 2: "Ración doble" };
 
 const hrefFor = (o: number) => (o === 0 ? "/menu" : `/menu?semana=${o}`);
 
@@ -290,8 +299,28 @@ export function MenuGrid(p: Props) {
                 <span className="text-xs text-muted">Media al día entre comida y cena</span>
               </div>
               {p.goal.bodyGoal && (
-                <div className="mt-3">
-                  <DayBreakdown kcalDay={p.goal.kcalDay} />
+                <div className="mt-3 flex flex-col gap-2">
+                  {p.goal.plan && (
+                    <p className="rounded-xl bg-cream px-3 py-2 text-sm">
+                      Tu plan: perder <b>{num(p.goal.plan.kgPerWeek)} kg por semana</b>
+                      {p.goal.plan.targetKg != null && p.goal.plan.weeks != null && (
+                        <> hasta <b>{num(p.goal.plan.targetKg)} kg</b>, en unas <b>{p.goal.plan.weeks} semanas</b></>
+                      )}
+                      . <Link href="/ajustes#objetivo" className="font-medium text-brand hover:underline">Cambiar</Link>
+                    </p>
+                  )}
+                  <DayBreakdown kcalDay={p.goal.kcalDay} proteinDay={p.goal.proteinDay} fatDay={p.goal.fatDay} carbsDay={p.goal.carbsDay} />
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-cream-dark px-3 py-2 text-sm">
+                    <span className="min-w-0">
+                      <b>{PORTION_LABEL[p.goal.portion] ?? `Ración ×${num(p.goal.portion)}`}</b>
+                      <span className="block text-xs text-muted">Ajustada a tus calorías. La compra ya la cuenta.</span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-1">
+                      <button type="button" aria-label="Ración más pequeña" disabled={pending || p.goal.portion <= 0.75} onClick={() => start(() => setPortionAction(menu.id, p.goal.portion - 0.25))} className="h-8 w-8 rounded-lg bg-cream font-bold disabled:opacity-40">−</button>
+                      <span className="w-12 text-center font-semibold tabular-nums">×{num(p.goal.portion)}</span>
+                      <button type="button" aria-label="Ración más grande" disabled={pending || p.goal.portion >= 2} onClick={() => start(() => setPortionAction(menu.id, p.goal.portion + 0.25))} className="h-8 w-8 rounded-lg bg-cream font-bold disabled:opacity-40">+</button>
+                    </span>
+                  </div>
                 </div>
               )}
               <ul className="mt-3 flex flex-col gap-2.5">

@@ -33,7 +33,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
   const weekStart = currentWeekStart(offset);
 
   const [{ data: profile }, supers, { data: chainRows }, listId] = await Promise.all([
-    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions,weekly_budget,compare_mode,main_supermarket,sex,age,weight_kg,height_cm,activity,body_goal").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("household_size,planning_meals,diet,allergies,avoid_foods,cook_sessions,weekly_budget,compare_mode,main_supermarket,sex,age,weight_kg,height_cm,activity,body_goal,target_weight_kg,loss_pace").eq("id", user.id).maybeSingle(),
     userSupermarketIds(supabase, user.id),
     supabase.from("supermarkets").select("id,name,has_prices"),
     getOrCreateActiveList(supabase, user.id),
@@ -45,7 +45,7 @@ export default async function MenuPage(props: PageProps<"/menu">) {
     supabase.from("shopping_list_items").select(`quantity,product:products(${PRODUCT_COLUMNS})`).eq("list_id", listId),
     supabase.from("recipe_ingredients").select("recipe_id,ingredient_name,qty,unit"),
   ]);
-  const needs = await aggregateIngredients(supabase, slots, menu.servings);
+  const needs = await aggregateIngredients(supabase, slots, menu.servings * menu.portion);
 
   // Lista actual y comparativa entre cadenas con precios
   const items = (itemRows ?? [])
@@ -88,18 +88,32 @@ export default async function MenuPage(props: PageProps<"/menu">) {
     heightCm: profile?.height_cm ?? null,
     activity: (profile?.activity as Body["activity"]) ?? null,
     bodyGoal: (profile?.body_goal as Body["bodyGoal"]) ?? null,
+    targetWeightKg: profile?.target_weight_kg != null ? Number(profile.target_weight_kg) : null,
+    paceKgWeek: profile?.loss_pace != null ? Number(profile.loss_pace) : null,
   };
   const nutrition = nutritionByRecipe(
     (ingRows ?? []).map((r) => ({ recipe_id: r.recipe_id as number, ingredient_name: r.ingredient_name as string, qty: Number(r.qty), unit: r.unit as string })),
     new Map(recipes.map((r) => [r.id, Number(r.servings) || 4]))
   );
-  const wb = weekBalance(slots, nutrition);
+  const wb = weekBalance(slots, nutrition, body.bodyGoal ? menu.portion : 1);
   const targets = targetsFor(body);
   const verdict = assess(wb, targets, body.bodyGoal);
   const goal: GoalPanel = {
     bodyGoal: body.bodyGoal,
     estimated: targets.estimated,
     kcalDay: targets.kcalDay,
+    proteinDay: targets.proteinDay,
+    fatDay: targets.fatDay,
+    carbsDay: targets.carbsDay,
+    portion: menu.portion,
+    plan:
+      body.bodyGoal === "perder" && targets.kgPerWeek > 0
+        ? {
+            kgPerWeek: targets.kgPerWeek,
+            targetKg: body.targetWeightKg ?? null,
+            weeks: body.targetWeightKg != null && body.weightKg != null && body.weightKg > body.targetWeightKg ? Math.ceil((body.weightKg - body.targetWeightKg) / targets.kgPerWeek) : null,
+          }
+        : null,
     kcal: { value: wb.avgKcal, target: targets.kcalMeals, verdict: verdict.kcal },
     protein: { value: wb.avgProtein, target: targets.proteinMeals, verdict: verdict.protein },
     veg: { value: wb.avgVeg, target: targets.vegMeals, verdict: verdict.veg },

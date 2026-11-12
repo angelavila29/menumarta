@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { recipeAllowed } from "../lib/prefs";
-import { currentWeekStart, defaultCookSessions, generateWeek, MAX_PORTIONS, packsNeeded, parsePackSize, toProductUnit, weekOffsetFrom, type Recipe } from "../lib/menu";
+import { currentWeekStart, defaultCookSessions, generateWeek, MAX_PORTIONS, packsNeeded, parsePackSize, portionFor, toProductUnit, weekOffsetFrom, type Recipe } from "../lib/menu";
 
 const raw = JSON.parse(readFileSync("data/recipes.json", "utf8")) as { name: string; meal: Recipe["meal"]; servings: number; tags: string[] }[];
 const recipes: Recipe[] = raw.map((r, i) => ({ id: i + 1, name: r.name, meal: r.meal, servings: r.servings, tags: r.tags, owner_id: null, author_name: null }));
@@ -126,4 +126,11 @@ test("variedad: no pone dos versiones del mismo plato la misma semana", () => {
     if (ids.has(1) && ids.has(2)) both++;
   }
   assert.ok(both <= 2, `dos pistos casi nunca (${both}/30)`);
+});
+
+test("tamaño de ración: cuadra calorías en saltos de cuarto, entre 0,75 y 2", () => {
+  assert.equal(portionFor(1600, 1300), 1.25);
+  assert.equal(portionFor(1000, 1300), 0.75);
+  assert.equal(portionFor(4000, 1000), 2);
+  assert.equal(portionFor(1000, 0), 1);
 });
