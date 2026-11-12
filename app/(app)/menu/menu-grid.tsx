@@ -1,4 +1,5 @@
 "use client";
+import { useConfirm } from "@/components/confirm-dialog";
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
 import { DayBreakdown } from "@/components/day-breakdown";
@@ -63,6 +64,10 @@ const UsersIcon = ({ className }: { className?: string }) => (
 const num = (n: number) => n.toLocaleString("es-ES", { maximumFractionDigits: 2 });
 const PORTION_LABEL: Record<number, string> = { 0.75: "Ración algo más pequeña", 1: "Ración normal", 1.25: "Ración generosa", 1.5: "Ración y media", 2: "Ración doble" };
 
+const RefreshIcon = ({ className }: { className?: string }) => (
+  <svg {...svg} className={className}><path d="M20 11a8 8 0 0 0-14.3-4.5L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.5l1.7-2M20 20v-4.5h-4.5" /></svg>
+);
+
 const hrefFor = (o: number) => (o === 0 ? "/menu" : `/menu?semana=${o}`);
 
 export function MenuGrid(p: Props) {
@@ -75,6 +80,7 @@ export function MenuGrid(p: Props) {
     return state.map((s, k) => (k === i ? { ...s, ...patch } : s));
   });
   const [notice, setNotice] = useState("");
+  const [ask, confirmDialog] = useConfirm();
   const recipeById = new Map(recipes.map((r) => [r.id, r]));
   const sideRecipes = recipes.filter((r) => r.tags.includes("guarnicion"));
   const slotAt = (day: number, meal: string) => slots.find((s) => s.day === day && s.meal === meal);
@@ -105,8 +111,9 @@ export function MenuGrid(p: Props) {
   // En la semana en curso solo se planifica de hoy en adelante
   const fromToday = p.todayIndex !== null && p.todayIndex > 0;
   const startsToday = () => setNotice(fromToday ? `El menú empieza hoy, ${DAYS[p.todayIndex!].toLowerCase()}: los días que ya han pasado no se tocan.` : "");
-  function createMenu() {
-    if (filled > 0 && !confirm(fromToday ? "¿Sustituir el menú de hoy en adelante por uno nuevo?" : "¿Sustituir el menú de esta semana por uno nuevo?")) return;
+  const replaceBody = fromToday ? "Se cambian los platos de hoy en adelante. Los días que ya han pasado no se tocan." : "Se cambian todos los platos de esta semana.";
+  async function createMenu() {
+    if (filled > 0 && !(await ask({ title: "¿Regenerar el menú?", body: replaceBody, confirmLabel: "Regenerar" }))) return;
     start(async () => {
       await generateWeekAction(menu.week_start);
       startsToday();
@@ -115,6 +122,7 @@ export function MenuGrid(p: Props) {
 
   return (
     <main className="flex flex-col gap-5">
+      {confirmDialog}
       {/* Cabecera */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -137,8 +145,8 @@ export function MenuGrid(p: Props) {
           <button
             type="button"
             disabled={pending}
-            onClick={() => {
-              if (filled > 0 && !confirm("¿Sustituir el menú de esta semana por el de la semana anterior?")) return;
+            onClick={async () => {
+              if (filled > 0 && !(await ask({ title: "¿Repetir la semana anterior?", body: "El menú de esta semana se sustituye por el de la anterior.", confirmLabel: "Repetir" }))) return;
               start(async () => setNotice((await repeatPreviousWeekAction(menu.week_start)) ? "" : "La semana anterior no tiene menú que copiar."));
             }}
             className={`order-3 rounded-xl border border-cream-dark bg-white px-2 py-3 text-[13px] font-medium shadow-sm hover:bg-cream disabled:opacity-60 sm:order-none sm:px-4 sm:text-sm ${p.pantryCount > 0 ? "" : "col-span-2"}`}
@@ -149,8 +157,8 @@ export function MenuGrid(p: Props) {
             <button
               type="button"
               disabled={pending}
-              onClick={() => {
-                if (filled > 0 && !confirm("¿Sustituir el menú de esta semana por uno hecho con lo que tienes en casa?")) return;
+              onClick={async () => {
+                if (filled > 0 && !(await ask({ title: "¿Hacer el menú con lo que tienes?", body: `${replaceBody} Se priorizan las recetas que gastan tu despensa.`, confirmLabel: "Hacer menú" }))) return;
                 start(async () => {
                   await generateWeekAction(menu.week_start, "despensa");
                   startsToday();
@@ -168,8 +176,8 @@ export function MenuGrid(p: Props) {
             disabled={pending}
             className="order-2 col-span-2 flex items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-sm hover:bg-brand-dark disabled:opacity-60 sm:order-none"
           >
-            <PlusIcon className="h-5 w-5" />
-            {pending ? "Preparando…" : filled > 0 ? "Crear nuevo menú" : "Generar menú"}
+            {filled > 0 ? <RefreshIcon className={`h-5 w-5 ${pending ? "animate-spin" : ""}`} /> : <PlusIcon className="h-5 w-5" />}
+            {pending ? "Preparando…" : filled > 0 ? "Regenerar menú" : "Generar menú"}
           </button>
         </div>
       </div>

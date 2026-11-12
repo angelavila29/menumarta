@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/confirm-dialog";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { CartIcon, HeartIcon, PlusIcon } from "@/components/icons";
@@ -154,17 +155,21 @@ export function AddToMenuControl({ recipeId, meal, todayIndex }: { recipeId: num
 
 export function DeleteRecipeButton({ recipeId }: { recipeId: number }) {
   const [pending, start] = useTransition();
+  const [ask, confirmDialog] = useConfirm();
   return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={() => {
-        if (confirm("¿Borrar esta receta? No se puede deshacer.")) start(() => deleteRecipe(recipeId));
-      }}
-      className="rounded-xl px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50"
-    >
-      {pending ? "Borrando…" : "Borrar"}
-    </button>
+    <>
+      {confirmDialog}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={async () => {
+          if (await ask({ title: "¿Borrar esta receta?", body: "No se puede deshacer.", confirmLabel: "Borrar", danger: true })) start(() => deleteRecipe(recipeId));
+        }}
+        className="rounded-xl px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50"
+      >
+        {pending ? "Borrando…" : "Borrar"}
+      </button>
+    </>
   );
 }
 

@@ -214,3 +214,7 @@ mejor encaja.
       calorías se reparten entre las demás y suben las raciones de comida y cena.
 - [x] "Tu perfil está completo al X %": solo cuenta lo que afecta al menú, dice qué falta con un
       botón que lleva a su pestaña, y desaparece al llegar al 100 %.
+- [x] Menú menos repetitivo: las sobras se reparten (mejor dos días después, una al día como mucho)
+      y por defecto se cocinan 10 de 14 comidas en casas de una o dos personas.
+- [x] Sin `confirm()` del navegador: modal propio (`components/confirm-dialog.tsx`, `useConfirm`).
+      Con menú ya hecho el botón es "Regenerar menú".

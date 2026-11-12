@@ -98,17 +98,18 @@ export async function loadSlots(supabase: Supa, menuId: string): Promise<Slot[]>
 export const MAX_PORTIONS = 3; // una receta cocinada da como mucho 3 comidas (por conservación)
 
 /**
- * Veces que se cocina por defecto si no se ha elegido: quien vive solo cocina 7 (cada plato dos
- * días, para que la semana no se haga repetitiva), en pareja 6, y a partir de tres, cada comida.
+ * Veces que se cocina por defecto si no se ha elegido: en casas de una o dos personas, casi todo
+ * distinto y unas pocas comidas de sobras (10 de 14); a partir de tres, cada comida.
  */
 export function defaultCookSessions(householdSize: number, activeSlots: number): number {
-  return Math.min(activeSlots, householdSize === 1 ? 7 : householdSize === 2 ? 6 : activeSlots);
+  return householdSize <= 2 ? Math.min(activeSlots, Math.max(1, Math.round(activeSlots * 0.72))) : activeSlots;
 }
 
 /**
- * Genera la semana cocinando `sessions` veces. Cada receta cocinada se reparte como sobras o
- * táper en los días siguientes (misma comida, hasta 3 días después). Los huecos de `blocked`
- * ("como fuera") no se tocan. Máximo 2 recetas por etiqueta principal; si no hay otra, se relaja.
+ * Genera la semana cocinando `sessions` veces; el resto de huecos son sobras de algo cocinado
+ * antes. Las sobras se reparten por la semana: mejor dos días después que al día siguiente, y
+ * como mucho una al día, para no comer y cenar lo mismo dos días seguidos. Los huecos de
+ * `blocked` ("como fuera") no se tocan. Máximo 2 recetas por etiqueta principal; si no hay otra, se relaja.
  */
 export type GeneratePrefs = {
   sessions?: number;
@@ -164,10 +165,35 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
   const active = order.filter((s) => !blocked.has(keyOf(s.day, s.meal)));
   const sessions = Math.max(1, Math.min(opts.sessions ?? active.length, active.length));
 
-  // raciones por sesión: se reparten los huecos entre las sesiones, con tope
-  const base = Math.floor(active.length / sessions);
-  const extra = active.length % sessions;
-  const portions = Array.from({ length: sessions }, (_, i) => Math.min(MAX_PORTIONS, base + (i < extra ? 1 : 0)));
+  // Qué huecos serán sobras y de cuál. Se relaja por pasos solo si no salen las cuentas:
+  // 1) dos días después, una sobra al día, cada plato se repite una vez; 2) tres días después;
+  // 3) al día siguiente; 4) dos sobras el mismo día; 5) un plato hasta MAX_PORTIONS veces.
+  const leftoverOf = new Map<string, string>();
+  const donorUses = new Map<string, number>();
+  const leftoverDays = new Map<number, number>();
+  const activeKeys = new Set(active.map((s) => keyOf(s.day, s.meal)));
+  const mixed = [...active].sort(() => Math.random() - 0.5);
+  const passes: { gaps: number[]; perDay: number; uses: number }[] = [
+    { gaps: [2], perDay: 1, uses: 1 },
+    { gaps: [3], perDay: 1, uses: 1 },
+    { gaps: [1], perDay: 1, uses: 1 },
+    { gaps: [2, 3, 1], perDay: 2, uses: 1 },
+    { gaps: [2, 3, 1], perDay: 2, uses: MAX_PORTIONS - 1 },
+  ];
+  for (const pass of passes) {
+    for (const gap of pass.gaps) {
+      for (const s of mixed) {
+        if (leftoverOf.size >= active.length - sessions) break;
+        const key = keyOf(s.day, s.meal);
+        const donor = keyOf(s.day - gap, s.meal);
+        if (leftoverOf.has(key) || donorUses.has(key) || !activeKeys.has(donor) || leftoverOf.has(donor)) continue;
+        if ((leftoverDays.get(s.day) ?? 0) >= pass.perDay || (donorUses.get(donor) ?? 0) >= pass.uses) continue;
+        leftoverOf.set(key, donor);
+        donorUses.set(donor, (donorUses.get(donor) ?? 0) + 1);
+        leftoverDays.set(s.day, (leftoverDays.get(s.day) ?? 0) + 1);
+      }
+    }
+  }
 
   const used = new Set<number>();
   const tagCount = new Map<string, number>();
@@ -181,7 +207,16 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
   let done = 0;
 
   for (const slot of active) {
-    if (assigned.has(keyOf(slot.day, slot.meal)) || done >= sessions) continue;
+    const from = leftoverOf.get(keyOf(slot.day, slot.meal));
+    if (from !== undefined) {
+      const id = assigned.get(from);
+      if (id !== undefined) {
+        assigned.set(keyOf(slot.day, slot.meal), id);
+        cookedAt.get(id)!.count++;
+      }
+      continue;
+    }
+    if (done >= sessions) continue; // cocinando muy pocas veces no hay reparto que valga: lo rellena el paso final
     const candidates = shuffled.filter((r) => !used.has(r.id) && (r.meal === slot.meal || r.meal === "ambas"));
     const varied = candidates.filter((r) => (tagCount.get(r.tags[0] ?? "") ?? 0) < 2);
     // Entre unas pocas al azar (para que cada semana sea distinta) gana la que mejor encaja
@@ -212,15 +247,7 @@ export function generateWeek(recipes: Recipe[], opts: GeneratePrefs = {}): Slot[
     for (const w of dishWords(recipe.name)) dishes.add(w);
     tagCount.set(recipe.tags[0] ?? "", (tagCount.get(recipe.tags[0] ?? "") ?? 0) + 1);
     assigned.set(keyOf(slot.day, slot.meal), recipe.id);
-    let count = 1;
-    // sobras: misma comida en los días siguientes
-    for (let d = slot.day + 1; d <= slot.day + 3 && count < portions[done]; d++) {
-      if (isFree(d, slot.meal)) {
-        assigned.set(keyOf(d, slot.meal), recipe.id);
-        count++;
-      }
-    }
-    cookedAt.set(recipe.id, { day: slot.day, count, meal: recipe.meal });
+    cookedAt.set(recipe.id, { day: slot.day, count: 1, meal: recipe.meal });
     done++;
   }
 

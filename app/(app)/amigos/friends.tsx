@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/confirm-dialog";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { WhatsAppIcon } from "@/components/icons-extra";
@@ -7,7 +8,8 @@ import { acceptFriend, inviteByEmail, removeFriend, requestFriend, setFriendReci
 
 export type Friendship = { other_id: string; display_name: string; status: string; incoming: boolean; recipes: number };
 
-export function Friends({ code, inviteUrl, myName, friendships, incomingCode, recipesMode, invitedEmails }: { code: string; inviteUrl: string; myName: string; friendships: Friendship[]; incomingCode: string; recipesMode: "all" | "saved"; invitedEmails: string[] }) {
+export function Friends({ code, inviteUrl, myName, friendships, incomingCode, recipesMode, invitedEmails }: { code: string; inviteUrl: string; myName: string; friendships: Friendship[]; incomingCode: string; recipesMode: "all" | "saved"; invitedEmails: string[] }) {  const [ask, confirmDialog] = useConfirm();
+
   const [mode, setMode] = useState(recipesMode);
   const [input, setInput] = useState(incomingCode && incomingCode.toUpperCase() !== code ? incomingCode.toUpperCase() : "");
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
@@ -32,6 +34,7 @@ export function Friends({ code, inviteUrl, myName, friendships, incomingCode, re
 
   return (
     <main className="md:max-w-3xl">
+      {confirmDialog}
       <h1 className="text-3xl font-bold md:text-5xl">Amigos</h1>
       <p className="mt-1 text-muted md:text-lg">Añade a tus amigos para ver sus recetas y que vean las tuyas.</p>
 
@@ -168,7 +171,7 @@ export function Friends({ code, inviteUrl, myName, friendships, incomingCode, re
                   <span className="block text-xs text-muted">{f.recipes} {f.recipes === 1 ? "receta compartida" : "recetas compartidas"}</span>
                 </span>
                 <Link href={`/recetas?autor=${f.other_id}`} className="rounded-xl bg-brand-soft px-4 py-2 text-sm font-semibold text-brand-dark hover:bg-brand hover:text-white">Ver sus recetas</Link>
-                <button type="button" disabled={pending} onClick={() => { if (confirm(`¿Dejar de ser amigo de ${f.display_name}?`)) start(() => removeFriend(f.other_id)); }} className="text-sm text-muted hover:text-red-700">Quitar</button>
+                <button type="button" disabled={pending} onClick={async () => { if (await ask({ title: `¿Dejar de ser amigo de ${f.display_name}?`, body: "Dejaréis de ver las recetas del otro.", confirmLabel: "Quitar", danger: true })) start(() => removeFriend(f.other_id)); }} className="text-sm text-muted hover:text-red-700">Quitar</button>
               </li>
             ))}
           </ul>

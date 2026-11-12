@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/confirm-dialog";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { ChainLogo } from "@/components/chain-logo";
@@ -72,6 +73,7 @@ function lineTotal(i: ListItem) {
 }
 
 export function ListView({ items: serverItems, chains: userChains, comparison, weekStart, sharing }: { items: ListItem[]; chains: Chain[]; comparison: Comparison | null; weekStart: string; sharing: Sharing }) {
+  const [ask, confirmDialog] = useConfirm();
   const [shareMsg, setShareMsg] = useState("");
   const [friendToAdd, setFriendToAdd] = useState("");
   const people = Math.max(1, sharing.members.length);
@@ -194,6 +196,7 @@ export function ListView({ items: serverItems, chains: userChains, comparison, w
 
   return (
     <main>
+      {confirmDialog}
       {/* Cabecera */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -227,7 +230,7 @@ export function ListView({ items: serverItems, chains: userChains, comparison, w
                 <MenuBtn disabled={checkedCount === 0} onClick={() => startTransition(() => clearChecked())}>
                   Vaciar comprados ({checkedCount})
                 </MenuBtn>
-                <MenuBtn disabled={items.length === 0} danger onClick={() => { if (confirm("¿Vaciar toda la lista?")) startTransition(() => clearList()); }}>
+                <MenuBtn disabled={items.length === 0} danger onClick={async () => { if (await ask({ title: "¿Vaciar toda la lista?", body: "Se quitan todos los productos, también los que ya has comprado.", confirmLabel: "Vaciar lista", danger: true })) startTransition(() => clearList()); }}>
                   Vaciar toda la lista
                 </MenuBtn>
               </div>
@@ -431,7 +434,7 @@ export function ListView({ items: serverItems, chains: userChains, comparison, w
                   <b className="text-lg">{euro(grand / people)}</b>
                 </p>
                 {!sharing.iAmOwner && (
-                  <button type="button" onClick={() => { if (confirm("¿Salir de esta lista compartida? Volverás a tu lista propia.")) startTransition(() => removeFromList(sharing.listId, sharing.me)); }} className="mt-3 text-sm font-medium text-red-700 hover:underline">
+                  <button type="button" onClick={async () => { if (await ask({ title: "¿Salir de esta lista compartida?", body: "Volverás a tu lista propia.", confirmLabel: "Salir", danger: true })) startTransition(() => removeFromList(sharing.listId, sharing.me)); }} className="mt-3 text-sm font-medium text-red-700 hover:underline">
                     Salir de la lista compartida
                   </button>
                 )}

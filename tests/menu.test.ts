@@ -134,3 +134,24 @@ test("tamaño de ración: cuadra calorías en saltos de cuarto, entre 0,75 y 2",
   assert.equal(portionFor(4000, 1000), 2);
   assert.equal(portionFor(1000, 0), 1);
 });
+
+test("sobras repartidas: cocinando 10 veces no se repite plato en días seguidos ni dos sobras el mismo día", () => {
+  const recipes: Recipe[] = Array.from({ length: 40 }, (_, i) => ({ id: i + 1, name: `Plato ${i + 1}`, meal: "ambas", servings: 2, tags: [`t${i % 9}`], owner_id: null, author_name: null }));
+  for (let k = 0; k < 20; k++) {
+    const week = generateWeek(recipes, { sessions: 10 });
+    const at = (d: number, m: string) => week.find((s) => s.day === d && s.meal === m)?.recipe_id ?? null;
+    assert.equal(new Set(week.map((s) => s.recipe_id)).size, 10);
+    assert.ok(week.every((s) => s.recipe_id !== null));
+    const seen = new Set<number>();
+    for (let d = 0; d < 7; d++) {
+      let leftovers = 0;
+      for (const m of ["comida", "cena"]) {
+        const id = at(d, m)!;
+        if (d > 0) assert.notEqual(id, at(d - 1, m), "mismo plato dos días seguidos");
+        if (seen.has(id)) leftovers++;
+        seen.add(id);
+      }
+      assert.ok(leftovers <= 1, "dos sobras el mismo día");
+    }
+  }
+});
