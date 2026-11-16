@@ -5,7 +5,7 @@ import { useEffect, useOptimistic, useRef, useState, useTransition } from "react
 import { DayBreakdown } from "@/components/day-breakdown";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
 import { euro } from "@/lib/format";
-import { DAYS, MEALS, type Menu, type Recipe, type Slot } from "@/lib/menu";
+import { DAYS, MEALS, keepsWell, type Menu, type Recipe, type Slot } from "@/lib/menu";
 import { generateWeekAction, repeatPreviousWeekAction, setCookedAction, setCookSessionsAction, setPortionAction, setServingsAction, setSideAction, setSlotAction } from "@/lib/menu-actions";
 import { RecipeArt } from "@/components/recipe-art";
 import { RecipePicker } from "@/components/recipe-picker";
@@ -126,19 +126,21 @@ export function MenuGrid(p: Props) {
     const id = slotAt(day, meal)?.recipe_id;
     return id != null ? recipeById.get(id) ?? null : null;
   };
-  // Un plato es "sobras" si la misma receta ya aparece antes en la semana
+  // Un plato es "sobras" si la misma receta ya aparece antes en la semana y es de las que se
+  // guardan (táper). Un sándwich o unas tostas repetidos no son sobras: se vuelven a hacer.
   const seen = new Set<number>();
   const leftovers = new Set<string>();
   for (const day of [0, 1, 2, 3, 4, 5, 6]) {
     for (const meal of MEALS) {
       const id = slotAt(day, meal)?.recipe_id;
       if (id == null) continue;
-      if (seen.has(id)) leftovers.add(`${day}-${meal}`);
+      const r = recipeById.get(id);
+      if (seen.has(id) && r && keepsWell(r)) leftovers.add(`${day}-${meal}`);
       seen.add(id);
     }
   }
   const filled = slots.filter((s) => s.recipe_id !== null).length;
-  const cooked = seen.size;
+  const cooked = filled - leftovers.size;
   const outCount = slots.filter((s) => s.kind === "out").length;
   const listHref = `/menu/lista${offset !== 0 ? `?semana=${offset}` : ""}`;
 
