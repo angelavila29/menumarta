@@ -4,10 +4,12 @@
  *   npx tsx scripts/gen_photos.mts --dry            # solo enseña los prompts, no gasta nada
  *   npx tsx scripts/gen_photos.mts --limit 3        # genera y sube 3 (para probar)
  *   npx tsx scripts/gen_photos.mts                  # todas las recetas de Sobremesa sin foto
- *   npx tsx scripts/gen_photos.mts --id 123         # una receta concreta (aunque ya tenga foto)
+ *   npx tsx scripts/gen_photos.mts --id 123         # una receta concreta (aunque ya tenga foto, o sea de alguien)
+ *   npx tsx scripts/gen_photos.mts --id 123 --prompt "Crea una imagen de…"   # con un prompt a mano
  *
- * Necesita APIMART_API_KEY y SUPABASE_SERVICE_ROLE_KEY en .env.local. Solo toca recetas del banco
- * (owner_id null); las fotos van a recipe-photos/sobremesa/<slug>.jpg, cuadradas a 900 px.
+ * Necesita APIMART_API_KEY y SUPABASE_SERVICE_ROLE_KEY en .env.local. Sin --id solo toca recetas del
+ * banco (owner_id null); las fotos van a recipe-photos/sobremesa/<slug>.jpg (las de una persona, a
+ * su carpeta recipe-photos/<owner_id>/), cuadradas a 900 px.
  * El recorte usa `sips` (macOS).
  */
 import { execFileSync } from "node:child_process";
@@ -29,6 +31,7 @@ const value = (name: string) => {
 const DRY = flag("dry");
 const LIMIT = Number(value("limit") ?? Infinity);
 const ONLY = value("id") ? Number(value("id")) : null;
+const CUSTOM = value("prompt"); // prompt a mano para una receta concreta (con --id)
 const KEY = process.env.APIMART_API_KEY;
 if (!DRY && !KEY) throw new Error("Falta APIMART_API_KEY en .env.local");
 
@@ -86,7 +89,8 @@ async function generate(prompt: string): Promise<{ url: string; credits: number 
 }
 
 const [{ data: recipes, error }, { data: ingRows }] = await Promise.all([
-  sb.from("recipes").select("id,name,tags,photo_url").is("owner_id", null).order("id"),
+  // con --id vale también una receta de alguien (su foto va a su carpeta); sin --id, solo las de Sobremesa
+  ONLY ? sb.from("recipes").select("id,name,tags,photo_url,owner_id").eq("id", ONLY) : sb.from("recipes").select("id,name,tags,photo_url,owner_id").is("owner_id", null).order("id"),
   sb.from("recipe_ingredients").select("recipe_id,ingredient_name,qty").order("qty", { ascending: false }),
 ]);
 if (error) throw error;
@@ -102,7 +106,7 @@ let ok = 0;
 let credits = 0;
 const failed: string[] = [];
 for (const [i, r] of todo.entries()) {
-  const prompt = promptFor(r, ingredients.get(r.id) ?? []);
+  const prompt = CUSTOM ?? promptFor(r, ingredients.get(r.id) ?? []);
   if (DRY) {
     console.log(`#${r.id} ${r.name}\n  ${prompt}\n`);
     continue;
@@ -118,12 +122,12 @@ for (const [i, r] of todo.entries()) {
     const side = Math.min(dims[0], dims[1]);
     execFileSync("sips", ["-s", "format", "jpeg", "-s", "formatOptions", "82", "-c", String(side), String(side), raw, "--out", jpg]);
     execFileSync("sips", ["-Z", "900", jpg]);
-    const path = `sobremesa/${slug(r.name)}.jpg`;
+    const path = `${r.owner_id ?? "sobremesa"}/${slug(r.name)}.jpg`;
     const up = await sb.storage.from("recipe-photos").upload(path, readFileSync(jpg), { contentType: "image/jpeg", upsert: true });
     if (up.error) throw new Error(up.error.message);
     // ?v= para que el navegador no enseñe la foto anterior si se regenera
     const publicUrl = `${sb.storage.from("recipe-photos").getPublicUrl(path).data.publicUrl}?v=${Date.now()}`;
-    const { error: e } = await sb.from("recipes").update({ photo_url: publicUrl }).eq("id", r.id).is("owner_id", null);
+    const { error: e } = await sb.from("recipes").update({ photo_url: publicUrl }).eq("id", r.id);
     if (e) throw new Error(e.message);
     ok++;
     credits += c ?? 0;
