@@ -20,10 +20,12 @@ const UNIT_GROUPS: [string, string][] = [["peso", "Peso"], ["volumen", "Volumen"
 const fieldCls = "rounded-xl border border-cream-dark bg-white px-3 py-2.5 outline-none focus:border-brand";
 const inputCls = `w-full ${fieldCls}`;
 
-export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput | null; knownIngredients: string[] }) {
+export type MenuTarget = { offset: number; day: number; meal: "comida" | "cena"; label: string };
+
+export function RecipeForm({ initial, knownIngredients, target }: { initial: RecipeInput | null; knownIngredients: string[]; target?: MenuTarget }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
-  const [meal, setMeal] = useState(initial?.meal ?? "ambas");
+  const [meal, setMeal] = useState(initial?.meal ?? target?.meal ?? "ambas");
   const [servings, setServings] = useState(initial?.servings ?? 2);
   const [time, setTime] = useState(initial?.timeMinutes != null ? String(initial.timeMinutes) : "");
   const [difficulty, setDifficulty] = useState(initial?.difficulty ?? "Fácil");
@@ -126,6 +128,7 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
         ingredients: ings.map((i) => ({ name: i.name, qty: parseQty(i.qty) ?? NaN, unit: i.unit })),
         steps,
         photoUrl,
+        target: target && !initial?.id ? { offset: target.offset, day: target.day, meal: target.meal } : undefined,
       });
       if (res && !res.ok) setError(res.error);
     });
@@ -134,6 +137,11 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
   return (
     <form onSubmit={submit} className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
       <div className="flex min-w-0 flex-col gap-4">
+        {target && !initial?.id && (
+          <p role="status" className="rounded-2xl border border-brand/30 bg-brand-soft px-4 py-3 font-medium text-brand-dark">
+            Al guardarla se pone en tu menú: <strong>{target.label}</strong>.
+          </p>
+        )}
         {!initial?.id && (
           <section className="rounded-2xl bg-olive-soft p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -319,9 +327,9 @@ export function RecipeForm({ initial, knownIngredients }: { initial: RecipeInput
         </section>
         {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
         <button type="submit" disabled={pending} className="flex items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 font-semibold text-white hover:bg-brand-dark disabled:opacity-60">
-          <CheckIcon className="h-5 w-5" /> {pending ? "Guardando…" : initial?.id ? "Guardar cambios" : "Publicar receta"}
+          <CheckIcon className="h-5 w-5" /> {pending ? "Guardando…" : initial?.id ? "Guardar cambios" : target ? "Guardar y poner en el menú" : "Publicar receta"}
         </button>
-        <Link href={initial?.id ? `/recetas/${initial.id}` : "/recetas"} className="rounded-xl border border-cream-dark bg-white px-6 py-3 text-center font-medium hover:bg-cream">Cancelar</Link>
+        <Link href={initial?.id ? `/recetas/${initial.id}` : target ? `/menu${target.offset ? `?semana=${target.offset}` : ""}` : "/recetas"} className="rounded-xl border border-cream-dark bg-white px-6 py-3 text-center font-medium hover:bg-cream">Cancelar</Link>
       </aside>
     </form>
   );

@@ -21,6 +21,8 @@ export type RecipeInput = {
   ingredients: { name: string; qty: number; unit: string }[];
   steps: string[];
   photoUrl?: string | null;
+  /** Receta creada desde el menú: al guardarla se pone en ese hueco (cambios de última hora). */
+  target?: { offset: number; day: number; meal: "comida" | "cena" };
 };
 
 const MEALS = ["comida", "cena", "ambas"];
@@ -81,6 +83,16 @@ export async function saveRecipe(input: RecipeInput): Promise<SaveResult> {
   if (iErr) return { ok: false, error: iErr.message };
 
   revalidatePath("/recetas");
+  const t = input.target;
+  if (!input.id && t && Number.isInteger(t.day) && t.day >= 0 && t.day <= 6 && (t.meal === "comida" || t.meal === "cena")) {
+    const offset = t.offset === 1 ? 1 : 0;
+    const menu = await getOrCreateMenu(supabase, user.id, currentWeekStart(offset));
+    await supabase
+      .from("weekly_menu_slots")
+      .upsert({ menu_id: menu.id, day: t.day, meal: t.meal, recipe_id: recipeId, kind: "meal", cooked: false, side_recipe_id: null }, { onConflict: "menu_id,day,meal" });
+    revalidatePath("/menu");
+    redirect(`/menu${offset ? "?semana=1" : ""}`);
+  }
   redirect(`/recetas/${recipeId}`);
 }
 

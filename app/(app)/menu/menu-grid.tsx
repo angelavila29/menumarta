@@ -1,6 +1,7 @@
 "use client";
 import { useConfirm } from "@/components/confirm-dialog";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
 import { DayBreakdown } from "@/components/day-breakdown";
 import { CartIcon, ChevronLeft, ChevronRight, HeartIcon, LeafIcon, PlusIcon, SettingsIcon, StoreIcon } from "@/components/icons";
@@ -75,6 +76,7 @@ const hrefFor = (o: number) => (o === 0 ? "/menu" : `/menu?semana=${o}`);
 
 export function MenuGrid(p: Props) {
   const { menu, recipes, offset } = p;
+  const router = useRouter();
   const [pending, start] = useTransition();
   // Los toques (cocinado, cambiar plato, guarnición) se ven al instante; el servidor confirma después
   const [slots, patchSlot] = useOptimistic(p.slots, (state: Slot[], patch: Pick<Slot, "day" | "meal"> & Partial<Slot>) => {
@@ -211,6 +213,9 @@ export function MenuGrid(p: Props) {
             minutes={p.minutes}
             currentId={current?.recipe_id ?? null}
             extras={[
+              ...(offset === 0 || offset === 1
+                ? [{ label: "Crear receta nueva", emoji: "✍️", onClick: () => router.push(`/recetas/nueva?semana=${offset}&dia=${day}&comida=${meal}`) }]
+                : []),
               { label: "Como fuera / no cocino", emoji: "🍴", onClick: () => choose("out") },
               ...(current?.recipe_id != null || current?.kind === "out" ? [{ label: "Dejar vacío", emoji: "🗑️", onClick: () => choose(null) }] : []),
             ]}

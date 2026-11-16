@@ -45,6 +45,7 @@ const T: Record<string, Row> = {
   cuscús: { kcal: 360, protein: 12, carbs: 72 },
   limón: { kcal: 29, protein: 1.1, carbs: 9, unitGrams: 100 },
   "lomo de cerdo": { kcal: 143, protein: 21, carbs: 0 },
+  "magro de cerdo": { kcal: 150, protein: 21, carbs: 0 },
   macarrones: { kcal: 360, protein: 12.5, carbs: 72 },
   "maíz en lata": { kcal: 80, protein: 2.5, carbs: 16, veg: true },
   merluza: { kcal: 72, protein: 17, carbs: 0 },
