@@ -643,7 +643,7 @@ function MealSlot({ label, day, recipe, minutes, isOut, isLeftover, cooked, onCo
         <RecipeArt tags={recipe.tags} name={recipe.name} photoUrl={recipe.photo_url} className="aspect-[16/9] w-full text-6xl" />
         <span className="absolute left-2 top-2 flex items-center gap-1">
           <span className="rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide">{label}</span>
-          <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${isLeftover ? "bg-olive text-white" : "bg-brand text-white"}`}>{isLeftover ? "Sobras" : "Cocinas"}</span>
+          <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${isLeftover ? "bg-olive text-white" : recipe.tags.includes("preparado") ? "bg-sky-600 text-white" : "bg-brand text-white"}`}>{isLeftover ? "Sobras" : recipe.tags.includes("preparado") ? "Preparado" : "Cocinas"}</span>
         </span>
         <button
           type="button"
@@ -659,16 +659,20 @@ function MealSlot({ label, day, recipe, minutes, isOut, isLeftover, cooked, onCo
         <Link href={`/recetas/${recipe.id}?dia=${day}`} className={`line-clamp-2 block min-h-[2.6em] font-semibold leading-snug hover:text-brand hover:underline`}>
           {recipe.name}
         </Link>
-        <p className="mt-0.5 flex min-h-[1.25rem] items-center gap-1 text-xs text-muted">
+        <p className="mt-0.5 min-h-[1.25rem] whitespace-nowrap text-xs text-muted">
           {minutes && !isLeftover ? <span>⏱ {minutes} min</span> : isLeftover ? <span>Ya cocinado: solo calentar</span> : null}
-          {side && (
-            <>
-              <span aria-hidden>·</span>
-              <Link href={`/recetas/${side.id}`} className="line-clamp-1 text-olive-dark hover:underline">con {side.name.toLowerCase()}</Link>
-              <button type="button" disabled={disabled} onClick={onRemoveSide} aria-label={`Quitar ${side.name}`} className="shrink-0 rounded px-1 hover:text-red-700">×</button>
-            </>
-          )}
         </p>
+        {side && (
+          // El acompañamiento con su foto: puede ser una guarnición o un plato entero (unas gyozas)
+          <div className="mt-2 flex items-center gap-2 rounded-lg bg-olive-soft/60 p-1.5 pr-1">
+            <RecipeArt tags={side.tags} name={side.name} photoUrl={side.photo_url} className="h-10 w-10 shrink-0 rounded-md text-xl" />
+            <Link href={`/recetas/${side.id}`} className="min-w-0 flex-1 text-xs leading-tight text-olive-dark hover:underline">
+              <span className="block text-[10px] font-semibold uppercase tracking-wide text-olive">Con</span>
+              <span className="line-clamp-2">{side.name}</span>
+            </Link>
+            <button type="button" disabled={disabled} onClick={onRemoveSide} aria-label={`Quitar ${side.name}`} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base text-muted hover:bg-white hover:text-red-700">×</button>
+          </div>
+        )}
         <div className="mt-2 flex items-center justify-between gap-2 border-t border-cream-dark pt-2 text-xs">
           <label className={`flex cursor-pointer items-center gap-1.5 ${cooked ? "font-semibold text-olive-dark" : "text-muted"}`}>
             <input type="checkbox" checked={cooked} disabled={disabled} onChange={(e) => onCooked(e.target.checked)} className="h-4 w-4 accent-olive" />
