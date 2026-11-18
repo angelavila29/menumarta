@@ -50,6 +50,9 @@ export async function saveRecipe(input: RecipeInput): Promise<SaveResult> {
   const tags = [mainIds.includes(input.mainTag) ? input.mainTag : "guiso", ...input.extraTags.filter((t) => extraIds.includes(t))];
 
   const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
+  // Al editar, la foto que ya tenía se respeta aunque no sea de tu carpeta (la de un plato preparado)
+  const { data: current } = input.id ? await supabase.from("recipes").select("photo_url").eq("id", input.id).eq("owner_id", user.id).maybeSingle() : { data: null };
+  const keepPhoto = current?.photo_url && input.photoUrl === current.photo_url ? (current.photo_url as string) : null;
   const row = {
     owner_id: user.id,
     author_name: profile?.display_name?.trim() || null,
@@ -62,7 +65,7 @@ export async function saveRecipe(input: RecipeInput): Promise<SaveResult> {
     tags,
     steps,
     visibility: VISIBILITIES.includes(input.visibility) ? input.visibility : "friends",
-    photo_url: safePhoto(input.photoUrl, user.id),
+    photo_url: keepPhoto ?? safePhoto(input.photoUrl, user.id),
   };
 
   let recipeId = input.id;

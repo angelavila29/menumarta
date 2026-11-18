@@ -10,6 +10,7 @@ import { euro } from "@/lib/format";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { cheapestProductFor, currentWeekStart, DAYS, toProductUnit, type Need, todayIndex } from "@/lib/menu";
 import { nutritionPerServing, unitGramsOf } from "@/lib/nutrition";
+import { loadExtraNutrition } from "@/lib/nutrition-extra";
 import { APPLIANCES, requiredAppliances } from "@/lib/appliances";
 import { formatUnits } from "@/lib/qty";
 import { formatMeasure } from "@/lib/units";
@@ -111,7 +112,7 @@ export default async function RecipePage(props: PageProps<"/recetas/[id]">) {
   // Solo se comparan precios si todas las cadenas tienen todos los ingredientes
   const comparable = ranked.length > 1 && ranked.every((c) => c.missing === 0);
 
-  const nutri = nutritionPerServing(ings, base);
+  const nutri = nutritionPerServing(ings, base, await loadExtraNutrition(supabase));
   const needsTools = requiredAppliances(recipe.steps as string[] | null).filter((a) => a !== "fuego");
   const kitchen = (profile?.appliances as string[] | null) ?? null;
   const missingTools = kitchen ? needsTools.filter((a) => !kitchen.includes(a) && !(a === "horno" && kitchen.includes("freidora"))) : [];

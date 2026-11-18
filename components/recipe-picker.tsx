@@ -6,15 +6,16 @@ import { RecipeArt } from "@/components/recipe-art";
 export type PickerRecipe = { id: number; name: string; tags: string[]; photo_url?: string | null; owner_id?: string | null; author_name?: string | null };
 type Extra = { label: string; emoji: string; onClick: () => void };
 
-const FILTERS: [string, string][] = [["rápido", "⏱️ Rápidas"], ["táper", "🥡 De táper"], ["económico", "💶 Económicas"], ["vegetariano", "🥬 Vegetarianas"], ["carne", "🍗 Carne"], ["pescado", "🐟 Pescado"], ["pasta", "🍝 Pasta"], ["legumbre", "🍲 Legumbres"]];
+const FILTERS: [string, string][] = [["rápido", "⏱️ Rápidas"], ["preparado", "🧊 Preparados"], ["táper", "🥡 De táper"], ["económico", "💶 Económicas"], ["vegetariano", "🥬 Vegetarianas"], ["carne", "🍗 Carne"], ["pescado", "🐟 Pescado"], ["pasta", "🍝 Pasta"], ["legumbre", "🍲 Legumbres"]];
 const plain = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 /**
  * Elegir un plato a la vista: recomendados arriba, buscador y filtros, y todas las recetas con
  * su imagen. Sustituye al desplegable de nombres.
  */
-export function RecipePicker({ title, subtitle, recipes, recommended = [], favorites, minutes, currentId, extras = [], showFilters = true, onPick, onClose }: {
+export function RecipePicker({ title, subtitle, recipes, recommended = [], recommendedLabel = "Recomendadas para este hueco", favorites, minutes, currentId, extras = [], showFilters = true, onPick, onClose }: {
   title: string;
+  recommendedLabel?: string;
   subtitle?: string;
   recipes: PickerRecipe[];
   recommended?: PickerRecipe[];
@@ -114,7 +115,7 @@ export function RecipePicker({ title, subtitle, recipes, recommended = [], favor
         <div className="min-h-0 flex-1 overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-5">
           {browsing && recommended.length > 0 && (
             <section className="mb-5">
-              <p className="mb-2 text-sm font-semibold">Recomendadas para este hueco</p>
+              <p className="mb-2 text-sm font-semibold">{recommendedLabel}</p>
               <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
                 {recommended.map((r) => <Card key={r.id} r={r} />)}
               </ul>

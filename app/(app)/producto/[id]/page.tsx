@@ -12,7 +12,8 @@ import { parsePackSize } from "@/lib/menu";
 import { keywords, PACK_WORDS, unaccent, wordRegex } from "@/lib/search";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { PriceChart } from "./price-chart";
-import { AddToListControl, FavoriteButton, QuickAddButton } from "./product-client";
+import { AddToListControl, FavoriteButton, PreparedButton, QuickAddButton } from "./product-client";
+import { genericName, PREPARED_CATEGORY } from "@/lib/prepared";
 
 const TIPS: Record<string, string> = {
   fruta: "Compra la fruta y la verdura en dos veces a lo largo de la semana: aguanta mejor y desperdicias menos.",
@@ -154,6 +155,13 @@ export default async function ProductPage(props: PageProps<"/producto/[id]">) {
                 </a>
               )}
             </div>
+            {PREPARED_CATEGORY.test(product.category ?? "") && (
+              <PreparedButton
+                productId={productId}
+                defaultName={genericName(product.name, product.brand)}
+                defaultGrams={pack && pack.unit === "kg" ? Math.round(pack.amount * 1000) : null}
+              />
+            )}
           </div>
         </section>
 

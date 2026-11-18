@@ -1,18 +1,18 @@
 /** Equilibrio del menú semanal frente al objetivo de la persona. */
 import { judge, type Targets, type Verdict } from "@/lib/goal";
 import type { Slot } from "@/lib/menu";
-import { nutritionPerServing, type Nutrition } from "@/lib/nutrition";
+import { nutritionPerServing, type ExtraNutrition, type Nutrition } from "@/lib/nutrition";
 
 export type RecipeNutrition = Pick<Nutrition, "kcal" | "protein" | "veg"> & { covered: number; total: number };
 export type IngredientRow = { recipe_id: number; ingredient_name: string; qty: number; unit: string };
 
 /** Nutrición por ración de cada receta a partir de sus ingredientes y raciones base. */
-export function nutritionByRecipe(rows: IngredientRow[], servingsById: Map<number, number>): Map<number, RecipeNutrition> {
+export function nutritionByRecipe(rows: IngredientRow[], servingsById: Map<number, number>, extra?: ExtraNutrition): Map<number, RecipeNutrition> {
   const byRecipe = new Map<number, IngredientRow[]>();
   for (const r of rows) byRecipe.set(r.recipe_id, [...(byRecipe.get(r.recipe_id) ?? []), r]);
   const out = new Map<number, RecipeNutrition>();
   for (const [id, ings] of byRecipe) {
-    const n = nutritionPerServing(ings, servingsById.get(id) ?? 4);
+    const n = nutritionPerServing(ings, servingsById.get(id) ?? 4, extra);
     // veg viene en gramos por ración; una ración de verdura son ~150 g
     out.set(id, { kcal: n.kcal, protein: n.protein, veg: Math.round((n.veg / 150) * 10) / 10, covered: n.covered, total: n.total });
   }

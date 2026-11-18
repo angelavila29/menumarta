@@ -6,6 +6,7 @@ import { canCook } from "@/lib/appliances";
 import { targetsFor, type Body } from "@/lib/goal";
 import { requireUser } from "@/lib/auth";
 import { assess, nutritionByRecipe, weekBalance } from "@/lib/menu-nutrition";
+import { loadExtraNutrition } from "@/lib/nutrition-extra";
 import { getOrCreateActiveList } from "@/lib/lists";
 import { isSide, currentWeekStart, todayIndex, portionFor, defaultCookSessions, generateWeek, getOrCreateMenu, loadIngredientNames, loadRecipes, loadSlots } from "@/lib/menu";
 import { recipeAllowed } from "@/lib/prefs";
@@ -34,7 +35,8 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
   const nutrition = bodyGoal
     ? nutritionByRecipe(
         (ingRows ?? []).map((r) => ({ recipe_id: r.recipe_id as number, ingredient_name: r.ingredient_name as string, qty: Number(r.qty), unit: r.unit as string })),
-        new Map(recipes.map((r) => [r.id, Number(r.servings) || 4]))
+        new Map(recipes.map((r) => [r.id, Number(r.servings) || 4])),
+        await loadExtraNutrition(supabase)
       )
     : undefined;
   const [{ data: favs }, { data: pantryRows }] = await Promise.all([
@@ -64,8 +66,10 @@ export async function generateWeekFor(supabase: Awaited<ReturnType<typeof import
       (maxMinutes === null || (minutes.get(r.id) ?? 0) <= maxMinutes) &&
       canCook(stepsById.get(r.id), kitchen)
   );
-  allowed = allowed.filter((r) => !isSide(r));
-  if (allowed.length < 6) allowed = pool.filter((r) => !isSide(r)); // demasiado restrictivo: mejor un menú que ninguno
+  // Guarniciones y platos preparados (lo que se compra hecho) no se ponen solos: los eliges tú
+  const autoOk = (r: { tags: string[] }) => !isSide(r) && !r.tags.includes("preparado");
+  allowed = allowed.filter(autoOk);
+  if (allowed.length < 6) allowed = pool.filter(autoOk); // demasiado restrictivo: mejor un menú que ninguno
 
   // Perder peso: fuera los platos que se pasan claramente de lo que toca por comida.
   // Si eso deja muy pocas recetas, se relaja en vez de dejar la semana vacía.

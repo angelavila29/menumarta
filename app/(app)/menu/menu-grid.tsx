@@ -169,13 +169,18 @@ export function MenuGrid(p: Props) {
         const current = slotAt(day, meal);
         const when = `${meal === "comida" ? "Comida" : "Cena"} del ${DAYS[day].toLowerCase()}`;
         if (kind === "side") {
+          // Una guarnición o cualquier otro plato: arroz negro + gyozas, crema + tortilla…
+          const mainId = current?.recipe_id ?? null;
+          const others = recipes.filter((r) => !r.tags.includes("guarnicion") && r.id !== mainId && (r.meal === meal || r.meal === "ambas"));
           return (
             <RecipePicker
-              title="Añadir guarnición"
+              title="Acompañar con…"
               subtitle={`${when} · con ${recipeAt(day, meal)?.name ?? ""}`}
-              recipes={sideRecipes}
+              recipes={[...sideRecipes, ...others]}
+              recommended={sideRecipes.slice(0, 6)}
+              recommendedLabel="Guarniciones"
+              favorites={favorites}
               minutes={p.minutes}
-              showFilters={false}
               onClose={() => setPicking(null)}
               onPick={(id) => {
                 setPicking(null);
@@ -670,8 +675,8 @@ function MealSlot({ label, day, recipe, minutes, isOut, isLeftover, cooked, onCo
             {cooked ? "Hecho" : isLeftover ? "Comido" : "Cocinado"}
           </label>
           {!side && (
-            <button type="button" disabled={disabled} onClick={onOpenSide} aria-label={`Añadir guarnición a ${recipe.name}`} className="font-medium text-muted hover:text-brand">
-              ＋ Guarnición
+            <button type="button" disabled={disabled} onClick={onOpenSide} aria-label={`Añadir una guarnición u otro plato a ${recipe.name}`} className="font-medium text-muted hover:text-brand">
+              ＋ Acompañar
             </button>
           )}
         </div>

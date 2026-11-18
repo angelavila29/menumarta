@@ -5,7 +5,9 @@
  */
 import { toBase } from "@/lib/units";
 
-type Row = { kcal: number; protein: number; carbs: number; unitGrams?: number; veg?: boolean; density?: number };
+export type Row = { kcal: number; protein: number; carbs: number; unitGrams?: number; veg?: boolean; density?: number };
+/** Valores que vienen de la base de datos (platos preparados con los datos de su etiqueta). */
+export type ExtraNutrition = Record<string, Row>;
 
 const T: Record<string, Row> = {
   "aceite de oliva": { kcal: 884, protein: 0, carbs: 0, density: 0.92 },
@@ -108,12 +110,12 @@ const T: Record<string, Row> = {
 };
 
 /** Peso típico en gramos de una unidad del ingrediente (1 cebolla ≈ 150 g). */
-export function unitGramsOf(ingredient: string): number | null {
-  return T[ingredient]?.unitGrams ?? null;
+export function unitGramsOf(ingredient: string, extra?: ExtraNutrition): number | null {
+  return (extra?.[ingredient] ?? T[ingredient])?.unitGrams ?? null;
 }
 
-function gramsOf(ingredient: string, qty: number, unit: string): number | null {
-  const row = T[ingredient];
+function gramsOf(ingredient: string, qty: number, unit: string, extra?: ExtraNutrition): number | null {
+  const row = extra?.[ingredient] ?? T[ingredient];
   const b = toBase(qty, unit, ingredient);
   if (b.unit === "g") return b.qty;
   if (b.unit === "ml") return b.qty * (row?.density ?? 1);
@@ -123,15 +125,15 @@ function gramsOf(ingredient: string, qty: number, unit: string): number | null {
 export type Nutrition = { kcal: number; protein: number; carbs: number; veg: number; covered: number; total: number };
 
 /** Nutrición por ración. `covered` dice cuántos ingredientes se han podido calcular. */
-export function nutritionPerServing(ings: { ingredient_name: string; qty: number; unit: string }[], servings: number): Nutrition {
+export function nutritionPerServing(ings: { ingredient_name: string; qty: number; unit: string }[], servings: number, extra?: ExtraNutrition): Nutrition {
   let kcal = 0;
   let protein = 0;
   let carbs = 0;
   let veg = 0;
   let covered = 0;
   for (const i of ings) {
-    const row = T[i.ingredient_name];
-    const g = gramsOf(i.ingredient_name, Number(i.qty), i.unit);
+    const row = extra?.[i.ingredient_name] ?? T[i.ingredient_name];
+    const g = gramsOf(i.ingredient_name, Number(i.qty), i.unit, extra);
     if (!row || g === null) continue;
     covered += 1;
     kcal += (row.kcal * g) / 100;

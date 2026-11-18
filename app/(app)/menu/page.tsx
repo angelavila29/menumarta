@@ -15,6 +15,7 @@ import { buildPlanRows, recommendedPlan, summarize } from "@/lib/plan";
 import { PRODUCT_COLUMNS, type Product } from "@/lib/types";
 import { targetsFor, type Body } from "@/lib/goal";
 import { assess, nutritionByRecipe, weekBalance } from "@/lib/menu-nutrition";
+import { loadExtraNutrition } from "@/lib/nutrition-extra";
 import { MenuGrid, type BalanceItem, type GoalPanel, type MenuSettings } from "./menu-grid";
 
 const DIET_LABEL: Record<string, string> = {
@@ -92,9 +93,11 @@ export default async function MenuPage(props: PageProps<"/menu">) {
     paceKgWeek: profile?.loss_pace != null ? Number(profile.loss_pace) : null,
       skipMeals: (profile?.skipped_meals as string[] | null) ?? [],
   };
+  const extraNutrition = await loadExtraNutrition(supabase);
   const nutrition = nutritionByRecipe(
     (ingRows ?? []).map((r) => ({ recipe_id: r.recipe_id as number, ingredient_name: r.ingredient_name as string, qty: Number(r.qty), unit: r.unit as string })),
-    new Map(recipes.map((r) => [r.id, Number(r.servings) || 4]))
+    new Map(recipes.map((r) => [r.id, Number(r.servings) || 4])),
+    extraNutrition
   );
   const wb = weekBalance(slots, nutrition, body.bodyGoal ? menu.portion : 1);
   const targets = targetsFor(body);
